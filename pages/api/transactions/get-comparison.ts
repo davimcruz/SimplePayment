@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { getTransactions } from "./get-transactions"
 import { Transaction } from "@/types/types"
-import { verifyToken } from "../middleware/jwt-auth"
+import { verifyTokenFromRequest } from "@/pages/api/middleware/jwt-auth"
 import { parseCookies } from "nookies"
 
 export default async function queryComparison(
@@ -9,7 +9,7 @@ export default async function queryComparison(
   res: NextApiResponse
 ): Promise<void> {
   try {
-    const tokenValid = await verifyToken({ req } as any)
+    const tokenValid = verifyTokenFromRequest(req as any)
     if (!tokenValid) {
       return res.status(401).json({ error: "Não autorizado" })
     }

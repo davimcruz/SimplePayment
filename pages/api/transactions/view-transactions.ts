@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next"
 
-import { verifyToken } from "../middleware/jwt-auth"
+import { verifyTokenFromRequest } from "@/pages/api/middleware/jwt-auth"
 
 import prisma from "@/lib/prisma"
 
@@ -12,7 +12,7 @@ export default async function viewTransactions(
     return res.status(405).json({ error: "Método não permitido" })
   }
 
-  const tokenValid = await verifyToken({ req } as any)
+  const tokenValid = verifyTokenFromRequest(req as any)
   if (!tokenValid) {
     return res.status(401).json({ error: "Não autorizado" })
   }

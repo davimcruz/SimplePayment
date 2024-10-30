@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import BillService from "../services/BillService"
-import { verifyToken } from "../../middleware/jwt-auth"
+import { verifyTokenFromRequest } from "../../middleware/jwt-auth"
 
 // Definição do controller da fatura
 class BillController {
@@ -30,7 +30,7 @@ class BillController {
 
   // Controler para obtenção de faturas
   async getBill(req: NextApiRequest, res: NextApiResponse) {
-    const tokenValid = await verifyToken({ req } as any)
+    const tokenValid = verifyTokenFromRequest(req as any)
     if (!tokenValid) {
       return res.status(401).json({ error: "[ERRO] Não autorizado" })
     }
@@ -66,7 +66,7 @@ class BillController {
 
   // Controler para obtenção de parcelas
   async getParcels(req: NextApiRequest, res: NextApiResponse) {
-    const tokenValid = await verifyToken({ req } as any)
+    const tokenValid = verifyTokenFromRequest(req as any)
     if (!tokenValid) {
       return res.status(401).json({ error: "[ERRO] Não autorizado" })
     }
@@ -96,7 +96,7 @@ class BillController {
 
   // Controler para pagamento de faturas
   async payBill(req: NextApiRequest, res: NextApiResponse) {
-    const tokenValid = await verifyToken({ req } as any)
+    const tokenValid = verifyTokenFromRequest(req as any)
     if (!tokenValid) {
       return res.status(401).json({ error: "[ERRO] Não autorizado" })
     }

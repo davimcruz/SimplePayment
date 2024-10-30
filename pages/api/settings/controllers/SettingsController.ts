@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next"
-import { verifyToken } from "../../middleware/jwt-auth"
+import { verifyTokenFromRequest } from "../../middleware/jwt-auth"
 import SettingsService from "../services/SettingsService"
 import { UpdateUserDto } from "../dtos/UpdateUserDTO"
 import { SaveImageDto } from "../dtos/SaveImageDTO"
@@ -9,7 +9,7 @@ export async function updateNameHandler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const tokenValid = await verifyToken({ req } as any)
+  const tokenValid = verifyTokenFromRequest(req as any)
   if (!tokenValid) {
     return res.status(401).json({ error: "[ERRO] Não autorizado" })
   }
@@ -37,7 +37,9 @@ export async function updateNameHandler(
       nome,
       sobrenome,
     })
-    console.log(`[SUCESSO] Nome e sobrenome atualizados para o usuário: ${email}`)
+    console.log(
+      `[SUCESSO] Nome e sobrenome atualizados para o usuário: ${email}`
+    )
     return res.status(200).json({
       message: "[SUCESSO] Nome e sobrenome atualizados com sucesso",
       user: updatedUser,
@@ -47,7 +49,9 @@ export async function updateNameHandler(
     if (error instanceof Error) {
       return res.status(500).json({ error: `[ERRO] ${error.message}` })
     }
-    return res.status(500).json({ error: "[ERRO] Erro ao processar a requisição" })
+    return res
+      .status(500)
+      .json({ error: "[ERRO] Erro ao processar a requisição" })
   }
 }
 
@@ -60,7 +64,7 @@ export async function saveImageHandler(
     return res.status(405).json({ error: "[ERRO] Método não permitido" })
   }
 
-  const tokenValid = await verifyToken({ req } as any)
+  const tokenValid = verifyTokenFromRequest(req as any)
   if (!tokenValid) {
     return res.status(401).json({ error: "[ERRO] Não autorizado" })
   }
@@ -79,12 +83,19 @@ export async function saveImageHandler(
   try {
     const updatedUser = await SettingsService.saveImage({ email, imageUrl })
     console.log(`[SUCESSO] Imagem atualizada para o usuário: ${email}`)
-    return res.status(200).json({ message: "[SUCESSO] Imagem salva com sucesso", user: updatedUser })
+    return res
+      .status(200)
+      .json({
+        message: "[SUCESSO] Imagem salva com sucesso",
+        user: updatedUser,
+      })
   } catch (error) {
     console.error("[ERRO] ao atualizar usuário:", error)
     if (error instanceof Error) {
       return res.status(500).json({ error: `[ERRO] ${error.message}` })
     }
-    return res.status(500).json({ error: "[ERRO] Erro ao processar a requisição" })
+    return res
+      .status(500)
+      .json({ error: "[ERRO] Erro ao processar a requisição" })
   }
 }

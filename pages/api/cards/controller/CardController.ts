@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import CardService from "../services/CardService"
-import { verifyToken } from "@/pages/api/middleware/jwt-auth"
+import { verifyTokenFromRequest } from "../../middleware/jwt-auth"
 import { createCardSchema } from "../dtos/CreateCardDTO"
 import { updateCardSchema } from "../dtos/UpdateCardDTO"
 import { deleteCardSchema } from "../dtos/DeleteCardDTO"
@@ -9,7 +9,7 @@ import { deleteCardSchema } from "../dtos/DeleteCardDTO"
 class CardController {
   // Controller para criação de cartões
   async createCard(req: NextApiRequest, res: NextApiResponse) {
-    const tokenValid = await verifyToken({ req } as any)
+    const tokenValid = verifyTokenFromRequest(req as any)
     if (!tokenValid) {
       return res.status(401).json({ error: "[ERRO] Não autorizado" })
     }
@@ -37,7 +37,7 @@ class CardController {
 
   // Controller para atualização de cartões
   async updateCard(req: NextApiRequest, res: NextApiResponse) {
-    const tokenValid = await verifyToken({ req } as any)
+    const tokenValid = verifyTokenFromRequest(req as any)
     if (!tokenValid) {
       return res.status(401).json({ error: "[ERRO] Não autorizado" })
     }
@@ -64,7 +64,7 @@ class CardController {
 
   // Controller para exclusão de cartões
   async deleteCard(req: NextApiRequest, res: NextApiResponse) {
-    const tokenValid = await verifyToken({ req } as any)
+    const tokenValid = verifyTokenFromRequest(req as any)
     if (!tokenValid) {
       return res.status(401).json({ error: "[ERRO] Não autorizado" })
     }
@@ -91,7 +91,7 @@ class CardController {
 
   // Controller para obtenção de cartões (Todos os dados daquele cartão)
   async getCard(req: NextApiRequest, res: NextApiResponse) {
-    const tokenValid = await verifyToken({ req } as any)
+    const tokenValid = verifyTokenFromRequest(req as any)
     if (!tokenValid) {
       return res.status(401).json({ error: "[ERRO] Não autorizado" })
     }
@@ -116,7 +116,7 @@ class CardController {
 
   // Controller para obtenção do nome do cartão (Fiz uma rota específica para isso, entretanto, dá para utilizar o próprio getCards para obter o nome)
   async getCardName(req: NextApiRequest, res: NextApiResponse) {
-    const tokenValid = await verifyToken({ req } as any)
+    const tokenValid = verifyTokenFromRequest(req as any)
     if (!tokenValid) {
       return res.status(401).json({ error: "[ERRO] Não autorizado" })
     }

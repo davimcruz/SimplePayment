@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next"
-import { verifyToken } from "../../middleware/jwt-auth"
+import { verifyTokenFromRequest } from "../../middleware/jwt-auth"
 import { UserService } from "../services/UserService"
 
 // Instância do serviço de usuários
@@ -12,7 +12,7 @@ export class UserController {
       return res.status(405).json({ error: "[ERRO] Método não permitido" })
     }
 
-    const tokenValid = await verifyToken({ req } as any)
+    const tokenValid = verifyTokenFromRequest(req as any)
     if (!tokenValid) {
       return res.status(401).json({ error: "[ERRO] Não autorizado" })
     }
@@ -43,7 +43,7 @@ export class UserController {
       return res.status(405).json({ error: "[ERRO] Método não permitido" })
     }
 
-    const tokenValid = await verifyToken({ req } as any)
+    const tokenValid = verifyTokenFromRequest(req as any)
     if (!tokenValid) {
       return res.status(401).json({ error: "[ERRO] Não autorizado" })
     }
@@ -74,7 +74,7 @@ export class UserController {
       return res.status(405).json({ error: "[ERRO] Método não permitido" })
     }
 
-    const tokenValid = await verifyToken({ req } as any)
+    const tokenValid = verifyTokenFromRequest(req as any)
     if (!tokenValid) {
       return res.status(401).json({ error: "[ERRO] Não autorizado" })
     }

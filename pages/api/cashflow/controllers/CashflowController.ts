@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next"
 import CashflowService from "../services/CashflowService"
 import { createFlowSchema } from "../dtos/CreateFlowDTO"
 import { updateFlowSchema } from "../dtos/UpdateFlowDTO"
-import { verifyToken } from "../../middleware/jwt-auth"
+import { verifyTokenFromRequest } from "../../middleware/jwt-auth"
 
 // Definição do controller de cashflow
 class CashflowController {
@@ -13,7 +13,7 @@ class CashflowController {
     }
 
     try {
-      if (!(await verifyToken({ req } as any))) {
+      if (!(verifyTokenFromRequest(req as any))) {
         return res.status(401).json({ message: "[ERRO] Não autorizado" })
       }
 
@@ -69,7 +69,7 @@ class CashflowController {
     }
 
     try {
-      if (!(await verifyToken({ req } as any))) {
+      if (!(verifyTokenFromRequest(req as any))) {
         return res.status(401).json({ message: "[ERRO] Não autorizado" })
       }
 
@@ -138,7 +138,7 @@ class CashflowController {
     }
 
     try {
-      if (!(await verifyToken({ req } as any))) {
+      if (!(verifyTokenFromRequest(req as any))) {
         return res.status(401).json({ message: "[ERRO] Não autorizado" })
       }
 

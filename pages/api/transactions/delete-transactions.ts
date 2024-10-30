@@ -1,45 +1,20 @@
 import { NextApiRequest, NextApiResponse } from "next"
-import { verifyToken } from "../middleware/jwt-auth"
+import { verifyTokenFromRequest } from "@/pages/api/middleware/jwt-auth"
 import prisma from "@/lib/prisma"
-import Redis from "ioredis"
 import { invalidateSummaryCache } from "@/lib/invalidateSummaryCache"
 import { atualizarFluxoReal } from "@/utils/cashflow/flowReal"
 import { compararFluxos } from "@/utils/cashflow/flowComparisons"
-
-const redisUrl = process.env.REDIS_URL
-const redisToken = process.env.REDIS_TOKEN
-
-if (!redisUrl || !redisToken) {
-  throw new Error(
-    "Variáveis de Ambiente REDIS_URL e REDIS_TOKEN não estão definidas."
-  )
-}
-
-const redis = new Redis(redisUrl, {
-  password: redisToken,
-  maxRetriesPerRequest: 5,
-  retryStrategy: (times) => {
-    const delay = Math.min(times * 100, 3000)
-    return delay
-  },
-  reconnectOnError: (err) => {
-    const targetErrors = ["READONLY", "ECONNRESET", "ETIMEDOUT"]
-    if (targetErrors.some((targetError) => err.message.includes(targetError))) {
-      return true
-    }
-    return false
-  },
-})
+import redis from "@/lib/redis"
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const anoAtual = new Date().getFullYear();
+  const anoAtual = new Date().getFullYear()
 
   console.log("Recebendo requisição:", req.method, req.body)
 
-  const tokenValid = await verifyToken({ req } as any)
+    const tokenValid = verifyTokenFromRequest(req as any)
   if (!tokenValid) {
     return res.status(401).json({ error: "Não autorizado" })
   }
@@ -111,20 +86,26 @@ export default async function handler(
     console.log("Transação deletada com sucesso:", transactionId)
 
     const invalidateCaches = async () => {
-      const cacheKeyUserFlow = `userFlow:${userId}:${anoAtual}`; 
-      const cacheKeyTransactions = `transactions:user:${userId}`; 
+      const cacheKeyUserFlow = `userFlow:${userId}:${anoAtual}`
+      const cacheKeyTransactions = `transactions:user:${userId}`
 
       await Promise.all([
-        redis.del(cacheKeyUserFlow), 
-        redis.del(cacheKeyTransactions), 
+        redis.del(cacheKeyUserFlow),
+        redis.del(cacheKeyTransactions),
         invalidateSummaryCache(userId),
-        atualizarFluxoReal(userId).then(() => compararFluxos(userId))
-      ]);
-      console.log("Caches invalidados, fluxo real atualizado e comparações feitas para o usuário:", userId);
+        atualizarFluxoReal(userId).then(() => compararFluxos(userId)),
+      ])
+      console.log(
+        "Caches invalidados, fluxo real atualizado e comparações feitas para o usuário:",
+        userId
+      )
     }
 
     invalidateCaches().catch((err) =>
-      console.error("Erro ao invalidar caches, atualizar fluxo real e fazer comparações:", err)
+      console.error(
+        "Erro ao invalidar caches, atualizar fluxo real e fazer comparações:",
+        err
+      )
     )
 
     return res.status(200).json({ success: true })
