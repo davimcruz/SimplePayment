@@ -99,7 +99,7 @@ const CardsView = () => {
       const data = await response.json()
       if (response.ok) {
         setTimeout(() => {
-          router.reload()
+          router.push('/dashboard/cards')
         }, 500)
       } else {
         console.error("Erro ao deletar cartão:", data.error)

@@ -151,7 +151,7 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({ transactionId }) => {
 
       if (result.success) {
         setIsOpen(false)
-        router.reload()
+        router.push("/dashboard/transactions")
       } else {
         throw new Error(
           result.error || "Erro desconhecido ao atualizar a transação"
@@ -188,7 +188,7 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({ transactionId }) => {
 
       if (result.success) {
         setIsOpen(false)
-        router.reload()
+        router.push("/dashboard/transactions")
       } else {
         throw new Error(
           result.error || "Erro desconhecido ao excluir a transação"

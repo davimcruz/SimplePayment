@@ -110,7 +110,7 @@ export const columns = (
                   throw new Error("Erro ao pagar fatura")
                 }
 
-                router.reload()
+                router.push("/dashboard/cashflow")
               } catch (error) {
                 console.error("Erro ao pagar a fatura:", error)
               } finally {
@@ -158,7 +158,7 @@ export const columns = (
                       throw new Error("Erro ao excluir fatura")
                     }
 
-                    router.reload()
+                    router.push("/dashboard/cashflow")
                   } catch (error) {
                     console.error("Erro ao excluir fatura:", error)
                   } finally {

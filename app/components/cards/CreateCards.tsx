@@ -110,7 +110,7 @@ const CreateCreditCard: React.FC<CreateCreditCardProps> = ({ onCancel }) => {
       const result = await response.json()
       if (response.ok) {
         setTimeout(() => {
-          router.reload()
+          router.push("/dashboard/cards")
         }, 500)
       } else {
         setErrors({

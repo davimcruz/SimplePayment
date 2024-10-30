@@ -167,7 +167,7 @@ const CreateTransaction: React.FC = () => {
 
         reset()
         setIsOpen(false)
-        router.reload()
+        router.push("/dashboard/transactions")
       } catch (error) {
         console.error("Erro ao criar transação:", error)
         setApiError(
