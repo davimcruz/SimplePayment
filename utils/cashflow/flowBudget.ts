@@ -4,6 +4,7 @@ export async function realocarFluxo(userId: number) {
   const anoAtual = new Date().getFullYear()
   const mesAtual = new Date().getMonth() + 1 
 
+  // Busca os fluxos de caixa do usuário para o ano atual e meses futuros
   const fluxoAtual = await prisma.orcamento.findMany({
     where: {
       userId,
@@ -13,51 +14,50 @@ export async function realocarFluxo(userId: number) {
     orderBy: { mes: "asc" },
   })
 
+
   if (fluxoAtual.length === 0) {
-    throw new Error("Fluxo de caixa não encontrado")
+    throw new Error("Nenhum fluxo de caixa encontrado para o usuário.")
   }
 
   let saldoAnterior = 0
+
+  // Mapeia os fluxos para calcular o novo saldo orçado
   const fluxoRealocado = fluxoAtual.map((mes) => {
     const receitaOrcada = mes.receitaOrcada ?? 0
     const despesaOrcada = mes.despesaOrcada ?? 0
-    const novoSaldoOrcado = Number((saldoAnterior + (receitaOrcada - despesaOrcada)).toFixed(2))
-    
-    let status: 'deficit' | 'excedente' | 'neutro'
-    if (novoSaldoOrcado < 0) {
-      status = 'deficit'
-    } else if (novoSaldoOrcado > 0) {
-      status = 'excedente'
-    } else {
-      status = 'neutro'
-    }
 
-    const mesAtualizado = {
+    // Calcula o novo saldo orçado
+    const novoSaldoOrcado = saldoAnterior + (receitaOrcada - despesaOrcada)
+    saldoAnterior = Number(novoSaldoOrcado.toFixed(2)) // Atualiza o saldo anterior
+
+    return {
       ...mes,
-      saldoOrcado: novoSaldoOrcado,
-      status: status,
+      saldoOrcado: saldoAnterior,
     }
-    saldoAnterior = novoSaldoOrcado
-    return mesAtualizado
   })
 
-  await prisma.$transaction(
-    fluxoRealocado.map((mes) =>
-      prisma.orcamento.update({
-        where: {
-          userId_mes_ano: {
-            userId: mes.userId,
-            mes: mes.mes,
-            ano: mes.ano,
+  // Atualiza os fluxos no banco de dados em uma transação
+  try {
+    await prisma.$transaction(
+      fluxoRealocado.map((mes) =>
+        prisma.orcamento.update({
+          where: {
+            userId_mes_ano: {
+              userId: mes.userId,
+              mes: mes.mes,
+              ano: mes.ano,
+            },
           },
-        },
-        data: {
-          saldoOrcado: mes.saldoOrcado,
-          status: mes.status,
-        },
-      })
+          data: {
+            saldoOrcado: mes.saldoOrcado,
+            status: mes.status, 
+          },
+        })
+      )
     )
-  )
+  } catch (error) {
+    throw new Error("Falha ao atualizar os fluxos de caixa. Tente novamente mais tarde.")
+  }
 
   return fluxoRealocado
 }

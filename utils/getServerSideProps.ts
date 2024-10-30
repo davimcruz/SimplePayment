@@ -32,6 +32,7 @@ export const getServerSidePropsDashboard = async (
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/get-user?userId=${userIdCookie}`
     )
     const userData = await response.json()
+    console.log(userData)
 
     return {
       props: {

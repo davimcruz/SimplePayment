@@ -81,8 +81,6 @@ export default async function transactionsSummary(
         tipo: true,
       },
     })
-    console.log("Transações encontradas:", transactions.length)
-    console.log("Transações:", JSON.stringify(transactions, null, 2))
 
     let annualIncome = 0
     let annualExpense = 0
@@ -120,8 +118,7 @@ export default async function transactionsSummary(
 
     const annualBalance = annualIncome - annualExpense
     const monthlyBalance = monthlyIncome - monthlyExpense
-    console.log("Cálculos finalizados:", { annualIncome, annualExpense, annualBalance, monthlyIncome, monthlyExpense, monthlyBalance })
-
+  
     const monthNames = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"]
     const currentMonthName = monthNames[currentMonth - 1]
 

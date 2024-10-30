@@ -76,7 +76,6 @@ const BalanceComparisonTable = () => {
           throw new Error("Erro ao buscar dados")
         }
         const result = await response.json()
-        console.log("Dados retornados pela API get-flow:", JSON.stringify(result, null, 2))
         setData(result.flows)
       } catch (error) {
         console.error("Erro ao buscar dados:", error)

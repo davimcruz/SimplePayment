@@ -95,7 +95,6 @@ const BillsTable: React.FC<BillsTableProps> = ({ cardId }) => {
         })
 
         const data = await response.json()
-        console.log("Dados recebidos:", data)
 
         if (Array.isArray(data.faturas)) {
           setBills(data.faturas)
@@ -125,12 +124,10 @@ const BillsTable: React.FC<BillsTableProps> = ({ cardId }) => {
         }
       )
 
+      
       const data = await response.json()
-      if (Array.isArray(data)) {
-        setParcelas(data)
-      } else {
-        console.error("A resposta da API não é um array.")
-      }
+      setParcelas(data.parcelas)
+   
     } catch (error) {
       console.error("Erro ao buscar parcelas:", error)
     } finally {
