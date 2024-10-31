@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import {
   Card,
   CardContent,
@@ -15,30 +16,30 @@ import { Separator } from "@/app/components/ui/separator"
 
 import { ModeToggle } from "@/app/components/theme/toggleTheme"
 import { ThemeProvider } from "@/app/components/theme/theme-provider"
-
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { registerSchema, RegisterInput } from "@/lib/validation"
+import { loginSchema, LoginInput } from "@/lib/validation"
 
-export default function Register() {
+
+export default function LoginPage() {
   const router = useRouter()
-  const [error, setError] = useState<string | undefined>(undefined)
+  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<RegisterInput>({
-    resolver: zodResolver(registerSchema),
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
   })
 
-  const onSubmit = async (data: RegisterInput) => {
+  const onSubmit = async (data: LoginInput) => {
     setLoading(true)
-    setError(undefined)
+    setError(null)
 
     try {
-      const response = await fetch("/api/auth/register", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -48,13 +49,13 @@ export default function Register() {
 
       const result = await response.json()
 
-      if (!response.ok) {
-        throw new Error(result.error || "Erro ao registrar")
+      if (response.ok) {
+        router.push("/dashboard")
+      } else {
+        setError(result.error || "Credenciais inválidas.")
       }
-
-      router.push("/setup")
-    } catch (error: any) {
-      setError(error.message || "Erro ao registrar")
+    } catch (err) {
+      setError("Erro ao tentar fazer login.")
     } finally {
       setLoading(false)
     }
@@ -62,7 +63,9 @@ export default function Register() {
 
   return (
     <ThemeProvider defaultTheme="dark" attribute="class">
-      <div className="flex items-center justify-center max-h-[90vh] min-h-[90vh]">
+      <div
+        className="flex items-center justify-center max-h-[90vh] min-h-[90vh]"
+      >
         <div className="fixed right-4 top-4 lg:block hidden">
           <ModeToggle />
         </div>
@@ -71,43 +74,11 @@ export default function Register() {
             SimpleFinance
           </CardTitle>
           <CardDescription className="pt-4 text-center">
-            Faça seu registro abaixo
+            Faça login com sua conta
           </CardDescription>
-          <Separator className="mt-10"></Separator>
+          <Separator className="mt-10" />
           <CardContent className="pt-10 pl-4 pb-3">
             <form onSubmit={handleSubmit(onSubmit)}>
-              <div className="grid gap-4 mb-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="nome">Nome</Label>
-                    <Input
-                      id="nome"
-                      placeholder="John"
-                      {...register("nome")}
-                      className={errors.nome ? "border-red-500" : ""}
-                    />
-                    {errors.nome && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errors.nome.message}
-                      </p>
-                    )}
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="sobrenome">Sobrenome</Label>
-                    <Input
-                      id="sobrenome"
-                      placeholder="Doe"
-                      {...register("sobrenome")}
-                      className={errors.sobrenome ? "border-red-500" : ""}
-                    />
-                    {errors.sobrenome && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errors.sobrenome.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
               <div className="grid max-w-sm gap-5 mx-auto">
                 <div>
                   <Label htmlFor="email">Email:</Label>
@@ -129,7 +100,7 @@ export default function Register() {
                   <Input
                     type="password"
                     id="password"
-                    placeholder="No mínimo 8 dígitos"
+                    placeholder="Sua senha"
                     {...register("password")}
                     className={errors.password ? "border-red-500" : ""}
                   />
@@ -145,23 +116,21 @@ export default function Register() {
                 type="submit"
                 disabled={loading}
               >
-                {loading ? "Registrando..." : "Registrar"}
+                {loading ? "Logando..." : "Logar"}
               </Button>
               {error && (
-                <p className="mt-4 text-center text-red-500 transition text-sm">
-                  {error}
-                </p>
+                <p className="mt-4 text-center text-sm text-red-600">{error}</p>
               )}
             </form>
           </CardContent>
           <CardFooter className="text-center justify-center mt-auto py-4">
             <div className="text-center justify-center mt-auto">
-              <a
-                href="./signin"
+              <Link
+                href="/signup"
                 className="text-center text-sm mb-2 hover:text-sky-400 text-slate-500 transition duration-300"
               >
-                Logar com minha conta
-              </a>
+                Não possuo uma conta
+              </Link>
             </div>
           </CardFooter>
         </Card>

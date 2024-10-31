@@ -130,8 +130,8 @@ const TransactionsFull = () => {
   }
 
   return (
-    <div className="flex justify-center items-center">
-      <Card className="m-12 w-[90vw]">
+    <div className="h-full w-full px-12 mt-8">
+      <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Transações</CardTitle>
           <div className="flex items-center">
@@ -156,75 +156,81 @@ const TransactionsFull = () => {
               <p>Nenhuma transação encontrada</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead onClick={() => handleSort("nome")}>
-                    Transação{" "}
-                    {sortKey === "nome" && (sortOrder === "asc" ? "↑" : "↓")}
-                  </TableHead>
+            <div
+              className="max-h-[calc(100vh-16rem)] overflow-auto"
+            >
+              <Table>
+                <TableHeader className="sticky top-0 bg-background">
+                  <TableRow>
+                    <TableHead onClick={() => handleSort("nome")}>
+                      Transação{" "}
+                      {sortKey === "nome" && (sortOrder === "asc" ? "↑" : "↓")}
+                    </TableHead>
 
-                  <TableHead className="hidden lg:table-cell md:table-cell">
-                    Tipo
-                  </TableHead>
-                  <TableHead className="hidden lg:table-cell">Origem</TableHead>
+                    <TableHead className="hidden lg:table-cell md:table-cell">
+                      Tipo
+                    </TableHead>
+                    <TableHead className="hidden lg:table-cell">
+                      Origem
+                    </TableHead>
 
-                  <TableHead
-                    onClick={() => handleSort("data")}
-                    className="hidden lg:table-cell cursor-pointer"
-                  >
-                    Data{" "}
-                    {sortKey === "data" && (sortOrder === "asc" ? "↑" : "↓")}
-                  </TableHead>
-                  <TableHead
-                    onClick={() => handleSort("valor")}
-                    className="cursor-pointer hidden lg:table-cell"
-                  >
-                    Valor{" "}
-                    {sortKey === "valor" && (sortOrder === "asc" ? "↑" : "↓")}
-                  </TableHead>
-                  <TableHead className="ml-auto">Visualização</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTransactions.map((transaction, index) => (
-                  <TableRow key={index}>
-                    <TableCell>
-                      <div className="font-medium">{transaction.nome}</div>
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell">
-                      <Badge
-                        className="hidden lg:inline-flex md:inline-flex text-xs"
-                        variant="outline"
-                      >
-                        {capitalizeFirstLetter(transaction.tipo)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell">
-                      {formatFonte(transaction.fonte)}
-                      <br />
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        {transaction.fonte === "cartao-credito"
-                          ? transaction.detalhesFonte || "Cartão de Crédito"
-                          : transaction.detalhesFonte}
-                      </div>
-                    </TableCell>
-
-                    <TableCell className="hidden lg:table-cell">
-                      {transaction.data.replace(/-/g, "/")}
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell">
-                      {formatValor(transaction.valor)}
-                    </TableCell>
-                    <TableCell className="">
-                      <ViewTransaction
-                        transactionId={transaction.transactionId}
-                      />
-                    </TableCell>
+                    <TableHead
+                      onClick={() => handleSort("data")}
+                      className="hidden lg:table-cell cursor-pointer"
+                    >
+                      Data{" "}
+                      {sortKey === "data" && (sortOrder === "asc" ? "↑" : "↓")}
+                    </TableHead>
+                    <TableHead
+                      onClick={() => handleSort("valor")}
+                      className="cursor-pointer hidden lg:table-cell"
+                    >
+                      Valor{" "}
+                      {sortKey === "valor" && (sortOrder === "asc" ? "↑" : "↓")}
+                    </TableHead>
+                    <TableHead className="ml-auto">Visualização</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredTransactions.map((transaction, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <div className="font-medium">{transaction.nome}</div>
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        <Badge
+                          className="hidden lg:inline-flex md:inline-flex text-xs"
+                          variant="outline"
+                        >
+                          {capitalizeFirstLetter(transaction.tipo)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        {formatFonte(transaction.fonte)}
+                        <br />
+                        <div className="hidden text-sm text-muted-foreground md:inline">
+                          {transaction.fonte === "cartao-credito"
+                            ? transaction.detalhesFonte || "Cartão de Crédito"
+                            : transaction.detalhesFonte}
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="hidden lg:table-cell">
+                        {transaction.data.replace(/-/g, "/")}
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        {formatValor(transaction.valor)}
+                      </TableCell>
+                      <TableCell className="">
+                        <ViewTransaction
+                          transactionId={transaction.transactionId}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

@@ -4,7 +4,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/app/components/ui/card"
-import { ArrowDownUp } from "lucide-react"
+import { MoveDownRight } from "lucide-react"
 
 interface ExpenseCardProps {
   monthlyExpense: string
@@ -23,7 +23,7 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({
     <Card x-chunk="dashboard-01-chunk-3">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Despesas</CardTitle>
-        <ArrowDownUp className="h-4 w-4 text-muted-foreground" />
+        <MoveDownRight className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{monthlyExpense}</div>

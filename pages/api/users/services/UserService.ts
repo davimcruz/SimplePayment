@@ -43,7 +43,7 @@ export class UserService {
     // Se não estiver no cache, busca o usuário no banco de dados
     const user = await prisma.usuarios.findUnique({
       where: { id: userId },
-      select: { id: true, nome: true, sobrenome: true, image: true }, 
+      select: { id: true, nome: true, sobrenome: true, image: true, email: true, permissao: true }, 
     });
 
     // Se o usuário for encontrado, armazena no cache para futuras requisições (mais performático)

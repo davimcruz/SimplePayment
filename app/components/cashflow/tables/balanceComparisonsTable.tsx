@@ -155,16 +155,16 @@ const BalanceComparisonTable = () => {
   }
 
   return (
-    <div className="flex justify-center items-center">
-      <Card className="m-12 w-[90vw]">
-        <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 mb-4">
+    <div className="h-full w-full px-12">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Fluxo de Caixa</CardTitle>
-          <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
+          <div className="flex items-center">
             <Input
               placeholder="Pesquisar por mês ou status"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full max-w-sm py-0"
+              className="w-full max-w-sm py-0 hidden lg:block"
             />
           </div>
         </CardHeader>
@@ -176,86 +176,83 @@ const BalanceComparisonTable = () => {
               <p>Nenhuma comparação encontrada</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead
-                    onClick={() => handleSort("mes")}
-                    className="cursor-pointer"
-                  >
-                    Mês {sortKey === "mes" && (sortOrder === "asc" ? "↓" : "↑")}
-                  </TableHead>
-                  <TableHead
-                    onClick={() => handleSort("saldoOrcado")}
-                    className="cursor-pointer"
-                  >
-                    Orçado{" "}
-                    {sortKey === "saldoOrcado" &&
-                      (sortOrder === "asc" ? "↑" : "↓")}
-                  </TableHead>
-                  <TableHead
-                    onClick={() => handleSort("saldoRealizado")}
-                    className="cursor-pointer"
-                  >
-                    Realizado{" "}
-                    {sortKey === "saldoRealizado" &&
-                      (sortOrder === "asc" ? "↑" : "↓")}
-                  </TableHead>
-                  <TableHead
-                    onClick={() => handleSort("gapMoney")}
-                    className="cursor-pointer"
-                  >
-                    Gap (R$){" "}
-                    {sortKey === "gapMoney" &&
-                      (sortOrder === "asc" ? "↑" : "↓")}
-                  </TableHead>
-                  <TableHead
-                    onClick={() => handleSort("gapPercentage")}
-                    className="cursor-pointer"
-                  >
-                    Gap (%){" "}
-                    {sortKey === "gapPercentage" &&
-                      (sortOrder === "asc" ? "↑" : "↓")}
-                  </TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredAndSortedData.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-semibold">{item.nome}</TableCell>
-                    <TableCell>{formatCurrency(item.saldoOrcado)}</TableCell>
-                    <TableCell>{formatCurrency(item.saldoRealizado)}</TableCell>
-                    <TableCell>{formatCurrency(item.gapMoney)}</TableCell>
-                    <TableCell>
-                      {formatPercentage(item.gapPercentage)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={getBadgeClass(item.status)}
-                      >
-                        {statusTranslations[item.status] || item.status}
-                      </Badge>
-                    </TableCell>
+            <div className="relative overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead
+                      onClick={() => handleSort("mes")}
+                      className="cursor-pointer"
+                    >
+                      Mês {sortKey === "mes" && (sortOrder === "asc" ? "↓" : "↑")}
+                    </TableHead>
+                    <TableHead
+                      onClick={() => handleSort("saldoOrcado")}
+                      className="cursor-pointer hidden lg:table-cell"
+                    >
+                      Orçado {sortKey === "saldoOrcado" && (sortOrder === "asc" ? "↑" : "↓")}
+                    </TableHead>
+                    <TableHead
+                      onClick={() => handleSort("saldoRealizado")}
+                      className="cursor-pointer hidden lg:table-cell"
+                    >
+                      Realizado {sortKey === "saldoRealizado" && (sortOrder === "asc" ? "↑" : "↓")}
+                    </TableHead>
+                    <TableHead
+                      onClick={() => handleSort("gapMoney")}
+                      className="cursor-pointer hidden lg:table-cell"
+                    >
+                      Gap (R$) {sortKey === "gapMoney" && (sortOrder === "asc" ? "↑" : "↓")}
+                    </TableHead>
+                    <TableHead
+                      onClick={() => handleSort("gapPercentage")}
+                      className="cursor-pointer hidden lg:table-cell"
+                    >
+                      Gap (%) {sortKey === "gapPercentage" && (sortOrder === "asc" ? "↑" : "↓")}
+                    </TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredAndSortedData.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">{item.nome}</TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        {formatCurrency(item.saldoOrcado)}
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        {formatCurrency(item.saldoRealizado)}
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        {formatCurrency(item.gapMoney)}
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        {formatPercentage(item.gapPercentage)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={getBadgeClass(item.status)}
+                        >
+                          {statusTranslations[item.status] || item.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
-        <div className="w-full flex">
-          <CardFooter className="mx-auto">
-            <Button
-              variant={"link"}
-              className="mt-4 -mb-4 text-sm text-zinc-500"
-              onClick={handleUpdateBudgetClick}
-            >
-              Clique aqui para alterar seu orçamento{" "}
-              <span className="lg:block hidden ml-1">mensal</span>
-            </Button>
-          </CardFooter>
-        </div>
+        <CardFooter className="flex justify-center">
+          <Button
+            variant="link"
+            className="text-sm text-zinc-500"
+            onClick={handleUpdateBudgetClick}
+          >
+            Clique aqui para alterar seu orçamento anual
+          </Button>
+        </CardFooter>
       </Card>
     </div>
   )

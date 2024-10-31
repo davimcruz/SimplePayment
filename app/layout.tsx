@@ -1,12 +1,13 @@
 import "./globals.css"
-import { Inter } from "next/font/google";
-import { Metadata } from "next";
-import type { Viewport } from "next";
+import { Inter } from "next/font/google"
+import { Metadata } from "next"
+import type { Viewport } from "next"
+import { ThemeProvider } from "@/app/components/theme/theme-provider"
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"] })
 
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
@@ -14,12 +15,14 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "Simple Finance",
-  description: "Descubra o Simple Finance, o principal software de finanças pessoais projetado para ajudá-lo a gerenciar orçamentos, despesas e cartões em um só lugar.",
+  description:
+    "Descubra o Simple Finance, o principal software de finanças pessoais projetado para ajudá-lo a gerenciar orçamentos, despesas e cartões em um só lugar.",
   openGraph: {
     title: "Simple Finance - Seu Gerente de Finanças Pessoais",
-    description: "Simplifique seu gerenciamento financeiro com o Simple Finance. Acompanhe despesas, gerencie orçamentos e supervisione seus cartões com facilidade.",
+    description:
+      "Simplifique seu gerenciamento financeiro com o Simple Finance. Acompanhe despesas, gerencie orçamentos e supervisione seus cartões com facilidade.",
   },
-};
+}
 
 export default function RootLayout({
   children,
@@ -28,10 +31,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-br" suppressHydrationWarning>
-      <head>
-        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-      </head>
-      <body className={inter.className}>{children}</body>
+      <ThemeProvider defaultTheme="dark" attribute="class">
+        <body className={inter.className}>{children}</body>
+      </ThemeProvider>
     </html>
   )
 }

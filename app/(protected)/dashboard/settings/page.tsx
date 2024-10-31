@@ -1,8 +1,7 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ThemeProvider } from "@/app/components/theme/theme-provider"
 import { UploadButton } from "@/app/components/uploadthing"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/app/components/ui/avatar"
@@ -17,8 +16,6 @@ import {
 } from "@/app/components/ui/card"
 import { Input } from "@/app/components/ui/input"
 
-import Header from "@/app/components/header/HeaderComponent"
-
 interface UserData {
   nome: string
   sobrenome: string
@@ -26,9 +23,6 @@ interface UserData {
 }
 
 const SettingsPage = () => {
-  const [user, setUser] = useState<UserData | null>(null)
-  const [name, setName] = useState("")
-  const [lastName, setLastName] = useState("")
   const [newName, setNewName] = useState("")
   const [newLastName, setNewLastName] = useState("")
   const [loadingSave, setLoadingSave] = useState(false)
@@ -45,38 +39,8 @@ const SettingsPage = () => {
         .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/")
     })
 
-    router.push("/auth/signin")
+    router.push("/signin")
   }
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const userIdCookie = document.cookie.split('; ').find(row => row.startsWith('userId='));
-      if (!userIdCookie) {
-        router.push('/auth/signin'); // Redireciona se o cookie não existir
-        return;
-      }
-
-      const userId = userIdCookie.split('=')[1];
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/users/get-user?userId=${userId}`);
-        const userData = await response.json();
-
-        if (!response.ok) {
-          throw new Error('Erro ao buscar dados do usuário');
-        }
-
-        setUser(userData);
-        setName(userData.nome);
-        setLastName(userData.sobrenome);
-        setUserImage(userData.image || "");
-      } catch (error) {
-        console.error("Erro ao buscar os dados do usuário:", error);
-        router.push('/auth/signin'); // Redireciona em caso de erro
-      }
-    };
-
-    fetchUserData();
-  }, [router]);
 
   const handleSave = async () => {
     if (!newName || !newLastName) {
@@ -160,9 +124,7 @@ const SettingsPage = () => {
   }
 
   return (
-    <ThemeProvider defaultTheme="dark" attribute="class">
-    <div className="flex min-h-screen w-full flex-col">
-        <Header userImage={userImage} />
+      <div className="flex flex-col">
         <main className="flex min-h-[calc(100vh_-_theme(spacing.16))] flex-1 flex-col gap-4 bg-muted/40 p-4 md:gap-8 md:p-10">
           <div className="mx-auto grid w-full max-w-6xl gap-2">
             <h1 className="text-2xl ml-1 lg:ml-0 my-4 lg:my-0 font-semibold">
@@ -270,7 +232,6 @@ const SettingsPage = () => {
           </div>
         </main>
       </div>
-    </ThemeProvider>
   )
 }
 

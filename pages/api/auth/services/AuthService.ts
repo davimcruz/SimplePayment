@@ -25,6 +25,7 @@ class AuthService {
         sobrenome,
         email,
         senha: hashedPassword,
+        permissao: 'free',
       },
       select: {
         id: true,
