@@ -98,7 +98,7 @@ const Summary: React.FC<SummaryProps> = ({ initialData }) => {
           annualBalance={summaryData?.annualBalance || "R$ 0,00"}
           annualBalanceMessage={summaryData?.annualBalanceMessage || ""}
         />
-        {userId && <BudgetCard userId={userId} />}
+        <BudgetCard/>
       </>
     </div>
   )
