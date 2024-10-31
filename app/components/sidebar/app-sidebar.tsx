@@ -40,12 +40,12 @@ import { Separator } from "../ui/separator"
 import Image from "next/image"
 
 interface UserData {
-  id: string
-  nome: string
-  sobrenome: string
-  email: string
-  image: string | null
-  permissao: 'admin' | 'pro' | 'free'
+  id?: string
+  nome?: string
+  sobrenome?: string
+  email?: string
+  image?: string | null
+  permissao?: 'admin' | 'pro' | 'free'
 }
 
 const items = [
@@ -75,23 +75,39 @@ const fetcher = async (url: string) => {
   const cookies = parseCookies()
   const userId = cookies.userId
 
-  if (!userId) return null
-
-  const response = await fetch(`${url}?userId=${userId}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-  
-  if (!response.ok) {
-    throw new Error('Erro ao carregar dados do usuário')
+  if (!userId) return {
+    image: '/profile.png',
+    nome: 'User',
+    sobrenome: '',
+    email: '',
+    permissao: 'free' as const
   }
 
-  const data = await response.json()
-  return {
-    ...data,
-    image: data.image || '/profile.png'
+  try {
+    const response = await fetch(`${url}?userId=${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    
+    if (!response.ok) {
+      throw new Error('Erro ao carregar dados do usuário')
+    }
+
+    const data = await response.json()
+    return {
+      ...data,
+      image: data.image || '/profile.png'
+    }
+  } catch (error) {
+    return {
+      image: '/profile.png',
+      nome: 'User',
+      sobrenome: '',
+      email: '',
+      permissao: 'free' as const
+    }
   }
 }
 
@@ -101,17 +117,32 @@ interface AppSidebarProps {
 
 export function AppSidebar({ initialData }: AppSidebarProps) {
   const router = useRouter()
-  const { data: userData } = useSWR<UserData>('/api/users/get-user', fetcher, {
-    fallbackData: {
-      ...initialData,
-      image: initialData.image || '/profile.png'
-    },
+  const { data: userData, isLoading } = useSWR<UserData>('/api/users/get-user', fetcher, {
+    fallbackData: initialData,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     revalidateIfStale: false,
     revalidateOnMount: false,
     dedupingInterval: 60000,
+    suspense: false,
   })
+
+  if (isLoading || !userData) {
+    return (
+      <Sidebar collapsible="icon">
+        <SidebarHeader>
+          <div className="flex items-center gap-2 mt-2">
+            <Wallet className="w-4 h-4 ml-2" />
+          </div>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Carregando...</SidebarGroupLabel>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
+    )
+  }
 
   const handleLogout = () => {
     const cookiesToDelete = ['token', 'userId']
@@ -176,41 +207,42 @@ console.log(userData)
                 <DropdownMenuTrigger asChild className="h-auto">
                   <SidebarMenuButton>
                     <Image
-                      src={userData?.image || "/profile.png"}
-                      alt={`${userData?.nome || "User"} profile`}
+                      src={userData.image || "/profile.png"}
+                      alt={`${userData.nome || "User"} profile`}
                       width={48}
                       height={48}
                       className="rounded-sm object-cover"
+                      priority
                     />
                     <Separator orientation="vertical" className="h-12 mx-1" />
                     <div className="flex flex-col gap-1">
                       <span className="px-2">
-                        {userData?.nome && userData?.sobrenome
+                        {userData.nome && userData.sobrenome
                           ? `${userData.nome} ${userData.sobrenome}`
                           : "Username"}
                       </span>
                       <div className="flex justify-start">
                         <Badge
                           variant={
-                            userData?.permissao === "admin"
+                            userData.permissao === "admin"
                               ? "destructive"
-                              : userData?.permissao === "pro"
+                              : userData.permissao === "pro"
                               ? "premium"
                               : "secondary"
                           }
                           className={cn(
                             "font-bold",
-                            userData?.permissao === "admin" &&
+                            userData.permissao === "admin" &&
                               "bg-red-500/10 text-red-500 hover:bg-red-500/20",
-                            userData?.permissao === "pro" &&
+                            userData.permissao === "pro" &&
                               "bg-violet-500/10 text-violet-500 hover:bg-violet-500/20",
-                            userData?.permissao === "free" &&
+                            userData.permissao === "free" &&
                               "bg-zinc-500/10 text-zinc-500 hover:bg-zinc-500/20"
                           )}
                         >
-                          {userData?.permissao === "admin"
+                          {userData.permissao === "admin"
                             ? "Administrador"
-                            : userData?.permissao === "pro"
+                            : userData.permissao === "pro"
                             ? "Usuário Pro"
                             : "Usuário Gratuito"}
                         </Badge>
@@ -224,7 +256,7 @@ console.log(userData)
                   className="w-[--radix-popper-anchor-width]"
                 >
                   <DropdownMenuLabel>
-                    {userData?.email || "Minha Conta"}
+                    {userData.email || "Minha Conta"}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSettings}>
