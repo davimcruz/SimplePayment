@@ -4,20 +4,37 @@ import { AppSidebar } from "@/app/components/sidebar/app-sidebar"
 import Header from "../components/sidebar/Header"
 import { Separator } from "../components/ui/separator"
 import { cookies } from "next/headers"
+import { redirect } from "next/navigation"
 
 async function getUserData() {
   const cookieStore = cookies()
   const userId = cookieStore.get("userId")?.value
+  const token = cookieStore.get("token")?.value
 
-  if (!userId) return null
+  if (!userId || !token) {
+    redirect('/signin')
+  }
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/get-user?userId=${userId}`,
-    {
-      cache: "no-store",
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/get-user?userId=${userId}`,
+      {
+        cache: "no-store",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error('Falha ao obter dados do usuário')
     }
-  )
-  return response.json()
+
+    return response.json()
+  } catch (error) {
+    console.error('Erro ao buscar dados do usuário:', error)
+    redirect('/signin')
+  }
 }
 
 export default async function ProtectedLayout({
@@ -26,6 +43,10 @@ export default async function ProtectedLayout({
   children: React.ReactNode
 }) {
   const userData = await getUserData()
+
+  if (!userData) {
+    redirect('/signin')
+  }
 
   return (
     <Providers>

@@ -1,26 +1,41 @@
 import { NextResponse } from "next/server"
 import { NextRequest } from "next/server"
-import { verifyTokenFromRequest } from "@/pages/api/middleware/jwt-auth"
 
-//Verificação de autenticação
+// Páginas públicas que não precisam de autenticação
+const publicPaths = ['/signin', '/signup', '/']
 
 export async function middleware(request: NextRequest) {
-  const tokenValid = verifyTokenFromRequest(request)
+  const { pathname } = request.nextUrl
 
-  if (!tokenValid) {
-    return NextResponse.redirect(new URL("/signin", request.url))
+  // Permite acesso a páginas públicas
+  if (publicPaths.includes(pathname)) {
+    return NextResponse.next()
   }
 
+  // Verifica se existem os cookies necessários
+  const token = request.cookies.get('token')
+  const userId = request.cookies.get('userId')
+  const email = request.cookies.get('email')
+
+  // Se faltar algum cookie essencial, redireciona para login
+  if (!token || !userId || !email) {
+    const response = NextResponse.redirect(new URL('/signin', request.url))
+    
+    // Limpa todos os cookies por segurança
+    response.cookies.delete('token')
+    response.cookies.delete('userId')
+    response.cookies.delete('email')
+    
+    return response
+  }
+
+  // Se tiver todos os cookies, permite o acesso
   return NextResponse.next()
 }
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
-    "/cards/:path*",
-    "/cashflow/:path*",
-    "/settings/:path*",
-    "/transactions/:path*",
-    "/setup/:path*",
+    // Protege todas as rotas exceto as públicas e arquivos estáticos
+    '/((?!signin|signup|_next/static|_next/image|favicon.ico).*)',
   ],
 }
