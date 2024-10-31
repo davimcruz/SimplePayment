@@ -168,7 +168,7 @@ console.log(userData)
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <div className="flex items-center gap-2">
-          <Wallet className="w-4 h-4 ml-2 group-data-[collapsible=icon]:block hidden" />
+          <Wallet className="w-4 h-4 ml-2 mt-4 group-data-[collapsible=icon]:block hidden" />
           <div className="flex items-center gap-2 group-data-[collapsible=icon]:hidden">
             <Wallet className="w-12 h-12 p-2 border-zinc-50 rounded-lg" />
             <Separator orientation="vertical" className="h-10 mx-1" />
