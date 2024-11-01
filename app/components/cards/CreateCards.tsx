@@ -147,7 +147,7 @@ const CreateCreditCard: React.FC<CreateCreditCardProps> = ({ onCancel }) => {
       >
         {isSubmitting ? (
           <>
-            <CardTitle>Criando cartão...</CardTitle>
+            <CardTitle className="px-6 pt-6">Criando cartão...</CardTitle>
             <CardContent className="flex justify-center items-center h-[400px]">
               <LottieAnimation animationPath="/loadingAnimation.json" />
             </CardContent>

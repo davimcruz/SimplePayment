@@ -38,6 +38,17 @@ import { cn } from "@/lib/utils"
 import useSWR from "swr"
 import { Separator } from "../ui/separator"
 import Image from "next/image"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../ui/collapsible"
+import { useEffect, useState } from "react"
+import VisaIcon from "@/public/visa.svg"
+import MastercardIcon from "@/public/mastercard.svg"
+import AmexIcon from "@/public/amex.svg"
+import EloIcon from "@/public/elo.svg"
+import HipercardIcon from "@/public/hipercard.svg"
 
 interface UserData {
   id?: string
@@ -63,11 +74,6 @@ const items = [
     title: "Fluxo de Caixa",
     url: "/dashboard/cashflow/",
     icon: Calendar,
-  },
-  {
-    title: "Cartões de Crédito	",
-    url: "/dashboard/cards/",
-    icon: CreditCard,
   },
 ]
 
@@ -115,8 +121,29 @@ interface AppSidebarProps {
   initialData: UserData 
 }
 
+// Defina um tipo para as bandeiras possíveis
+type CardBrand = 'Visa' | 'Mastercard' | 'American Express' | 'Elo' | 'Hipercard';
+
+interface CardType {
+  cardId: string
+  nomeCartao: string
+  bandeira: CardBrand
+  limite?: string
+  vencimento?: string
+  tipoCartao: "credito"
+}
+
+const cardIcons = {
+  'Visa': VisaIcon,
+  'Mastercard': MastercardIcon,
+  'American Express': AmexIcon,
+  'Elo': EloIcon,
+  'Hipercard': HipercardIcon,
+} as const;
+
 export function AppSidebar({ initialData }: AppSidebarProps) {
   const router = useRouter()
+  const cookies = parseCookies()
   const { data: userData, isLoading } = useSWR<UserData>('/api/users/get-user', fetcher, {
     fallbackData: initialData,
     revalidateOnFocus: false,
@@ -126,6 +153,32 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
     dedupingInterval: 60000,
     suspense: false,
   })
+
+  const [cards, setCards] = useState<CardType[]>([])
+
+  useEffect(() => {
+    const fetchCards = async () => {
+      try {
+        const response = await fetch(`/api/cards/get-card?userId=${cookies.userId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+
+        const data = await response.json()
+        if (Array.isArray(data.cartoes)) {
+          setCards(data.cartoes)
+        }
+      } catch (error) {
+        console.error("Erro ao buscar cartões:", error)
+      }
+    }
+
+    if (cookies.userId) {
+      fetchCards()
+    }
+  }, [cookies.userId])
 
   if (isLoading || !userData) {
     return (
@@ -165,7 +218,7 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
   }
 console.log(userData)
   return (
-    <Sidebar collapsible="icon" className="backdrop-blur-md bg-white/80 dark:bg-zinc-900">
+    <Sidebar collapsible="icon" className="backdrop-blur-md bg-white/80 dark:bg-zinc-900 overflow-hidden">
       <SidebarHeader>
         <div className="flex items-center gap-2">
           <Wallet className="w-4 h-4 ml-2 mt-4 group-data-[collapsible=icon]:block hidden" />
@@ -184,7 +237,7 @@ console.log(userData)
           <SidebarGroupLabel>Explore nossas opções</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {items.filter(item => item.title !== "Cartões de Crédito").map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <a href={item.url}>
@@ -194,6 +247,42 @@ console.log(userData)
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              
+              <Collapsible defaultOpen className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <CreditCard />
+                      <span>Cartões de Crédito</span>
+                      <ChevronUp className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=closed]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="overflow-x-hidden">
+                    <SidebarMenu className="ml-4 mt-2">
+                      {cards.map((card) => {
+                        const CardIcon = cardIcons[card.bandeira] || CreditCard
+                        return (
+                          <SidebarMenuItem key={card.cardId}>
+                            <SidebarMenuButton asChild>
+                              <a href={`/dashboard/cards/${card.cardId}`}>
+                                <Image src={CardIcon} alt={card.bandeira} width={20} height={20} />
+                                <span>{card.nomeCartao}</span>
+                              </a>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )
+                      })}
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <a href="/dashboard/cards">
+                            <span className="text-xs text-muted-foreground">Ver todos os cartões</span>
+                          </a>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenu>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

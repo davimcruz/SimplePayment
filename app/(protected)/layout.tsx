@@ -1,11 +1,11 @@
 import { Inter } from "next/font/google"
-import { Providers } from "../components/providers"
 import { SidebarTrigger } from "@/app/components/ui/sidebar"
 import { AppSidebar } from "@/app/components/sidebar/app-sidebar"
 import Header from "../components/sidebar/Header"
 import { Separator } from "../components/ui/separator"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+import { Providers } from "../_app"
 
 const inter = Inter({ subsets: ["latin"] })
 
