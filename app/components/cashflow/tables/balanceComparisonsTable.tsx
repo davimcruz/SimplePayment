@@ -54,41 +54,17 @@ const getBadgeClass = (status: string) => {
   }
 }
 
-const BalanceComparisonTable = () => {
-  const [data, setData] = useState<FlowItem[]>([])
+interface BalanceComparisonTableProps {
+  data: FlowItem[]
+  loading: boolean
+  setData: (data: FlowItem[]) => void
+}
+
+const BalanceComparisonTable = ({ data, loading, setData }: BalanceComparisonTableProps) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [sortKey, setSortKey] = useState<keyof FlowItem>("mes")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
-  const [loading, setLoading] = useState(true)
   const router = useRouter()
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true)
-
-      const cookies = parseCookies()
-      const userId = cookies.userId
-
-      if (!userId) {
-        console.error("User ID não encontrado nos cookies.")
-        setLoading(false)
-        return
-      }
-
-      try {
-        const response = await fetch(`/api/cashflow/get-flow?userId=${userId}`)
-        if (!response.ok) {
-          throw new Error("Erro ao buscar dados")
-        }
-        const result = await response.json()
-        setData(result.flows)
-      } catch (error) {
-        console.error("Erro ao buscar dados:", error)
-      }
-      setLoading(false)
-    }
-    fetchData()
-  }, [])
 
   const filteredAndSortedData = useMemo(() => {
     let filtered = data
