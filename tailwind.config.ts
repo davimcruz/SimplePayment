@@ -13,7 +13,7 @@ export default withUt({
   prefix: "",
   theme: {
   	container: {
-  		center: true,
+  		center: 'true',
   		padding: '2rem',
   		screens: {
   			'2xl': '1400px'
@@ -78,6 +78,22 @@ export default withUt({
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		keyframes: {
+  			'border-spin': {
+  				from: {
+  					transform: 'rotate(0deg)'
+  				},
+  				to: {
+  					transform: 'rotate(360deg)'
+  				}
+  			},
+  			'border-width': {
+  				from: {
+  					borderWidth: '0'
+  				},
+  				to: {
+  					borderWidth: '1px'
+  				}
+  			},
   			'accordion-down': {
   				from: {
   					height: '0'
@@ -101,16 +117,34 @@ export default withUt({
   				to: {
   					opacity: '1'
   				}
+  			},
+  			marquee: {
+  				from: {
+  					transform: 'translateX(0)'
+  				},
+  				to: {
+  					transform: 'translateX(calc(-100% - var(--gap)))'
+  				}
+  			},
+  			'marquee-vertical': {
+  				from: {
+  					transform: 'translateY(0)'
+  				},
+  				to: {
+  					transform: 'translateY(calc(-100% - var(--gap)))'
+  				}
   			}
   		},
   		animation: {
+  			'border-spin': 'border-spin 6s linear infinite',
+  			'border-width': 'border-width 3s infinite alternate',
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out',
-  			fadeIn: 'fadeIn 2s ease-out forwards'
+  			fadeIn: 'fadeIn 2s ease-out forwards',
+  			marquee: 'marquee var(--duration) infinite linear',
+  			'marquee-vertical': 'marquee-vertical var(--duration) linear infinite'
   		}
   	}
   },
-  plugins: [
-		require("tailwindcss-animate"),
-	],
+  plugins: [require("tailwindcss-animate")],
 }) 

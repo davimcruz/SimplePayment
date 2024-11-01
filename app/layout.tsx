@@ -1,10 +1,14 @@
 import "./globals.css"
-import { Inter } from "next/font/google"
+import { Poppins } from "next/font/google"
 import { Metadata } from "next"
 import type { Viewport } from "next"
 import { ThemeProvider } from "@/app/components/theme/theme-provider"
 
-const inter = Inter({ subsets: ["latin"] })
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["200", "300", "400", "500", "600", "700"],
+  variable: "--font-poppins",
+})
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -14,13 +18,13 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "Simple Finance",
+  title: "SimpleFinance",
   description:
-    "Descubra o Simple Finance, o principal software de finanças pessoais projetado para ajudá-lo a gerenciar orçamentos, despesas e cartões em um só lugar.",
+    "Descubra o SimpleFinance, o principal software de finanças pessoais projetado para ajudá-lo a gerenciar orçamentos, despesas e cartões em um só lugar.",
   openGraph: {
-    title: "Simple Finance - Seu Gerente de Finanças Pessoais",
+    title: "SimpleFinance - Seu Gerente de Finanças Pessoais",
     description:
-      "Simplifique seu gerenciamento financeiro com o Simple Finance. Acompanhe despesas, gerencie orçamentos e supervisione seus cartões com facilidade.",
+      "Simplifique seu gerenciamento financeiro com o SimpleFinance. Acompanhe despesas, gerencie orçamentos e supervisione seus cartões com facilidade.",
   },
 }
 
@@ -32,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="pt-br" suppressHydrationWarning>
       <ThemeProvider defaultTheme="dark" attribute="class">
-        <body className={inter.className}>{children}</body>
+        <body className={poppins.className}>{children}</body>
       </ThemeProvider>
     </html>
   )

@@ -165,7 +165,7 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
   }
 console.log(userData)
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="backdrop-blur-md bg-white/80 dark:bg-zinc-900">
       <SidebarHeader>
         <div className="flex items-center gap-2">
           <Wallet className="w-4 h-4 ml-2 mt-4 group-data-[collapsible=icon]:block hidden" />

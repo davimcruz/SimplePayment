@@ -4,13 +4,4 @@ module.exports = {
   images: {
     domains: ["utfs.io"], // Domínio permitido para imagens (uploadthing)
   },
-  async redirects() {
-    return [
-      {
-        source: "/",
-        destination: "/dashboard",
-        permanent: false,
-      },
-    ]
-  },
 }

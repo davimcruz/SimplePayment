@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import handler from '@/pages/api/transactions/get-summary'
-import { verifyToken } from '@/pages/api/middleware/jwt-auth'
+import { verifyToken } from '@/pages/api/auth/controllers/AuthController'
 import prisma from '@/lib/prisma'
 import { parseCookies } from 'nookies'
 

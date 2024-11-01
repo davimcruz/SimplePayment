@@ -64,9 +64,11 @@ const BudgetCard = () => {
 
   if (error || !flowData) {
     return (
-      <Card>
+       <Card className="bg-gradient-to-br from-background/10 to-primary/10">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Gap Orçamentário</CardTitle>
+          <CardTitle className="text-sm font-medium">
+            Gap Orçamentário
+          </CardTitle>
           <ArrowDownUp className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -83,7 +85,7 @@ const BudgetCard = () => {
   const statusFlag = flowData.status === "excedente" ? "↑" : "↓"
 
   return (
-    <Card>
+    <Card className="bg-gradient-to-br from-background/10 to-primary/10">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Gap Orçamentário</CardTitle>
         <ArrowDownUp className="h-4 w-4 text-muted-foreground" />

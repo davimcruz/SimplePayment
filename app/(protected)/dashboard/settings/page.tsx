@@ -1,6 +1,8 @@
 "use client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { parseCookies } from "nookies"
+import useSWR from "swr"
 import Link from "next/link"
 import { UploadButton } from "@/app/components/uploadthing"
 
@@ -22,14 +24,54 @@ interface UserData {
   image?: string
 }
 
+const fetcher = async (url: string) => {
+  const cookies = parseCookies()
+  const userId = cookies.userId
+
+  if (!userId) return {
+    image: '/profile.png',
+    nome: 'User',
+    sobrenome: '',
+    email: '',
+    permissao: 'free' as const
+  }
+
+  try {
+    const response = await fetch(`${url}?userId=${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    
+    if (!response.ok) {
+      throw new Error('Erro ao carregar dados do usuário')
+    }
+
+    const data = await response.json()
+    return {
+      ...data,
+      image: data.image || '/profile.png'
+    }
+  } catch (error) {
+    return {
+      image: '/profile.png',
+      nome: 'User',
+      sobrenome: '',
+      email: '',
+      permissao: 'free' as const
+    }
+  }
+}
+
 const SettingsPage = () => {
   const [newName, setNewName] = useState("")
   const [newLastName, setNewLastName] = useState("")
   const [loadingSave, setLoadingSave] = useState(false)
   const [loadingImage, setLoadingImage] = useState(false)
   const [imageUrl, setImageUrl] = useState<string>("")
-  const [userImage, setUserImage] = useState("")
 
+  const { data: userData } = useSWR('/api/users/get-user', fetcher)
   const router = useRouter()
 
   const handleLogout = () => {
@@ -124,114 +166,98 @@ const SettingsPage = () => {
   }
 
   return (
-      <div className="flex flex-col">
-        <main className="flex min-h-[calc(100vh_-_theme(spacing.16))] flex-1 flex-col gap-4 bg-muted/40 p-4 md:gap-8 md:p-10">
-          <div className="mx-auto grid w-full max-w-6xl gap-2">
-            <h1 className="text-2xl ml-1 lg:ml-0 my-4 lg:my-0 font-semibold">
-              Configurações
-            </h1>
-          </div>
-          <div className="mx-auto grid w-full max-w-6xl items-start gap-6 md:grid-cols-[90vw] lg:grid-cols-[250px_1fr]">
-            <nav
-              className="gap-4 text-sm text-muted-foreground hidden lg:grid"
-              x-chunk="dashboard-04-chunk-0"
-            >
-              <Link href="#" className="font-semibold text-primary">
-                Geral
-              </Link>
-              <Link href="#" onClick={handleLogout}>
-                Sair
-              </Link>
-            </nav>
-            <div className="grid gap-6">
-              <Card x-chunk="dashboard-04-chunk-1">
-                <CardHeader>
-                  <CardTitle>Editar Nome</CardTitle>
-                  <CardDescription>
-                    Para editar seu nome na plataforma você deve preencher ambos
-                    os campos abaixo
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form>
-                    <Input
-                      className="mb-4"
-                      placeholder="Nome"
-                      value={newName}
-                      required
-                      onChange={(e) => setNewName(e.target.value)}
-                    />
-                    <Input
-                      placeholder="Sobrenome"
-                      value={newLastName}
-                      required
-                      onChange={(e) => setNewLastName(e.target.value)}
-                    />
-                  </form>
-                </CardContent>
-                <CardFooter className="border-t px-6 py-4">
-                  <Button
-                    onClick={handleSave}
-                    variant="outline"
-                    disabled={loadingSave || !newName || !newLastName}
-                  >
-                    {loadingSave ? "Salvando..." : "Salvar"}
-                  </Button>
-                </CardFooter>
-              </Card>
-              <Card x-chunk="dashboard-04-chunk-2">
-                <CardHeader>
-                  <div className="flex lg:gap-44">
-                    <div className="pt-4">
-                      <CardTitle>Imagem do Avatar</CardTitle>
-                      <CardDescription>
-                        Utilize esse espaço para fazer upload do seu avatar que
-                        será exibido na plataforma
-                      </CardDescription>
-                    </div>
-                    <Avatar className="w-20 h-20 mt-4 md:ml-auto lg:mt-0">
-                      <AvatarImage src={imageUrl}></AvatarImage>
-                      <AvatarFallback>SF</AvatarFallback>
-                    </Avatar>
+    <div className="flex flex-col">
+      <main className="min-h-[calc(100vh_-_theme(spacing.16))] flex-1 flex-col gap-4 p-4 md:gap-8 md:p-10">
+        <div className="mx-auto grid w-full max-w-3xl items-start gap-6">
+          <div className="grid gap-6">
+            <Card x-chunk="dashboard-04-chunk-1">
+              <CardHeader>
+                <CardTitle>Editar Nome</CardTitle>
+                <CardDescription>
+                  Para editar seu nome na plataforma você deve preencher ambos
+                  os campos abaixo
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form>
+                  <Input
+                    className="mb-4"
+                    placeholder="Nome"
+                    value={newName}
+                    required
+                    onChange={(e) => setNewName(e.target.value)}
+                  />
+                  <Input
+                    placeholder="Sobrenome"
+                    value={newLastName}
+                    required
+                    onChange={(e) => setNewLastName(e.target.value)}
+                  />
+                </form>
+              </CardContent>
+              <CardFooter className="border-t px-6 py-4">
+                <Button
+                  onClick={handleSave}
+                  variant="outline"
+                  disabled={loadingSave || !newName || !newLastName}
+                >
+                  {loadingSave ? "Salvando..." : "Salvar"}
+                </Button>
+              </CardFooter>
+            </Card>
+            <Card x-chunk="dashboard-04-chunk-2">
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                  <div>
+                    <CardTitle>Imagem do Avatar</CardTitle>
+                    <CardDescription>
+                      Utilize esse espaço para fazer upload do seu avatar que
+                      será exibido na plataforma
+                    </CardDescription>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <form className="flex flex-col gap-4">
-                    <UploadButton
-                      className="mt-6 lg:mt-0 
-                      ut-button:bg-zinc-800
-                      ut-button:after:bg-zinc-600
-                      ut-button:text-white
-                      ut-allowed-content:hidden
-                      ut-button:font-normal
-                      ut-button: text-sm
-                       "
-                      endpoint="imageUploader"
-                      onClientUploadComplete={(res) => {
-                        setImageUrl(res[0].url)
-                      }}
-                      onUploadError={(error: Error) => {
-                        console.log(`Erro: ${error.message}`)
-                      }}
-                    />
-                  </form>
-                </CardContent>
-                <CardFooter className="border-t px-6 py-4">
-                  <Button
-                    onClick={saveImage}
-                    className="font-semibold"
-                    disabled={loadingImage}
-                    variant="outline"
-                    id="save-image"
-                  >
-                    {loadingImage ? "Salvando..." : "Salvar"}
-                  </Button>
-                </CardFooter>
-              </Card>
-            </div>
+                  <Avatar className="w-20 h-20 self-center sm:self-start">
+                    <AvatarImage src={imageUrl || userData?.image} />
+                    <AvatarFallback>SF</AvatarFallback>
+                  </Avatar>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <form className="flex flex-col gap-4">
+                  <UploadButton
+                    className="mt-6 lg:mt-0 
+                    ut-button:bg-zinc-800
+                    ut-button:after:bg-zinc-600
+                    ut-button:text-white
+                    ut-allowed-content:hidden
+                    ut-button:font-normal
+                    ut-button: text-sm
+                     "
+                    endpoint="imageUploader"
+                    onClientUploadComplete={(res) => {
+                      setImageUrl(res[0].url)
+                    }}
+                    onUploadError={(error: Error) => {
+                      console.log(`Erro: ${error.message}`)
+                    }}
+                  />
+                </form>
+              </CardContent>
+              <CardFooter className="border-t px-6 py-4">
+                <Button
+                  onClick={saveImage}
+                  className="font-semibold"
+                  disabled={loadingImage}
+                  variant="outline"
+                  id="save-image"
+                >
+                  {loadingImage ? "Salvando..." : "Salvar"}
+                </Button>
+              </CardFooter>
+            </Card>
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
+    </div>
   )
 }
 

@@ -1,3 +1,4 @@
+import { Inter } from "next/font/google"
 import { Providers } from "../components/providers"
 import { SidebarTrigger } from "@/app/components/ui/sidebar"
 import { AppSidebar } from "@/app/components/sidebar/app-sidebar"
@@ -5,6 +6,8 @@ import Header from "../components/sidebar/Header"
 import { Separator } from "../components/ui/separator"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+
+const inter = Inter({ subsets: ["latin"] })
 
 async function getUserData() {
   const cookieStore = cookies()
@@ -50,7 +53,7 @@ export default async function ProtectedLayout({
 
   return (
     <Providers>
-      <div className="flex h-screen w-full">
+      <div className={`flex h-screen w-full ${inter.className}`}>
         <AppSidebar initialData={userData} />
         <div className="flex-1 flex flex-col w-0">
           <header className="w-full flex items-center h-16 border-b bg-background px-4">
@@ -58,7 +61,7 @@ export default async function ProtectedLayout({
             <Separator orientation="vertical" className="h-8 mx-4" />
             <Header />
           </header>
-          <main>{children}</main>
+          <main className={inter.className}>{children}</main>
         </div>
       </div>
     </Providers>
