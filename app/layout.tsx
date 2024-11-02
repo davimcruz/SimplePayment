@@ -1,13 +1,21 @@
 import "./globals.css"
-import { Poppins } from "next/font/google"
+// import { Poppins } from "next/font/google"
+import { Inter } from "next/font/google"
 import { Metadata } from "next"
 import type { Viewport } from "next"
 import { ThemeProvider } from "@/app/components/theme/theme-provider"
 import { Analytics } from "@vercel/analytics/react"
-const poppins = Poppins({
+
+// const poppins = Poppins({
+//   subsets: ["latin"],
+//   weight: ["200", "300", "400", "500", "600", "700"],
+//   variable: "--font-poppins",
+// })
+
+const inter = Inter({
   subsets: ["latin"],
   weight: ["200", "300", "400", "500", "600", "700"],
-  variable: "--font-poppins",
+  variable: "--font-inter",
 })
 
 export const viewport: Viewport = {
@@ -37,7 +45,7 @@ export default function RootLayout({
     <html lang="pt-br" suppressHydrationWarning>
       <Analytics />
       <ThemeProvider defaultTheme="dark" attribute="class">
-        <body className={poppins.className}>{children}</body>
+        <body className={inter.className}>{children}</body>
       </ThemeProvider>
     </html>
   )

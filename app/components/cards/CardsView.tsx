@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardDescription, CardTitle } from "../ui/card"
-import { Separator } from "../ui/separator"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
 import { parseCookies } from "nookies"
 import LottieAnimation from "../ui/loadingAnimation"
 import { Button } from "../ui/button"
@@ -12,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../ui/alert-dialog"
-import { Trash2, PencilLine } from "lucide-react"
+import { Trash2, PencilLine, Plus, Settings2 } from "lucide-react"
 import CreateCreditCard from "./CreateCards"
 import UpdateCard from "./UpdateCards"
 
@@ -23,7 +22,17 @@ interface CardType {
   limite?: string
   vencimento?: string
   tipoCartao: "credito"
+  instituicao: string
 }
+
+const cardBrands = {
+  visa: "/visa.svg",
+  mastercard: "/mastercard.svg",
+  elo: "/elo.svg",
+  "american express": "/amex.svg",
+  amex: "/amex.svg",
+  hipercard: "/hipercard.svg",
+} as const
 
 const CardsView = () => {
   const [cards, setCards] = useState<CardType[]>([])
@@ -98,9 +107,9 @@ const CardsView = () => {
 
       const data = await response.json()
       if (response.ok) {
-        setTimeout(() => {
-          router.push('/dashboard/cards')
-        }, 500)
+        const updatedCards = cards.filter(card => card.cardId !== cardId)
+        setCards(updatedCards)
+        setDeletingCardId(null)
       } else {
         console.error("Erro ao deletar cartão:", data.error)
       }
@@ -108,7 +117,6 @@ const CardsView = () => {
       console.error("Erro ao deletar cartão:", error)
     } finally {
       setIsDeleting(false)
-      setDeletingCardId(null)
     }
   }
 
@@ -128,185 +136,121 @@ const CardsView = () => {
     return <UpdateCard cardId={editingCardId} onCancel={handleCancelEdit} />
   }
 
+  const CardItem = ({ card }: { card: CardType }) => {
+    const brandIcon = cardBrands[card.bandeira.toLowerCase() as keyof typeof cardBrands]
+
+    return (
+      <Card
+        className="group hover:shadow-lg transition-all duration-300 cursor-pointer w-full"
+        onClick={() => handleCardClick(card.cardId)}
+      >
+        <CardHeader className="p-4 md:p-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle className="text-base md:text-lg">{card.nomeCartao}</CardTitle>
+              <CardDescription className="text-sm md:text-base">{card.instituicao}</CardDescription>
+            </div>
+            <div className="flex items-center gap-2 md:gap-3">
+              {brandIcon && (
+                <img 
+                  src={brandIcon} 
+                  alt={`${card.bandeira} logo`} 
+                  className="h-8 w-12 md:h-10 md:w-16 object-contain"
+                />
+              )}
+              {showManageCards && (
+                <div className="flex gap-1 md:gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleEditCard(card.cardId)
+                    }}
+                  >
+                    <PencilLine className="h-4 w-4 md:h-5 md:w-5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setDeletingCardId(card.cardId)
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 md:h-5 md:w-5 text-destructive" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+        {!showManageCards && (
+          <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
+            <div className="flex justify-end items-center">
+              <span className="text-sm md:text-base font-medium">
+                {formatCurrency(card.limite)}
+              </span>
+            </div>
+          </CardContent>
+        )}
+      </Card>
+    )
+  }
+
   return (
-    <>
-      {/* Versão Mobile */}
-      <div className="sm:hidden flex flex-col bg-card h-[calc(100vh-64px)]">
-        <div className="p-4">
-          <h1 className="text-2xl font-bold">Cartões de Crédito</h1>
-          <p className="text-muted-foreground mt-2">
-            Clique no cartão que deseja visualizar
-          </p>
-        </div>
-        <Separator />
-        <div className="flex-grow overflow-auto p-4">
+    <div className="px-4 md:px-12 py-4 md:py-6">
+      <Card className="w-[90vw] md:w-[900px]">
+        <CardContent className="p-4 md:p-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-0 mb-6 md:mb-8">
+            <div>
+              <h1 className="text-2xl md:text-2xl font-bold">Cartões de Crédito</h1>
+              <p className="text-muted-foreground text-sm mt-1">
+                Clique no cartão para ver detalhes	
+              </p>
+            </div>
+            <div className="flex gap-2 w-full md:w-auto">
+              <Button 
+                onClick={() => setShowCreateCard(true)} 
+                className="gap-2 flex-1 md:flex-none"
+              >
+                <Plus className="h-4 w-4" />
+                Novo Cartão
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowManageCards((prev) => !prev)}
+                className="gap-2 flex-1 md:flex-none"
+              >
+                <Settings2 className="h-4 w-4" />
+                {showManageCards ? "Concluir" : "Gerenciar"}
+              </Button>
+            </div>
+          </div>
+
           {loading ? (
-            <div className="flex justify-center items-center h-full">
+            <div className="flex justify-center items-center h-[40vh] md:h-[50vh]">
               <LottieAnimation animationPath="/loading.json" />
             </div>
+          ) : creditCards.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-[40vh] md:h-[50vh] text-center px-4">
+              <p className="text-lg md:text-xl font-medium mb-4">Nenhum cartão cadastrado</p>
+              <p className="text-muted-foreground mb-8">
+                Adicione seu primeiro cartão de crédito para começar
+              </p>
+              <Button onClick={() => setShowCreateCard(true)}>
+                Adicionar Cartão
+              </Button>
+            </div>
           ) : (
-            <div className="flex flex-col h-full">
-              <div className="flex-grow space-y-4 overflow-auto">
-                {creditCards.map((card) => (
-                  <div
-                    key={card.cardId}
-                    className="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-accent transition-colors"
-                    onClick={() => handleCardClick(card.cardId)}
-                  >
-                    <div className="flex items-center space-x-4">
-                      {showManageCards && (
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleEditCard(card.cardId)
-                            }}
-                          >
-                            <PencilLine className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setDeletingCardId(card.cardId)
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      )}
-                      <div>
-                        <p className="font-semibold  ">{card.nomeCartao}</p>
-                        <p className="text-sm  text-gray-500">
-                          {card.bandeira}
-                        </p>
-                      </div>
-                    </div>
-                    {!showManageCards && (
-                      <div className="flex flex-col">
-                        <p className="text-sm font-medium text-end">
-                          {formatCurrency(card.limite)}
-                        </p>
-                        <p className="text-sm text-end text-gray-500">
-                          Vencimento: {card.vencimento}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 space-y-2">
-                <Button
-                  onClick={() => setShowCreateCard(true)}
-                  className="w-full"
-                >
-                  Adicionar Novo Cartão
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowManageCards((prev) => !prev)}
-                  className="w-full"
-                >
-                  {showManageCards
-                    ? "Cancelar Gerenciamento"
-                    : "Gerenciar Cartões"}
-                </Button>
-              </div>
+            <div className="flex flex-col gap-4 mx-auto md:px-12">
+              {creditCards.map((card) => (
+                <CardItem key={card.cardId} card={card} />
+              ))}
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Versão Desktop */}
-      <div className="hidden sm:flex justify-center items-center min-h-[90vh] p-4">
-        <Card className="w-full max-w-[800px]">
-          <CardTitle className="px-6 pt-6">Cartões de Crédito</CardTitle>
-          <CardDescription className="px-6 mt-2">
-            Clique no cartão que deseja visualizar
-          </CardDescription>
-          <Separator className="w-full mt-6" />
-          <CardContent className="flex flex-col mt-8">
-            {loading ? (
-              <div className="flex justify-center items-center">
-                <LottieAnimation animationPath="/loading.json" />
-              </div>
-            ) : (
-              <>
-                <div className="space-y-4">
-                  {creditCards.map((card) => (
-                    <div
-                      key={card.cardId}
-                      className="flex w-full sm:w-[400px] items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors"
-                      onClick={() => handleCardClick(card.cardId)}
-                    >
-                      <div className="flex items-center space-x-4">
-                        {showManageCards && (
-                          <div className="flex space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleEditCard(card.cardId)
-                              }}
-                            >
-                              <PencilLine className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setDeletingCardId(card.cardId)
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )}
-                        <div>
-                          <p className="font-semibold  ">{card.nomeCartao}</p>
-                          <p className="text-sm  text-gray-500">
-                            {card.bandeira}
-                          </p>
-                        </div>
-                      </div>
-                      {!showManageCards && (
-                        <div className="flex flex-col">
-                          <p className="text-sm font-medium text-end">
-                            {formatCurrency(card.limite)}
-                          </p>
-                          <p className="text-sm text-end text-gray-500">
-                            Vencimento: {card.vencimento}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <Button
-                  onClick={() => setShowCreateCard(true)}
-                  className="w-full mt-6"
-                >
-                  Adicionar Novo Cartão
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowManageCards((prev) => !prev)}
-                  className="w-full mt-2"
-                >
-                  {showManageCards
-                    ? "Cancelar Gerenciamento"
-                    : "Gerenciar Cartões"}
-                </Button>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+        </CardContent>
+      </Card>
 
       <AlertDialog
         open={!!deletingCardId}
@@ -315,10 +259,9 @@ const CardsView = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-            <p>
-              Tem certeza que deseja excluir este cartão? <br /> <br />
-              Todas as transações, parcelas e faturas vinculadas a ele também
-              serão excluídas.
+            <p className="text-muted-foreground">
+              Tem certeza que deseja excluir este cartão? Todas as transações, 
+              parcelas e faturas vinculadas a ele também serão excluídas.
             </p>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -331,11 +274,7 @@ const CardsView = () => {
             </Button>
             <Button
               variant="destructive"
-              onClick={() => {
-                if (deletingCardId) {
-                  handleDeleteCard(deletingCardId)
-                }
-              }}
+              onClick={() => deletingCardId && handleDeleteCard(deletingCardId)}
               disabled={isDeleting}
             >
               {isDeleting ? "Excluindo..." : "Excluir Cartão"}
@@ -345,11 +284,11 @@ const CardsView = () => {
       </AlertDialog>
 
       {isDeleting && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <LottieAnimation animationPath="./loading.json" />
         </div>
       )}
-    </>
+    </div>
   )
 }
 

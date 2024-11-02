@@ -12,14 +12,15 @@ import { Button } from "@/app/components/ui/button"
 import { LogOut } from "lucide-react"
 import { DataTable } from "@/app/components/ui/DataTable"
 import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/app/components/ui/alert-dialog"
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/app/components/ui/dialog"
 import { columns } from "./BillColumns"
 import { ParcelsTable } from "./ParcelsTable"
+import BillChart from "./Billchart"
 
 interface BillType {
   faturaId: string
@@ -144,72 +145,77 @@ const BillsTable: React.FC<BillsTableProps> = ({ cardId }) => {
   )
 
   return (
-    <div className="flex justify-center items-center w-full">
-      <Card className="m-12 md:min-w-[600px] max-w-[100vw]">
-        <CardHeader className="flex-col md:flex-row items-center justify-between">
-          <div className="flex-col">
-            <CardTitle className="text-center md:text-start">
-              Faturas em Aberto
-            </CardTitle>
-            <CardDescription>
-              Todas as faturas abertas para:{" "}
-              <span className="font-semibold">{nomeCartao}</span>
-            </CardDescription>
-          </div>
-          <div className="flex items-center">
+    <div className="flex w-full gap-6">
+      <div className="w-1/2 ml-12">
+        <Card className="min-h-[500px]">
+          <CardHeader className="flex-col md:flex-row items-center justify-between">
+            <div className="flex-col">
+              <CardTitle className="text-center md:text-start">
+                Faturas em Aberto
+              </CardTitle>
+              <CardDescription>
+                Todas as faturas abertas para: <span className="font-semibold">{nomeCartao}</span>
+              </CardDescription>
+            </div>
             <Button
               onClick={handleBackClick}
               variant={"outline"}
-              className="mt-4 md:mt-0 cursor-pointer"
+              className="mt-4 md:mt-0 cursor-pointer md:hidden"
             >
               <LogOut className="mr-2" /> Sair da Fatura
             </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <Skeleton className="h-[250px]" />
-          ) : bills.length === 0 ? (
-            <div className="text-center justify-center items-center pt-20">
-              <p>Você não possui Faturas em Aberto</p>
-            </div>
-          ) : filteredBills.length === 0 ? (
-            <div className="text-center justify-center items-center pt-20">
-              <p>Nenhuma fatura encontrada</p>
-            </div>
-          ) : (
-            <div className="w-full max-w-[100vw] flex">
-              <DataTable<BillType, unknown>
-                columns={columns(handleBillClick)}
-                data={filteredBills}
-              />
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent className="md:px-6">
+            {loading ? (
+              <Skeleton className="h-[250px]" />
+            ) : bills.length === 0 ? (
+              <div className="text-center justify-center items-center pt-20">
+                <p>Você não possui Faturas em Aberto</p>
+              </div>
+            ) : filteredBills.length === 0 ? (
+              <div className="text-center justify-center items-center pt-20">
+                <p>Nenhuma fatura encontrada</p>
+              </div>
+            ) : (
+              <div className="w-full">
+                <DataTable<BillType, unknown>
+                  columns={columns(handleBillClick)}
+                  data={filteredBills}
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-      <AlertDialog
-        open={!!selectedFaturaId}
-        onOpenChange={() => setSelectedFaturaId(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Parcelas da Fatura</AlertDialogTitle>
-          </AlertDialogHeader>
-          {loadingParcelas ? (
-            <Skeleton className="h-[150px]" />
-          ) : parcelas.length === 0 ? (
-            <p>Nenhuma parcela encontrada para esta fatura.</p>
-          ) : (
-            <ParcelsTable parcelas={parcelas} />
-          )}
-          <AlertDialogFooter>
-            <Button variant="outline" onClick={() => setSelectedFaturaId(null)}>
-              Fechar
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        <Dialog
+          open={!!selectedFaturaId}
+          onOpenChange={() => setSelectedFaturaId(null)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Parcelas da Fatura</DialogTitle>
+            </DialogHeader>
+            {loadingParcelas ? (
+              <Skeleton className="h-[150px]" />
+            ) : parcelas.length === 0 ? (
+              <p>Nenhuma parcela encontrada para esta fatura.</p>
+            ) : (
+              <ParcelsTable parcelas={parcelas} />
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSelectedFaturaId(null)}>
+                Fechar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="w-1/2 mr-12">
+        <Card className="min-h-[500px]">
+          <BillChart bills={bills} />
+        </Card>
+      </div>
     </div>
   )
 }

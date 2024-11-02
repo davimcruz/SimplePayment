@@ -96,9 +96,7 @@ const UpdateCard: React.FC<UpdateCardProps> = ({ cardId, onCancel }) => {
         body: JSON.stringify(updatedCardData),
       })
       if (response.ok) {
-        setTimeout(() => {
-          router.push("/dashboard/cards")
-        }, 500)
+        window.location.reload()
       } else {
         const errorData = await response.json()
         setErrors(

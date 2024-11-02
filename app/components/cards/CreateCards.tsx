@@ -109,9 +109,7 @@ const CreateCreditCard: React.FC<CreateCreditCardProps> = ({ onCancel }) => {
 
       const result = await response.json()
       if (response.ok) {
-        setTimeout(() => {
-          router.push("/dashboard/cards")
-        }, 500)
+        window.location.reload()
       } else {
         setErrors({
           general: result.message || "Não foi possível criar o cartão.",
