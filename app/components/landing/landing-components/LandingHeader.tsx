@@ -23,26 +23,34 @@ const Header = () => {
   return (
     <nav className="fixed top-0 w-full z-[100]">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-      
+
       <div className="relative">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center gap-3 flex-shrink-0 w-[200px] md:w-[220px]">
-              <Image src="/logo.svg" alt="SimpleFinance" width={48} height={48} priority />
-              <span className="text-white font-semibold text-xl whitespace-nowrap">SimpleFinance</span>
+              <Image
+                src="/logo.svg"
+                alt="SimpleFinance"
+                width={48}
+                height={48}
+                priority
+              />
+              <span className="text-white font-semibold text-xl whitespace-nowrap">
+                SimpleFinance
+              </span>
             </div>
 
             <div className="hidden md:flex items-center justify-center flex-1 mx-4">
               <div className="flex items-center gap-8">
-                <Link 
-                  href="" 
+                <Link
+                  href=""
                   onClick={scrollToFeatures}
                   className="text-gray-300 hover:text-white transition-colors"
                 >
                   O que fazemos
                 </Link>
-                <Link 
-                  href="" 
+                <Link
+                  href=""
                   onClick={scrollToAbout}
                   className="text-gray-300 hover:text-white transition-colors"
                 >
@@ -60,7 +68,7 @@ const Header = () => {
             <div className="flex items-center flex-shrink-0 w-[200px] md:w-[220px] justify-end">
               <Button
                 variant="default"
-                className="bg-[#2662d9] hover:bg-[#2662d9]/90 flex items-center gap-2 text-white transition-colors"
+                className="bg-[#10b981] hover:bg-[#047857]/90 flex items-center gap-2 text-zinc-800 transition-colors"
                 asChild
               >
                 <Link href="/signin">

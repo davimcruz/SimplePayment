@@ -114,7 +114,7 @@ const LandingFeatures = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Recursos <span className="text-[#2662d9]">Eficientes</span>
+            Recursos <span className="text-[#10b981]">Eficientes</span>
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
             Ferramentas poderosas para simplificar sua gestão financeira
@@ -128,7 +128,7 @@ const LandingFeatures = () => {
         </BentoGrid>
       </div>
     </section>
-  );
+  )
 };
 
 export default LandingFeatures;

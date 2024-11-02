@@ -8,16 +8,16 @@ const AboutUs = () => {
     <section id="about" className="py-12 px-4">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <BoxReveal boxColor="#2662d9" duration={0.5}>
+          <BoxReveal boxColor="#10b981" duration={0.5}>
             <p className="text-[3rem] font-bold text-white">
-              Quem<span className="text-[#2662d9]"> Somos</span>
+              Quem<span className="text-[#10b981]"> Somos</span>
             </p>
           </BoxReveal>
 
-          <BoxReveal boxColor="#2662d9" duration={0.5}>
+          <BoxReveal boxColor="#10b981" duration={0.5}>
             <h2 className="mt-2 text-[1.2rem] text-gray-300">
               Uma empresa focada em
-              <span className="text-[#2662d9]">
+              <span className="text-[#10b981]">
                 {" "}
                 transformar sua relação com o dinheiro
               </span>
@@ -27,7 +27,7 @@ const AboutUs = () => {
 
         {/* Grid de valores - Espaçamento reduzido */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-          <BoxReveal boxColor="#2662d9" duration={0.5}>
+          <BoxReveal boxColor="#10b981" duration={0.5}>
             <div className="bg-gradient-to-br from-background/10 to-primary/10 p-8 rounded-xl border-[0.5px] border-zinc-800">
               <Shield className="w-12 h-12 text-white mb-4" />
               <h3 className="text-xl font-semibold text-white mb-3">
@@ -41,7 +41,7 @@ const AboutUs = () => {
             </div>
           </BoxReveal>
 
-          <BoxReveal boxColor="#2662d9" duration={0.5}>
+          <BoxReveal boxColor="#10b981" duration={0.5}>
             <div className="bg-gradient-to-br from-background/10 to-primary/10 p-8 rounded-xl border-[0.5px] border-zinc-800">
               <Users className="w-12 h-12 text-white mb-4" />
               <h3 className="text-xl font-semibold text-white mb-3">
@@ -55,7 +55,7 @@ const AboutUs = () => {
             </div>
           </BoxReveal>
 
-          <BoxReveal boxColor="#2662d9" duration={0.5}>
+          <BoxReveal boxColor="#10b981" duration={0.5}>
             <div className="bg-gradient-to-br from-background/10 to-primary/10 p-8 rounded-xl border-[0.5px] border-zinc-800">
               <TrendingUp className="w-12 h-12 text-white mb-4" />
               <h3 className="text-xl font-semibold text-white mb-3">
@@ -69,7 +69,7 @@ const AboutUs = () => {
             </div>
           </BoxReveal>
 
-          <BoxReveal boxColor="#2662d9" duration={0.5}>
+          <BoxReveal boxColor="#10b981" duration={0.5}>
             <div className="bg-gradient-to-br from-background/10 to-primary/10 p-8 rounded-xl border-[0.5px] border-zinc-800">
               <HeartHandshake className="w-12 h-12 text-white mb-4" />
               <h3 className="text-xl font-semibold text-white mb-3">
@@ -84,7 +84,7 @@ const AboutUs = () => {
         </div>
 
         <div className="flex justify-center mb-20">
-          <BoxReveal boxColor="#2662d9" duration={0.5}>
+          <BoxReveal boxColor="#10b981" duration={0.5}>
             <div className="grid grid-cols-3 md:grid-cols-3 gap-8 max-w-4xl">
               <div className="text-center">
                 <p className="text-4xl font-bold text-white">
@@ -112,7 +112,7 @@ const AboutUs = () => {
         </div>
 
         <div className="flex justify-center">
-          <BoxReveal boxColor="#2662d9" duration={0.5}>
+          <BoxReveal boxColor="#10b981" duration={0.5}>
             <div className="text-center max-w-3xl">
               <p className="text-xl text-gray-400 mb-6">
                 Junte-se a milhares de pessoas que já transformaram sua vida
@@ -120,7 +120,7 @@ const AboutUs = () => {
               </p>
               <Button
                 size="lg"
-                className="bg-[#2662d9] hover:bg-[#2662d9]/90 text-white px-8"
+                className="bg-[#10b981] hover:bg-[#10b981]/90 text-zinc-800 font-semibold px-8"
                 asChild
               >
                 <a href="#features">Conheça Nossos Recursos</a>

@@ -16,8 +16,6 @@ import {
   ChartLegendContent,
 } from "@/app/components/ui/chart"
 import { useEffect, useState } from "react"
-import { Button } from "@/app/components/ui/button"
-import { PlusCircle } from "lucide-react"
 import CreateTransaction from "@/app/components/sidebar/CreateTransactions"
 
 const chartConfig = {
@@ -26,11 +24,11 @@ const chartConfig = {
   },
   income: {
     label: "Receitas",
-    color: "#2563eb",
+    color: "#10b981",
   },
   expense: {
     label: "Despesas",
-    color: "#60a5fa",
+    color: "#064e3b",
   },
 } satisfies ChartConfig
 
