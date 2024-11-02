@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { parseCookies } from "nookies"
 import {
   Table,
   TableBody,
@@ -20,6 +19,9 @@ import { Input } from "@/app/components/ui/input"
 import { Button } from "@/app/components/ui/button"
 import { Badge } from "@/app/components/ui/badge"
 import { Skeleton } from "@/app/components/ui/skeleton"
+import { exampleFlows } from "@/utils/exampleData"
+import CreateTransaction from "@/app/components/sidebar/CreateTransactions"
+import { PlusCircle } from "lucide-react"
 
 interface FlowItem {
   mes: number
@@ -64,7 +66,12 @@ const BalanceComparisonTable = ({ data, loading, setData }: BalanceComparisonTab
   const [searchTerm, setSearchTerm] = useState("")
   const [sortKey, setSortKey] = useState<keyof FlowItem>("mes")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
+  const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false)
   const router = useRouter()
+
+  const isExample = useMemo(() => {
+    return JSON.stringify(data) === JSON.stringify(exampleFlows)
+  }, [data])
 
   const filteredAndSortedData = useMemo(() => {
     let filtered = data
@@ -132,103 +139,93 @@ const BalanceComparisonTable = ({ data, loading, setData }: BalanceComparisonTab
 
   return (
     <div className="h-full w-full px-12">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Fluxo de Caixa</CardTitle>
-          <div className="flex items-center">
-            <Input
-              placeholder="Pesquisar por mês ou status"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full max-w-sm py-0 hidden lg:block"
-            />
-          </div>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <Skeleton className="h-[250px]" />
-          ) : filteredAndSortedData.length === 0 ? (
-            <div className="text-center justify-center items-center pt-20">
-              <p>Nenhuma comparação encontrada</p>
+      <Card className="bg-gradient-to-tr from-background/10 to-primary/[5%] w-full mx-auto relative">
+        <div className={`${isExample ? "blur-md" : ""}`}>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="-mt-2">Fluxo de Caixa</CardTitle>
+            <div className="flex items-center">
+              <Input
+                placeholder="Pesquisar por mês ou status"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full max-w-sm py-0 hidden lg:block"
+              />
             </div>
-          ) : (
-            <div className="relative overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead
-                      onClick={() => handleSort("mes")}
-                      className="cursor-pointer"
-                    >
-                      Mês {sortKey === "mes" && (sortOrder === "asc" ? "↓" : "↑")}
-                    </TableHead>
-                    <TableHead
-                      onClick={() => handleSort("saldoOrcado")}
-                      className="cursor-pointer hidden lg:table-cell"
-                    >
-                      Orçado {sortKey === "saldoOrcado" && (sortOrder === "asc" ? "↑" : "↓")}
-                    </TableHead>
-                    <TableHead
-                      onClick={() => handleSort("saldoRealizado")}
-                      className="cursor-pointer hidden lg:table-cell"
-                    >
-                      Realizado {sortKey === "saldoRealizado" && (sortOrder === "asc" ? "↑" : "↓")}
-                    </TableHead>
-                    <TableHead
-                      onClick={() => handleSort("gapMoney")}
-                      className="cursor-pointer hidden lg:table-cell"
-                    >
-                      Gap (R$) {sortKey === "gapMoney" && (sortOrder === "asc" ? "↑" : "↓")}
-                    </TableHead>
-                    <TableHead
-                      onClick={() => handleSort("gapPercentage")}
-                      className="cursor-pointer hidden lg:table-cell"
-                    >
-                      Gap (%) {sortKey === "gapPercentage" && (sortOrder === "asc" ? "↑" : "↓")}
-                    </TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredAndSortedData.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">{item.nome}</TableCell>
-                      <TableCell className="hidden lg:table-cell">
-                        {formatCurrency(item.saldoOrcado)}
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell">
-                        {formatCurrency(item.saldoRealizado)}
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell">
-                        {formatCurrency(item.gapMoney)}
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell">
-                        {formatPercentage(item.gapPercentage)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={getBadgeClass(item.status)}
-                        >
-                          {statusTranslations[item.status] || item.status}
-                        </Badge>
-                      </TableCell>
+          </CardHeader>
+          <CardContent className="relative p-4">
+            {loading ? (
+              <Skeleton className="h-[250px]" />
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Mês</TableHead>
+                      <TableHead>Orçado</TableHead>
+                      <TableHead>Realizado</TableHead>
+                      <TableHead>Gap (R$)</TableHead>
+                      <TableHead>Gap (%)</TableHead>
+                      <TableHead className="text-right">Status</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-        <CardFooter className="flex justify-center">
-          <Button
-            variant="link"
-            className="text-sm text-zinc-500"
-            onClick={handleUpdateBudgetClick}
-          >
-            Clique aqui para alterar seu orçamento anual
-          </Button>
-        </CardFooter>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredAndSortedData.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell>
+                          <div className="font-medium">{item.nome}</div>
+                        </TableCell>
+                        <TableCell>{formatCurrency(item.saldoOrcado)}</TableCell>
+                        <TableCell>{formatCurrency(item.saldoRealizado)}</TableCell>
+                        <TableCell>{formatCurrency(item.gapMoney)}</TableCell>
+                        <TableCell>{formatPercentage(item.gapPercentage)}</TableCell>
+                        <TableCell className="text-right">
+                          <Badge
+                            variant="outline"
+                            className={getBadgeClass(item.status)}
+                          >
+                            {statusTranslations[item.status] || item.status}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <Button
+              variant="link"
+              className="text-sm text-zinc-500"
+              onClick={handleUpdateBudgetClick}
+            >
+              Clique aqui para alterar seu orçamento anual
+            </Button>
+          </CardFooter>
+        </div>
+
+        {isExample && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center ">
+            <p className="text-xl font-semibold mb-2 text-center px-4">
+              Você ainda não possui transações
+            </p>
+            <p className="text-sm text-muted-foreground mb-4 text-center px-4">
+              Crie sua primeira transação para começar a controlar suas finanças
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => setIsTransactionDialogOpen(true)}
+            >
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Criar Transação
+            </Button>
+          </div>
+        )}
+
+        <CreateTransaction 
+          isOpen={isTransactionDialogOpen}
+          onOpenChange={setIsTransactionDialogOpen}
+        />
       </Card>
     </div>
   )

@@ -7,61 +7,44 @@ import {
 } from "@/app/components/ui/card"
 import BarChartComponent from "./charts/bar-chart"
 import { Skeleton } from "../../ui/skeleton"
+import { Button } from "@/app/components/ui/button"
+import { PlusCircle } from "lucide-react"
+import CreateTransaction from "@/app/components/sidebar/CreateTransactions"
 
 const FinancesGraph = () => {
   const [loading, setLoading] = useState(true)
-  const [transactionsExist, setTransactionsExist] = useState(true)
+  const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false)
 
   function getCurrentYear() {
-    const currentYear = new Date().getFullYear()
-    return currentYear
+    return new Date().getFullYear()
   }
 
   const year = getCurrentYear()
 
   useEffect(() => {
-    const fetchTransactions = async () => {
-      const response = await fetch("/api/transactions/get-transactions")
-      const data = await response.json()
-      setTransactionsExist(data && data.length > 0)
+    // Simular um tempo de carregamento mínimo
+    setTimeout(() => {
       setLoading(false)
-    }
-
-    fetchTransactions()
+    }, 500)
   }, [])
 
   return (
-    <Card x-chunk="dashboard-01-chunk-5">
+    <Card className="bg-gradient-to-t from-background/10 to-primary/[5%]">
       <CardHeader>
         <CardTitle>Resumo Gráfico Comparativo ({year})</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col justify-center items-center max-w-[22rem] md:max-w-none">
-        <div className="hidden sm:hidden md:flex lg:flex xl:flex">
-          {loading ? (
-            <Skeleton className="h-64 w-96 mt-6" />
-          ) : transactionsExist ? (
-            <div className="w-full lg:h-96 lg:w-96 mt-8">
-              <BarChartComponent />
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-full mt-12">
-              <p>Você não possui transações.</p>
-            </div>
-          )}
-        </div>
-        <div className="flex-col text-center justify-center items-center md:hidden ml-auto">
-          {loading ? (
-            <Skeleton className="w-full h-48 mb-8" />
-          ) : transactionsExist ? (
-            <div className="w-full h-auto mt-8">
-              <BarChartComponent />
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <p>Você não possui transações.</p>
-            </div>
-          )}
-        </div>
+      <CardContent className="flex flex-col justify-center items-center">
+        {loading ? (
+          <Skeleton className="h-[300px] w-full md:h-[400px]" />
+        ) : (
+          <div className="w-full h-[300px] md:h-[400px] relative">
+            <BarChartComponent />
+            <CreateTransaction 
+              isOpen={isTransactionDialogOpen}
+              onOpenChange={setIsTransactionDialogOpen}
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   )

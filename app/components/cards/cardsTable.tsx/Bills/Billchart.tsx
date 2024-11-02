@@ -46,7 +46,7 @@ const BillChart = memo(({ bills }: BillChartProps) => {
   const chartData = allMonths.slice(-6) 
 
   return (
-    <Card className="h-[500px]">
+    <Card className="h-[500px] bg-gradient-to-t from-background/10 to-primary/[5%]">
       <CardHeader>
         <CardTitle>Evolução das Faturas</CardTitle>
         <CardDescription>

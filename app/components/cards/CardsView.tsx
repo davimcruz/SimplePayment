@@ -141,7 +141,7 @@ const CardsView = () => {
 
     return (
       <Card
-        className="group hover:shadow-lg transition-all duration-300 cursor-pointer w-full"
+        className="group hover:shadow-lg transition-all duration-300 cursor-pointer w-full bg-gradient-to-br from-background/10 to-primary/[5%]"
         onClick={() => handleCardClick(card.cardId)}
       >
         <CardHeader className="p-4 md:p-6">
@@ -200,7 +200,7 @@ const CardsView = () => {
 
   return (
     <div className="px-4 md:px-12 py-4 md:py-6">
-      <Card className="w-[90vw] md:w-[900px]">
+      <Card className="w-[90vw] md:w-[900px] bg-gradient-to-t from-background/10 to-primary/[5%]">
         <CardContent className="p-4 md:p-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-0 mb-6 md:mb-8">
             <div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { Badge } from "@/app/components/ui/badge"
 import {
   Card,
@@ -16,9 +16,12 @@ import {
 } from "@/app/components/ui/table"
 import { Input } from "@/app/components/ui/input"
 import { Skeleton } from "../ui/skeleton"
-import CreateTransactions from "./CreateTransactions"
+import CreateTransaction from "@/app/components/sidebar/CreateTransactions"
 import { Transactions } from "@/types/types"
 import ViewTransaction from "../dashboard/view-transactions/ViewTransactions"
+import { exampleTransactions } from "@/utils/exampleData"
+import { PlusCircle } from "lucide-react"
+import { Button } from "@/app/components/ui/button"
 
 type FonteKey =
   | "cartao-credito"
@@ -30,36 +33,70 @@ type FonteKey =
 
 type SortKey = "nome" | "data" | "valor"
 
+type TransactionWithUnknownId = Omit<Transactions, 'userId' | 'dataCriacao'> & {
+  userId: unknown;
+  dataCriacao: string | Date;
+}
+
 const TransactionsFull = () => {
-  const [transactions, setTransactions] = useState<Transactions[]>([])
-  const [filteredTransactions, setFilteredTransactions] = useState<
-    Transactions[]
-  >([])
+  const [transactions, setTransactions] = useState<TransactionWithUnknownId[]>([])
+  const [filteredTransactions, setFilteredTransactions] = useState<TransactionWithUnknownId[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [sortKey, setSortKey] = useState<SortKey>("data")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
+  const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false)
+
+  const isExample = useMemo(() => {
+    return filteredTransactions.length > 0 && 
+      filteredTransactions.every(transaction => 
+        exampleTransactions.some(example => 
+          example.transactionId === transaction.transactionId
+        )
+      )
+  }, [filteredTransactions])
 
   useEffect(() => {
     const fetchTransactions = async () => {
       setLoading(true)
-      const response = await fetch("/api/transactions/get-table")
-      const data = await response.json()
+      try {
+        const response = await fetch("/api/transactions/get-table")
+        const data = await response.json()
 
-      const sortedTransactions = data.table.sort(
-        (a: Transactions, b: Transactions) => {
-          const dateA = new Date(
-            a.data.split("-").reverse().join("/")
-          ).getTime()
-          const dateB = new Date(
-            b.data.split("-").reverse().join("/")
-          ).getTime()
-          return dateB - dateA
+        if (!data.table || data.table.length === 0) {
+          const completeExampleData = exampleTransactions.map(transaction => ({
+            ...transaction,
+            userId: "",
+            dataCriacao: new Date().toISOString()
+          })) as TransactionWithUnknownId[]
+          
+          setTransactions(completeExampleData)
+          setFilteredTransactions(completeExampleData)
+          setLoading(false)
+          return
         }
-      )
 
-      setTransactions(sortedTransactions)
-      setFilteredTransactions(sortedTransactions)
+        const sortedTransactions = data.table.sort(
+          (a: TransactionWithUnknownId, b: TransactionWithUnknownId) => {
+            const dateA = new Date(a.data.split("-").reverse().join("/")).getTime()
+            const dateB = new Date(b.data.split("-").reverse().join("/")).getTime()
+            return dateB - dateA
+          }
+        )
+
+        setTransactions(sortedTransactions)
+        setFilteredTransactions(sortedTransactions)
+      } catch (error) {
+        console.error(error)
+        const completeExampleData = exampleTransactions.map(transaction => ({
+          ...transaction,
+          userId: "",
+          dataCriacao: new Date().toISOString()
+        })) as TransactionWithUnknownId[]
+        
+        setTransactions(completeExampleData)
+        setFilteredTransactions(completeExampleData)
+      }
       setLoading(false)
     }
 
@@ -131,108 +168,131 @@ const TransactionsFull = () => {
 
   return (
     <div className="h-full w-full px-12 mt-8">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Transações</CardTitle>
-          <div className="flex items-center">
-            <Input
-              placeholder="Pesquisar pelo Nome..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full mr-8 max-w-sm py-0 hidden lg:block"
-            />
-            <CreateTransactions />
-          </div>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <Skeleton className="h-[250px]" />
-          ) : transactions.length === 0 ? (
-            <div className="text-center justify-center items-center pt-20">
-              <p>Você não possui Transações</p>
+      <Card className="bg-gradient-to-t from-background/10 to-primary/[5%] relative">
+        <div className={isExample ? "blur-md bg-background/20" : ""}>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Transações</CardTitle>
+            <div className="flex items-center gap-4">
+              <Input
+                placeholder="Pesquisar pelo Nome..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full max-w-sm py-0 hidden lg:block"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1"
+                onClick={() => setIsTransactionDialogOpen(true)}
+              >
+                <PlusCircle className="h-4 w-4" />
+                Criar Transação
+              </Button>
             </div>
-          ) : filteredTransactions.length === 0 ? (
-            <div className="text-center justify-center items-center pt-20">
-              <p>Nenhuma transação encontrada</p>
-            </div>
-          ) : (
-            <div
-              className="max-h-[calc(100vh-16rem)] overflow-auto"
-            >
-              <Table>
-                <TableHeader className="sticky top-0 bg-background">
-                  <TableRow>
-                    <TableHead onClick={() => handleSort("nome")}>
-                      Transação{" "}
-                      {sortKey === "nome" && (sortOrder === "asc" ? "↑" : "↓")}
-                    </TableHead>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-[250px]" />
+            ) : (
+              <div className="max-h-[calc(100vh-16rem)] overflow-auto">
+                <Table>
+                  <TableHeader className="sticky top-0 ">
+                    <TableRow>
+                      <TableHead onClick={() => handleSort("nome")}>
+                        Transação{" "}
+                        {sortKey === "nome" && (sortOrder === "asc" ? "↑" : "↓")}
+                      </TableHead>
 
-                    <TableHead className="hidden lg:table-cell md:table-cell">
-                      Tipo
-                    </TableHead>
-                    <TableHead className="hidden lg:table-cell">
-                      Origem
-                    </TableHead>
+                      <TableHead className="hidden lg:table-cell md:table-cell">
+                        Tipo
+                      </TableHead>
+                      <TableHead className="hidden lg:table-cell">
+                        Origem
+                      </TableHead>
 
-                    <TableHead
-                      onClick={() => handleSort("data")}
-                      className="hidden lg:table-cell cursor-pointer"
-                    >
-                      Data{" "}
-                      {sortKey === "data" && (sortOrder === "asc" ? "↑" : "↓")}
-                    </TableHead>
-                    <TableHead
-                      onClick={() => handleSort("valor")}
-                      className="cursor-pointer hidden lg:table-cell"
-                    >
-                      Valor{" "}
-                      {sortKey === "valor" && (sortOrder === "asc" ? "↑" : "↓")}
-                    </TableHead>
-                    <TableHead className="ml-auto">Visualização</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredTransactions.map((transaction, index) => (
-                    <TableRow key={index}>
-                      <TableCell>
-                        <div className="font-medium">{transaction.nome}</div>
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell">
-                        <Badge
-                          className="hidden lg:inline-flex md:inline-flex text-xs"
-                          variant="outline"
-                        >
-                          {capitalizeFirstLetter(transaction.tipo)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell">
-                        {formatFonte(transaction.fonte)}
-                        <br />
-                        <div className="hidden text-sm text-muted-foreground md:inline">
-                          {transaction.fonte === "cartao-credito"
-                            ? transaction.detalhesFonte || "Cartão de Crédito"
-                            : transaction.detalhesFonte}
-                        </div>
-                      </TableCell>
-
-                      <TableCell className="hidden lg:table-cell">
-                        {transaction.data.replace(/-/g, "/")}
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell">
-                        {formatValor(transaction.valor)}
-                      </TableCell>
-                      <TableCell className="">
-                        <ViewTransaction
-                          transactionId={transaction.transactionId}
-                        />
-                      </TableCell>
+                      <TableHead
+                        onClick={() => handleSort("data")}
+                        className="hidden lg:table-cell cursor-pointer"
+                      >
+                        Data{" "}
+                        {sortKey === "data" && (sortOrder === "asc" ? "↑" : "↓")}
+                      </TableHead>
+                      <TableHead
+                        onClick={() => handleSort("valor")}
+                        className="cursor-pointer hidden lg:table-cell"
+                      >
+                        Valor{" "}
+                        {sortKey === "valor" && (sortOrder === "asc" ? "↑" : "↓")}
+                      </TableHead>
+                      <TableHead className="ml-auto">Visualização</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredTransactions.map((transaction, index) => (
+                      <TableRow key={index}>
+                        <TableCell>
+                          <div className="font-medium">{transaction.nome}</div>
+                        </TableCell>
+                        <TableCell className="hidden lg:table-cell">
+                          <Badge
+                            className="hidden lg:inline-flex md:inline-flex text-xs"
+                            variant="outline"
+                          >
+                            {capitalizeFirstLetter(transaction.tipo)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="hidden lg:table-cell">
+                          {formatFonte(transaction.fonte)}
+                          <br />
+                          <div className="hidden text-sm text-muted-foreground md:inline">
+                            {transaction.fonte === "cartao-credito"
+                              ? transaction.detalhesFonte || "Cartão de Crédito"
+                              : transaction.detalhesFonte}
+                          </div>
+                        </TableCell>
+
+                        <TableCell className="hidden lg:table-cell">
+                          {transaction.data.replace(/-/g, "/")}
+                        </TableCell>
+                        <TableCell className="hidden lg:table-cell">
+                          {formatValor(transaction.valor)}
+                        </TableCell>
+                        <TableCell className="">
+                          <ViewTransaction
+                            transactionId={transaction.transactionId}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </div>
+
+        {isExample && (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center ">
+            <p className="text-xl font-semibold mb-2 text-center px-4">
+              Você ainda não possui transações
+            </p>
+            <p className="text-sm text-muted-foreground mb-4 text-center px-4">
+              Crie sua primeira transação para começar a controlar suas finanças
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => setIsTransactionDialogOpen(true)}
+            >
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Criar Transação
+            </Button>
+          </div>
+        )}
+
+        <CreateTransaction 
+          isOpen={isTransactionDialogOpen}
+          onOpenChange={setIsTransactionDialogOpen}
+        />
       </Card>
     </div>
   )

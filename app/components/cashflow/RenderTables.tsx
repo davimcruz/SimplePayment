@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { parseCookies } from "nookies"
 import BalanceComparisonTable from "./tables/balanceComparisonsTable"
 import BalanceComparisonChart from "./charts/balanceComparisonChart"
+import { exampleFlows } from "@/utils/exampleData"
 
 interface FlowItem {
   mes: number
@@ -32,6 +33,7 @@ const BudgetTables = () => {
 
       if (!userId) {
         console.error("User ID não encontrado nos cookies.")
+        setData(exampleFlows)
         setLoading(false)
         return
       }
@@ -43,6 +45,12 @@ const BudgetTables = () => {
         }
         const result = await response.json()
         
+        if (!result.flows || result.flows.length === 0) {
+          setData(exampleFlows)
+          setLoading(false)
+          return
+        }
+
         const processedData = result.flows.map((flow: FlowItem) => {
           const percentageChange = flow.saldoOrcado !== 0 
             ? ((flow.saldoRealizado - flow.saldoOrcado) / Math.abs(flow.saldoOrcado))
@@ -57,6 +65,7 @@ const BudgetTables = () => {
         setData(processedData)
       } catch (error) {
         console.error("Erro ao buscar dados:", error)
+        setData(exampleFlows)
       }
       setLoading(false)
     }

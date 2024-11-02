@@ -147,7 +147,7 @@ const BillsTable: React.FC<BillsTableProps> = ({ cardId }) => {
   return (
     <div className="flex w-full gap-6">
       <div className="w-1/2 ml-12">
-        <Card className="min-h-[500px]">
+        <Card className="min-h-[500px] bg-gradient-to-t from-background/10 to-primary/[5%]">
           <CardHeader className="flex-col md:flex-row items-center justify-between">
             <div className="flex-col">
               <CardTitle className="text-center md:text-start">

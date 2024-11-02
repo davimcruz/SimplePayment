@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import Link from "next/link"
-import { ArrowUpRight } from "lucide-react"
+import { ArrowUpRight, PlusCircle } from "lucide-react"
 import { Badge } from "@/app/components/ui/badge"
 import { Button } from "@/app/components/ui/button"
 import {
@@ -19,9 +19,10 @@ import {
   TableRow,
 } from "@/app/components/ui/table"
 import { Skeleton } from "../../ui/skeleton"
-import CreateTransactions from "../create-transactions/CreateTransactions"
+import CreateTransaction from "@/app/components/sidebar/CreateTransactions"
 import ViewTransaction from "../view-transactions/ViewTransactions"
 import { Transactions } from "@/types/types"
+import { exampleTransactions } from "@/utils/exampleData"
 
 type FonteKey =
   | "cartao-credito"
@@ -44,34 +45,40 @@ const TransactionsTable = () => {
   const [viewingTransactionId, setViewingTransactionId] = useState<
     string | null
   >(null)
+  const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false)
 
   useEffect(() => {
     const fetchTransactions = async () => {
       setLoading(true)
-      const response = await fetch("/api/transactions/get-table")
-      const data = await response.json()
+      try {
+        const response = await fetch("/api/transactions/get-table")
+        const data = await response.json()
 
-      const filtered = data.table.filter(
-        (transaction: Transactions) =>
-          transaction.tipo === "despesa" || transaction.tipo === "receita"
-      )
+        const filtered = data.table.filter(
+          (transaction: Transactions) =>
+            transaction.tipo === "despesa" || transaction.tipo === "receita"
+        )
 
-      const sortedTransactions = filtered.sort(
-        (a: Transactions, b: Transactions) => {
-          const dateA = new Date(
-            a.data.split("-").reverse().join("/")
-          ).getTime()
-          const dateB = new Date(
-            b.data.split("-").reverse().join("/")
-          ).getTime()
-          return dateB - dateA
+        if (filtered.length === 0) {
+          setTransactions(exampleTransactions as unknown as Transactions[])
+          setFilteredTransactions(exampleTransactions as unknown as Transactions[])
+        } else {
+          const sortedTransactions = filtered.sort(
+            (a: Transactions, b: Transactions) => {
+              const dateA = new Date(a.data.split("-").reverse().join("/")).getTime()
+              const dateB = new Date(b.data.split("-").reverse().join("/")).getTime()
+              return dateB - dateA
+            }
+          )
+          const limitedTransactions = sortedTransactions.slice(0, 5)
+          setTransactions(limitedTransactions)
+          setFilteredTransactions(limitedTransactions)
         }
-      )
-
-      const limitedTransactions = sortedTransactions.slice(0, 5)
-      setTransactions(limitedTransactions)
-      setFilteredTransactions(limitedTransactions)
-      setLoading(false)
+      } catch (error) {
+        console.error("Erro ao buscar transações:", error)
+      } finally {
+        setLoading(false)
+      }
     }
 
     fetchTransactions()
@@ -130,96 +137,129 @@ const TransactionsTable = () => {
   }
 
   return (
-    <Card className="lg:col-span-2">
+    <Card className="lg:col-span-2 bg-gradient-to-tl from-background/10 to-primary/[5%]">
       <CardHeader className="flex flex-row items-center">
         <div className="grid gap-2">
           <CardTitle>Transações</CardTitle>
           <CardDescription>Transações mais Recentes:</CardDescription>
         </div>
-        <Button
-          variant="outline"
-          asChild
-          size="sm"
-          className="ml-auto gap-1 hidden lg:flex"
-        >
-          <Link href="/dashboard/transactions">
-            Ver Todas
-            <ArrowUpRight className="h-4 w-4" />
-          </Link>
-        </Button>
-        <CreateTransactions />
+        {filteredTransactions !== exampleTransactions && (
+          <>
+            <Button
+              variant="outline"
+              asChild
+              size="sm"
+              className="ml-auto gap-1 hidden lg:flex"
+            >
+              <Link href="/dashboard/transactions">
+                Ver Todas
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1 ml-4"
+              onClick={() => setIsTransactionDialogOpen(true)}
+            >
+              <PlusCircle className="h-4 w-4" />
+              Criar Transação
+            </Button>
+          </>
+        )}
       </CardHeader>
       <CardContent>
         {loading ? (
           <Skeleton className="h-[250px]" />
-        ) : filteredTransactions.length === 0 ? (
-          <div className="text-center justify-center items-center pt-6">
-            <p>Você não possui Transações</p>
-          </div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table className="min-w-full">
-              <TableHeader>
-                <TableRow>
-                  <TableHead onClick={() => handleSort("nome")}>
-                    Transação{" "}
-                    {sortKey === "nome" && (sortOrder === "asc" ? "↑" : "↓")}
-                  </TableHead>
-                  <TableHead className="hidden lg:table-cell">Tipo</TableHead>
-                  <TableHead className="hidden lg:table-cell">Fonte</TableHead>
-                  <TableHead
-                    onClick={() => handleSort("data")}
-                    className="hidden lg:table-cell cursor-pointer"
-                  >
-                    Data{" "}
-                    {sortKey === "data" && (sortOrder === "asc" ? "↑" : "↓")}
-                  </TableHead>
-                  <TableHead
-                    onClick={() => handleSort("valor")}
-                    className="hidden lg:table-cell cursor-pointer"
-                  >
-                    Valor{" "}
-                    {sortKey === "valor" && (sortOrder === "asc" ? "↑" : "↓")}
-                  </TableHead>
-                  <TableHead className="text-right">Visualização</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTransactions.map((transaction) => (
-                  <TableRow key={transaction.transactionId}>
-                    <TableCell>
-                      <div className="font-medium">{transaction.nome}</div>
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell">
-                      <Badge className="text-xs" variant="outline">
-                        {capitalizeFirstLetter(transaction.tipo)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell">
-                      {formatFonte(transaction.fonte)}
-                      <br />
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        {transaction.fonte === "cartao-credito"
-                          ? transaction.detalhesFonte || "Cartão de Crédito"
-                          : transaction.detalhesFonte}
-                      </div>
-                    </TableCell>
-
-                    <TableCell className="hidden lg:table-cell">
-                      {transaction.data.replace(/-/g, "/")}
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell">
-                      {formatValor(transaction.valor)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <ViewTransaction
-                        transactionId={transaction.transactionId}
-                      />
-                    </TableCell>
+          <div className="relative">
+            {filteredTransactions === exampleTransactions && (
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center backdrop-blur-xl">
+                <p className="text-xl font-semibold mb-2 text-center">
+                  Você ainda não possui transações
+                </p>
+                <p className="text-sm text-muted-foreground mb-4 text-center px-4">
+                  Crie sua primeira transação para começar a controlar suas finanças
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsTransactionDialogOpen(true)}
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Criar Transação
+                </Button>
+              </div>
+            )}
+            <div
+              className={`overflow-x-auto ${
+                filteredTransactions === exampleTransactions ? "blur-xl opacity-50" : ""
+              }`}
+            >
+              <Table className="min-w-full">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead onClick={() => handleSort("nome")}>
+                      Transação{" "}
+                      {sortKey === "nome" && (sortOrder === "asc" ? "↑" : "↓")}
+                    </TableHead>
+                    <TableHead className="hidden lg:table-cell">Tipo</TableHead>
+                    <TableHead className="hidden lg:table-cell">
+                      Fonte
+                    </TableHead>
+                    <TableHead
+                      onClick={() => handleSort("data")}
+                      className="hidden lg:table-cell cursor-pointer"
+                    >
+                      Data{" "}
+                      {sortKey === "data" && (sortOrder === "asc" ? "↑" : "↓")}
+                    </TableHead>
+                    <TableHead
+                      onClick={() => handleSort("valor")}
+                      className="hidden lg:table-cell cursor-pointer"
+                    >
+                      Valor{" "}
+                      {sortKey === "valor" && (sortOrder === "asc" ? "↑" : "↓")}
+                    </TableHead>
+                    <TableHead className="text-right">Visualização</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredTransactions.map((transaction) => (
+                    <TableRow key={transaction.transactionId}>
+                      <TableCell>
+                        <div className="font-medium">{transaction.nome}</div>
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        <Badge className="text-xs" variant="outline">
+                          {capitalizeFirstLetter(transaction.tipo)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        {formatFonte(transaction.fonte)}
+                        <br />
+                        <div className="hidden text-sm text-muted-foreground md:inline">
+                          {transaction.fonte === "cartao-credito"
+                            ? transaction.detalhesFonte || "Cartão de Crédito"
+                            : transaction.detalhesFonte}
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="hidden lg:table-cell">
+                        {transaction.data.replace(/-/g, "/")}
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        {formatValor(transaction.valor)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <ViewTransaction
+                          transactionId={transaction.transactionId}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         )}
       </CardContent>
@@ -236,6 +276,11 @@ const TransactionsTable = () => {
           </Link>
         </Button>
       </div>
+
+      <CreateTransaction 
+        isOpen={isTransactionDialogOpen}
+        onOpenChange={setIsTransactionDialogOpen}
+      />
     </Card>
   )
 }

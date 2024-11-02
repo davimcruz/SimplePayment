@@ -170,7 +170,7 @@ const SettingsPage = () => {
       <main className="min-h-[calc(100vh_-_theme(spacing.16))] flex-1 flex-col gap-4 p-4 md:gap-8 md:p-10">
         <div className="mx-auto grid w-full max-w-3xl items-start gap-6">
           <div className="grid gap-6">
-            <Card x-chunk="dashboard-04-chunk-1">
+            <Card x-chunk="dashboard-04-chunk-1" className="bg-gradient-to-t from-background/10 to-primary/[5%]">
               <CardHeader>
                 <CardTitle>Editar Nome</CardTitle>
                 <CardDescription>
@@ -205,7 +205,7 @@ const SettingsPage = () => {
                 </Button>
               </CardFooter>
             </Card>
-            <Card x-chunk="dashboard-04-chunk-2">
+            <Card x-chunk="dashboard-04-chunk-2" className="bg-gradient-to-t from-background/10 to-primary/[5%]">
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                   <div>
