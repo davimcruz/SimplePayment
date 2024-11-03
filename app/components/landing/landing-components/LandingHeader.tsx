@@ -68,7 +68,7 @@ const Header = () => {
             <div className="flex items-center flex-shrink-0 w-[200px] md:w-[220px] justify-end">
               <Button
                 variant="default"
-                className="bg-[#10b981] hover:bg-[#047857]/90 flex items-center gap-2 text-zinc-800 transition-colors"
+                className="bg-emerald-500 hover:bg-emerald-800/90 flex items-center gap-2 text-zinc-800 hover:text-white transition-colors font-semibold"
                 asChild
               >
                 <Link href="/signin">

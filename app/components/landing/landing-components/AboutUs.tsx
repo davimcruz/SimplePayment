@@ -10,14 +10,14 @@ const AboutUs = () => {
         <div className="text-center mb-12">
           <BoxReveal boxColor="#10b981" duration={0.5}>
             <p className="text-[3rem] font-bold text-white">
-              Quem<span className="text-[#10b981]"> Somos</span>
+              Quem<span className="text-emerald-500"> Somos</span>
             </p>
           </BoxReveal>
 
           <BoxReveal boxColor="#10b981" duration={0.5}>
             <h2 className="mt-2 text-[1.2rem] text-gray-300">
               Uma empresa focada em
-              <span className="text-[#10b981]">
+              <span className="text-emerald-500">
                 {" "}
                 transformar sua relação com o dinheiro
               </span>
@@ -120,7 +120,7 @@ const AboutUs = () => {
               </p>
               <Button
                 size="lg"
-                className="bg-[#10b981] hover:bg-[#10b981]/90 text-zinc-800 font-semibold px-8"
+                className="bg-emerald-500 hover:bg-emerald-500/90 text-zinc-800 font-semibold px-8"
                 asChild
               >
                 <a href="#features">Conheça Nossos Recursos</a>

@@ -14,24 +14,18 @@ export const loginSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>
 
-export const registerSchema = z.object({
-  nome: z
-    .string()
-    .min(1, { message: "O nome é obrigatório." })
-    .max(100, { message: "O nome excede o tamanho máximo permitido." }),
-  sobrenome: z
-    .string()
-    .min(1, { message: "O sobrenome é obrigatório." })
-    .max(100, { message: "O sobrenome excede o tamanho máximo permitido." }),
-  email: z
-    .string()
-    .email({ message: "Formato de email inválido." })
-    .max(100, { message: "O email excede o tamanho máximo permitido." }),
-  password: z
-    .string()
-    .min(8, { message: "A senha deve ter pelo menos 8 caracteres." })
-    .max(100, { message: "A senha excede o tamanho máximo permitido." }),
-})
+export const registerSchema = z
+  .object({
+    nome: z.string().min(2, "Nome deve ter no mínimo 2 caracteres"),
+    sobrenome: z.string().min(2, "Sobrenome deve ter no mínimo 2 caracteres"),
+    email: z.string().email("Email inválido"),
+    password: z.string().min(8, "A senha deve ter no mínimo 8 caracteres"),
+    confirmPassword: z.string()
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"]
+  })
 
 export type RegisterInput = z.infer<typeof registerSchema>
 

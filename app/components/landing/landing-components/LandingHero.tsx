@@ -39,7 +39,7 @@ const LandingHero = () => {
         <div className="relative">
           <h1 className="relative z-[60] text-4xl md:text-6xl lg:text-7xl font-bold text-white">
             Planeje suas Finanças com{" "}
-            <span className="text-[#10b981]">SimpleFinance</span>
+            <span className="text-emerald-500">SimpleFinance</span>
           </h1>
           <AnimatedGridPattern
             numSquares={100}
@@ -62,7 +62,7 @@ const LandingHero = () => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6 relative z-[60]">
           <Button
             size="lg"
-            className="bg-[#10b981] hover:bg-[#047857]/90 text-zinc-800 font-semibold"
+            className="bg-emerald-500 hover:bg-emerald-800/90 text-zinc-800 hover:text-white font-semibold"
             asChild
           >
             <Link href="/signup">Vamos Começar?</Link>
