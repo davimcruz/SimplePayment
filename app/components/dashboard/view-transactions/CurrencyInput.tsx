@@ -51,13 +51,8 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
         onChange={onChangeWrapper}
         onFocus={onFocusWrapper}
         onBlur={onBlurWrapper}
-        required
       />
-      {error && (
-        <span className="text-red-500 text-sm">
-          Por favor, informe um valor válido para a transação.
-        </span>
-      )}
+      {error && <span className="text-red-500 text-sm">{error}</span>}
     </div>
   )
 }

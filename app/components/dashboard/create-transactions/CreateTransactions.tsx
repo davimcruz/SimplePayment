@@ -303,6 +303,7 @@ const CreateTransaction: React.FC = () => {
                         onBlur={field.onBlur}
                         error={errors.cardId?.message}
                         cards={cards}
+                        onCloseDialog={() => setIsOpen(false)}
                       />
                     )}
                   />

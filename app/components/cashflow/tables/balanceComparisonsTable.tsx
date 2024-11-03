@@ -174,10 +174,16 @@ const BalanceComparisonTable = ({ data, loading, setData }: BalanceComparisonTab
                         <TableCell>
                           <div className="font-medium">{item.nome}</div>
                         </TableCell>
-                        <TableCell>{formatCurrency(item.saldoOrcado)}</TableCell>
-                        <TableCell>{formatCurrency(item.saldoRealizado)}</TableCell>
+                        <TableCell>
+                          {formatCurrency(item.saldoOrcado)}
+                        </TableCell>
+                        <TableCell>
+                          {formatCurrency(item.saldoRealizado)}
+                        </TableCell>
                         <TableCell>{formatCurrency(item.gapMoney)}</TableCell>
-                        <TableCell>{formatPercentage(item.gapPercentage)}</TableCell>
+                        <TableCell>
+                          {formatPercentage(item.gapPercentage)}
+                        </TableCell>
                         <TableCell className="text-right">
                           <Badge
                             variant="outline"
@@ -207,22 +213,19 @@ const BalanceComparisonTable = ({ data, loading, setData }: BalanceComparisonTab
         {isExample && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center ">
             <p className="text-xl font-semibold mb-2 text-center px-4">
-              Você ainda não possui transações
+              Você ainda não criou seu fluxo de caixa
             </p>
             <p className="text-sm text-muted-foreground mb-4 text-center px-4">
-              Crie sua primeira transação para começar a controlar suas finanças
+              Crie seu fluxo de caixa para começar a controlar suas finanças
             </p>
-            <Button
-              variant="outline"
-              onClick={() => setIsTransactionDialogOpen(true)}
-            >
+            <Button variant="outline" onClick={handleUpdateBudgetClick}>
               <PlusCircle className="h-4 w-4 mr-2" />
-              Criar Transação
+              Criar Fluxo de Caixa
             </Button>
           </div>
         )}
 
-        <CreateTransaction 
+        <CreateTransaction
           isOpen={isTransactionDialogOpen}
           onOpenChange={setIsTransactionDialogOpen}
         />

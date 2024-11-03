@@ -41,7 +41,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       <Label className="text-left" htmlFor="dataTransacao">
         Data
       </Label>
-      <Popover modal={false}>
+      <Popover>
         <PopoverTrigger asChild>
           <Button
             variant={"outline"}
@@ -72,11 +72,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           </div>
         </PopoverContent>
       </Popover>
-      {error && (
-        <span className="text-red-500 text-sm">
-          Por favor, selecione a data da transação.
-        </span>
-      )}
+      {error && <span className="text-red-500 text-sm">{error}</span>}
     </div>
   )
 }

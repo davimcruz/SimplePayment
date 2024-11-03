@@ -23,6 +23,7 @@ interface CardSelectProps {
   onBlur: () => void
   error?: string
   cards: Card[] | { cartoes: Card[] } | null
+  onCloseDialog?: () => void
 }
 
 export const CardSelect: React.FC<CardSelectProps> = ({
@@ -31,9 +32,14 @@ export const CardSelect: React.FC<CardSelectProps> = ({
   onBlur,
   error,
   cards,
+  onCloseDialog,
 }) => {
   const cardsArray = Array.isArray(cards) ? cards : cards?.cartoes || []
   const hasCards = cardsArray.length > 0
+
+  const handleCardRegister = () => {
+    onCloseDialog?.()
+  }
 
   return (
     <div className="grid gap-2">
@@ -53,11 +59,15 @@ export const CardSelect: React.FC<CardSelectProps> = ({
         </Select>
       ) : (
         <div className="mt-2">
-          <p className="text-sm text-gray-500 mb-2">
-            Você ainda não possui cartões cadastrados.
+          <p className="text-sm text-gray-500 mb-2 text-center">
+            Você ainda não possui cartões cadastrados
           </p>
           <Link href="/dashboard/cards" passHref>
-            <Button variant="outline" className="w-full mb-4">
+            <Button 
+              variant="outline" 
+              className="w-full mb-4"
+              onClick={handleCardRegister}
+            >
               Cadastrar Novo Cartão
             </Button>
           </Link>

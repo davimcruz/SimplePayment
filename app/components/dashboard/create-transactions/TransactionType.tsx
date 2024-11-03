@@ -33,11 +33,7 @@ export const TransactionTypeSelect: React.FC<TransactionTypeSelectProps> = ({
           <SelectItem value="despesa">Despesa</SelectItem>
         </SelectContent>
       </Select>
-      {error && (
-        <span className="text-red-500 text-sm">
-          Por favor, selecione o tipo de transação.
-        </span>
-      )}
+      {error && <span className="text-red-500 text-sm">{error}</span>}
     </div>
   )
 }

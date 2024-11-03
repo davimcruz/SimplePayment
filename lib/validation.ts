@@ -36,40 +36,101 @@ export const registerSchema = z.object({
 export type RegisterInput = z.infer<typeof registerSchema>
 
 export const transactionSchema = z.object({
-  nome: z.string()
-    .min(1, { message: "O nome não pode estar vazio." })
-    .refine((value) => /^[a-zA-ZÀ-ÿ0-9\s]+$/.test(value), 
-      { message: "O nome deve conter apenas letras (incluindo acentuadas), números e espaços." }),
-  tipo: z.enum(["receita", "despesa"], { message: "Tipo deve ser 'receita' ou 'despesa'" }),
-  fonte: z.string().min(1, { message: "Fonte é obrigatória" }),
-  data: z.string().refine(
+  nome: z
+    .string()
+    .min(1, { message: "Digite o nome da transação" })
+    .regex(
+      /^[a-zA-ZÀ-ÿ0-9\s]*$/,
+      "O nome deve conter apenas letras, números e espaços"
+    ),
+  
+  tipo: z.enum(["receita", "despesa"], {
+    required_error: "Selecione o tipo de transação",
+    invalid_type_error: "Selecione o tipo de transação"
+  }),
+  
+  fonte: z.string({
+    required_error: "Selecione a origem da transação",
+    invalid_type_error: "Selecione a origem da transação"
+  }).min(1, { message: "Selecione a origem da transação" }),
+  
+  data: z.string({
+    required_error: "Selecione uma data",
+    invalid_type_error: "Data inválida"
+  }).refine(
     (date) => /^\d{2}-\d{2}-\d{4}$/.test(date) || /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/.test(date),
-    { message: "Data deve estar no formato DD-MM-YYYY ou ISO (yyyy-mm-ddTHH:MM:SS.sssZ)" }
+    { message: "Data inválida" }
   ),
-  valor: z.string().refine(
+  
+  valor: z.string({
+    required_error: "Digite o valor da transação",
+    invalid_type_error: "Valor inválido"
+  }).refine(
     (value) => parseCurrencyToFloat(value) >= 1,
     { message: "O valor mínimo é R$ 1,00" }
   ),
-  cardId: z.string().uuid({ message: "cardId deve ser um UUID válido" }).optional(),
+
+  cardId: z.string().uuid({ message: "Selecione um cartão" }).optional(),
   creditPaymentType: z.enum(["a-vista", "a-prazo"]).optional(),
   parcelas: z.string().optional(),
   detalhesFonte: z.string().optional(),
-})
+}).refine(
+  (data) => {
+    if (data.fonte === "cartao-credito") {
+      return data.cardId !== undefined;
+    }
+    return true;
+  },
+  { message: "Selecione um cartão", path: ["cardId"] }
+).refine(
+  (data) => {
+    if (data.fonte === "cartao-credito") {
+      return data.creditPaymentType !== undefined;
+    }
+    return true;
+  },
+  { message: "Selecione o tipo de pagamento", path: ["creditPaymentType"] }
+).refine(
+  (data) => {
+    if (data.creditPaymentType === "a-prazo") {
+      const numParcelas = parseInt(data.parcelas || "");
+      return !isNaN(numParcelas) && numParcelas >= 1 && numParcelas <= 12;
+    }
+    return true;
+  },
+  { message: "O número de parcelas deve estar entre 1 e 12", path: ["parcelas"] }
+).refine(
+  (data) => {
+    if (data.fonte === "outros") {
+      return !!data.detalhesFonte?.trim();
+    }
+    return true;
+  },
+  { message: "Digite os detalhes da origem", path: ["detalhesFonte"] }
+)
 
 export type TransactionFormData = z.infer<typeof transactionSchema>
 
 export const createCardSchema = z.object({
-  userId: z.number().positive(),
-  nome: z.string().min(1, { message: "Nome do cartão é obrigatório" })
-    .regex(/^[a-zA-ZÀ-ÿ0-9\s]+$/, { message: "O nome deve conter apenas letras (incluindo acentuadas), números e espaços." }),
+  userId: z.number(),
+  nome: z.string()
+    .min(1, "Digite o nome do cartão")
+    .regex(/^[a-zA-ZÀ-ÿ0-9\s]*$/, "O nome deve conter apenas letras (incluindo acentuadas), números e espaços."),
   bandeira: z.enum(["Mastercard", "Visa", "Elo", "American Express", "Hipercard"], {
     errorMap: () => ({ message: "Bandeira inválida" })
   }),
-  instituicao: z.string().min(1, { message: "Instituição é obrigatória" })
-    .regex(/^[a-zA-ZÀ-ÿ0-9\s]+$/, { message: "A instituição deve conter apenas letras (incluindo acentuadas), números e espaços." }),
+  instituicao: z.string()
+    .min(1, "Digite o nome da instituição")
+    .regex(/^[a-zA-ZÀ-ÿ0-9\s]*$/, "A instituição deve conter apenas letras (incluindo acentuadas), números e espaços."),
   tipo: z.literal("credito"),
-  vencimento: z.number().min(1).max(31, { message: "Vencimento deve ser entre 1 e 31" }),
-  limite: z.number().min(0.01, { message: "Limite deve ser maior que zero" }),
+  vencimento: z.number({
+    required_error: "Digite um dia válido",
+    invalid_type_error: "Digite um dia válido"
+  })
+    .min(1, "Digite um dia válido")
+    .max(31, "Digite um dia válido"),
+  limite: z.number()
+    .min(0.01, "Limite deve ser maior que zero"),
 })
 
 export type CreateCardInput = z.infer<typeof createCardSchema>
@@ -184,3 +245,52 @@ export const createTransactionSchema = z.object({
 })
 
 export type CreateTransactionInput = z.infer<typeof createTransactionSchema>
+
+export const viewTransactionSchema = z.object({
+  nome: z
+    .string()
+    .min(1, { message: "Digite o nome da transação" })
+    .regex(
+      /^[a-zA-ZÀ-ÿ0-9\s]*$/,
+      "O nome deve conter apenas letras, números e espaços"
+    ),
+  
+  tipo: z.enum(["receita", "despesa"], {
+    required_error: "Selecione o tipo de transação",
+    invalid_type_error: "Selecione o tipo de transação"
+  }),
+  
+  fonte: z.string({
+    required_error: "Selecione a origem da transação",
+    invalid_type_error: "Selecione a origem da transação"
+  }).min(1, { message: "Selecione a origem da transação" }),
+  
+  data: z.string({
+    required_error: "Selecione uma data",
+    invalid_type_error: "Data inválida"
+  }).refine(
+    (date) => /^\d{2}-\d{2}-\d{4}$/.test(date),
+    { message: "Data inválida" }
+  ),
+  
+  valor: z.string({
+    required_error: "Digite o valor da transação",
+    invalid_type_error: "Valor inválido"
+  }).refine(
+    (value) => parseCurrencyToFloat(value) >= 1,
+    { message: "O valor mínimo é R$ 1,00" }
+  ),
+
+  cardId: z.string().uuid().optional(),
+  detalhesFonte: z.string().optional(),
+}).refine(
+  (data) => {
+    if (data.fonte === "outros") {
+      return !!data.detalhesFonte?.trim();
+    }
+    return true;
+  },
+  { message: "Digite os detalhes da origem", path: ["detalhesFonte"] }
+)
+
+export type ViewTransactionFormData = z.infer<typeof viewTransactionSchema>

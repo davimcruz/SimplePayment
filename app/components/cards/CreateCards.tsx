@@ -141,7 +141,7 @@ const CreateCreditCard: React.FC<CreateCreditCardProps> = ({ onCancel }) => {
       md:rounded-lg rounded-none
       flex flex-col
       pt-6 md:pt-0
-      "
+      overflow-hidden"
       >
         {isSubmitting ? (
           <>
@@ -159,7 +159,7 @@ const CreateCreditCard: React.FC<CreateCreditCardProps> = ({ onCancel }) => {
               Preencha o formulário abaixo para registrar seu cartão de crédito
             </CardDescription>
             <Separator className="w-full my-6" />
-            <CardContent className="flex-col gap-4">
+            <CardContent className="flex-col gap-4 overflow-y-auto">
               <div className="mb-4">
                 <Label htmlFor="card-name">Nome do Cartão</Label>
                 <Input
@@ -263,25 +263,22 @@ const CreateCreditCard: React.FC<CreateCreditCardProps> = ({ onCancel }) => {
                 )}
               </div>
 
-              <Button
-                onClick={handleSubmit}
-                className="w-full mt-6"
-                disabled={isSubmitting}
-              >
-                Criar Cartão de Crédito
-              </Button>
-              <Button
-                onClick={onCancel}
-                className="w-full mt-2"
-                variant="outline"
-              >
-                Cancelar
-              </Button>
-              {errors.general && (
-                <span className="text-red-500 text-sm mt-2">
-                  {errors.general}
-                </span>
-              )}
+              <div className="p-6 mt-auto bg-background border-t">
+                <Button
+                  onClick={handleSubmit}
+                  className="w-full mb-2"
+                  disabled={isSubmitting}
+                >
+                  Criar Cartão de Crédito
+                </Button>
+                <Button
+                  onClick={onCancel}
+                  className="w-full"
+                  variant="outline"
+                >
+                  Cancelar
+                </Button>
+              </div>
             </CardContent>
           </>
         )}

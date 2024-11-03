@@ -128,6 +128,12 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({ transactionId }) => {
 
     try {
       const formData = getValues()
+      const validationResult = transactionSchema.safeParse(formData)
+
+      if (!validationResult.success) {
+        setApiError("Por favor, preencha todos os campos obrigatórios corretamente.")
+        return
+      }
 
       const updatedData = {
         transactionId,
@@ -151,11 +157,13 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({ transactionId }) => {
 
       if (result.success) {
         setIsOpen(false)
-        router.push("/dashboard/transactions")
+        if (window.location.pathname === "/dashboard/transactions") {
+          window.location.reload()
+        } else {
+          router.push("/dashboard/transactions")
+        }
       } else {
-        throw new Error(
-          result.error || "Erro desconhecido ao atualizar a transação"
-        )
+        throw new Error(result.error || "Erro desconhecido ao atualizar a transação")
       }
     } catch (error) {
       setApiError("Erro ao atualizar a transação. Por favor, tente novamente.")
@@ -166,7 +174,7 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({ transactionId }) => {
 
   const handleSubmitClick = (e: React.MouseEvent) => {
     e.preventDefault()
-    submitForm()
+    handleSubmit(submitForm)(e)
   }
 
   const handleDeleteClick = async () => {
@@ -188,11 +196,13 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({ transactionId }) => {
 
       if (result.success) {
         setIsOpen(false)
-        router.push("/dashboard/transactions")
+        if (window.location.pathname === "/dashboard/transactions") {
+          window.location.reload()
+        } else {
+          router.push("/dashboard/transactions")
+        }
       } else {
-        throw new Error(
-          result.error || "Erro desconhecido ao excluir a transação"
-        )
+        throw new Error(result.error || "Erro desconhecido ao excluir a transação")
       }
     } catch (error) {
       setApiError("Erro ao excluir a transação. Por favor, tente novamente.")
@@ -307,6 +317,7 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({ transactionId }) => {
                             onBlur={field.onBlur}
                             error={errors.cardId?.message}
                             cards={cards}
+                            onCloseDialog={() => setIsOpen(false)}
                           />
                         )}
                       />

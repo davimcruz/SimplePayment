@@ -297,6 +297,7 @@ const CreateTransaction: React.FC<CreateTransactionProps> = ({ isOpen, onOpenCha
                         onBlur={field.onBlur}
                         error={errors.cardId?.message}
                         cards={cards}
+                        onCloseDialog={() => onOpenChange(false)}
                       />
                     )}
                   />

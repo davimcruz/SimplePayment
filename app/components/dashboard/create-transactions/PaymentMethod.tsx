@@ -57,11 +57,7 @@ export const PaymentMethodSelect: React.FC<PaymentMethodSelectProps> = ({
           ))}
         </SelectContent>
       </Select>
-      {error && (
-        <span className="text-red-500 text-sm">
-          Por favor, selecione a origem da transação.
-        </span>
-      )}
+      {error && <span className="text-red-500 text-sm">{error}</span>}
     </div>
   )
 }

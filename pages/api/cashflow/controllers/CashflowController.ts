@@ -78,11 +78,22 @@ class CashflowController {
         return res.status(400).json({ message: "[ERRO] UserId não fornecido ou inválido" })
       }
 
-      const flows = await CashflowService.getFlow(userId)
-      return res.status(200).json({
-        message: "[SUCESSO] Fluxo de caixa obtido com sucesso",
-        flows,
-      })
+      try {
+        const flows = await CashflowService.getFlow(userId)
+        return res.status(200).json({
+          message: "[SUCESSO] Consulta realizada com sucesso",
+          flows: flows || [],
+        })
+      } catch (error) {
+        if (error instanceof Error && 
+            error.message === "Nenhum orçamento encontrado para o usuário.") {
+          return res.status(200).json({
+            message: "[INFO] Nenhum fluxo de caixa encontrado",
+            flows: [],
+          })
+        }
+        throw error
+      }
     } catch (error) {
       console.error("Erro ao obter fluxo de caixa:", error)
       return res.status(500).json({

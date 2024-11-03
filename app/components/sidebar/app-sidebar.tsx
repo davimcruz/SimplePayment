@@ -302,36 +302,50 @@ console.log(userData)
                     </CollapsibleTrigger>
                     <CollapsibleContent className="overflow-x-hidden">
                       <SidebarMenuSub className="text-zinc-700">
-                        {cards.map((card) => {
-                          const CardIcon =
-                            cardIcons[card.bandeira] || CreditCard
-                          return (
-                            <SidebarMenuSubItem key={card.cardId}>
+                        {cards.length > 0 ? (
+                          <>
+                            {cards.map((card) => {
+                              const CardIcon = cardIcons[card.bandeira] || CreditCard
+                              return (
+                                <SidebarMenuSubItem key={card.cardId}>
+                                  <SidebarMenuButton asChild>
+                                    <a href={`/dashboard/cards/${card.cardId}`}>
+                                      <Image
+                                        src={CardIcon}
+                                        alt={card.bandeira}
+                                        width={24}
+                                        height={24}
+                                      />
+                                      <span className="dark:text-neutral-300">
+                                        {card.nomeCartao}
+                                      </span>
+                                    </a>
+                                  </SidebarMenuButton>
+                                </SidebarMenuSubItem>
+                              )
+                            })}
+                            <SidebarMenuSubItem>
                               <SidebarMenuButton asChild>
-                                <a href={`/dashboard/cards/${card.cardId}`}>
-                                  <Image
-                                    src={CardIcon}
-                                    alt={card.bandeira}
-                                    width={24}
-                                    height={24}
-                                  />
-                                  <span className="dark:text-neutral-300">
-                                    {card.nomeCartao}
+                                <a href="/dashboard/cards">
+                                  <span className="text-xs text-muted-foreground">
+                                    Ver todos os cartões
                                   </span>
                                 </a>
                               </SidebarMenuButton>
                             </SidebarMenuSubItem>
-                          )
-                        })}
-                        <SidebarMenuSubItem>
-                          <SidebarMenuButton asChild>
-                            <a href="/dashboard/cards">
-                              <span className="text-xs text-muted-foreground">
-                                Ver todos os cartões
-                              </span>
-                            </a>
-                          </SidebarMenuButton>
-                        </SidebarMenuSubItem>
+                          </>
+                        ) : (
+                          <SidebarMenuSubItem>
+                            <SidebarMenuButton asChild>
+                              <a href="/dashboard/cards">
+                                <PlusCircle className="h-4 w-4 dark:text-neutral-300" />
+                                <span className="dark:text-neutral-300">
+                                  Cadastrar Cartão
+                                </span>
+                              </a>
+                            </SidebarMenuButton>
+                          </SidebarMenuSubItem>
+                        )}
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>

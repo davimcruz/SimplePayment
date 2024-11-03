@@ -101,12 +101,28 @@ const BalanceComparisonChart = ({ data }: BalanceComparisonChartProps) => {
               <ChartTooltip content={<ChartTooltipContent />} />
               <defs>
                 <linearGradient id="fillOrcado" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-orcado)" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="var(--color-orcado)" stopOpacity={0.1} />
+                  <stop
+                    offset="5%"
+                    stopColor="var(--color-orcado)"
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="var(--color-orcado)"
+                    stopOpacity={0.1}
+                  />
                 </linearGradient>
                 <linearGradient id="fillRealizado" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-realizado)" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="var(--color-realizado)" stopOpacity={0.1} />
+                  <stop
+                    offset="5%"
+                    stopColor="var(--color-realizado)"
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="var(--color-realizado)"
+                    stopOpacity={0.1}
+                  />
                 </linearGradient>
               </defs>
               <Area
@@ -146,10 +162,10 @@ const BalanceComparisonChart = ({ data }: BalanceComparisonChartProps) => {
       {isExample && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center">
           <p className="text-xl font-semibold mb-2 text-center px-4">
-            Você ainda não possui transações
+            Você ainda não criou seu fluxo de caixa
           </p>
           <p className="text-sm text-muted-foreground mb-4 text-center px-4">
-            Crie sua primeira transação para começar a controlar suas finanças
+            Crie seu fluxo de caixa para começar a controlar suas finanças
           </p>
           {/* <Button
             variant="outline"
@@ -161,7 +177,7 @@ const BalanceComparisonChart = ({ data }: BalanceComparisonChartProps) => {
         </div>
       )}
 
-      <CreateTransaction 
+      <CreateTransaction
         isOpen={isTransactionDialogOpen}
         onOpenChange={setIsTransactionDialogOpen}
       />
