@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/app/components/ui/table"
 import { Skeleton } from "../../ui/skeleton"
-import CreateTransaction from "@/app/components/sidebar/CreateTransactions"
+import CreateTransaction from "../create-transactions/CreateTransactions"
 import ViewTransaction from "../view-transactions/ViewTransactions"
 import { Transactions } from "@/types/types"
 import { exampleTransactions } from "@/utils/exampleData"
@@ -47,41 +47,53 @@ const TransactionsTable = () => {
   >(null)
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false)
 
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      setLoading(true)
-      try {
-        const response = await fetch("/api/transactions/get-table")
-        const data = await response.json()
+  const fetchTransactions = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch("/api/transactions/get-table")
+      const data = await response.json()
 
-        const filtered = data.table.filter(
-          (transaction: Transactions) =>
-            transaction.tipo === "despesa" || transaction.tipo === "receita"
+      const filtered = data.table.filter(
+        (transaction: Transactions) =>
+          transaction.tipo === "despesa" || transaction.tipo === "receita"
+      )
+
+      if (filtered.length === 0) {
+        setTransactions(exampleTransactions as unknown as Transactions[])
+        setFilteredTransactions(exampleTransactions as unknown as Transactions[])
+      } else {
+        const sortedTransactions = filtered.sort(
+          (a: Transactions, b: Transactions) => {
+            const dateA = new Date(a.data.split("-").reverse().join("/")).getTime()
+            const dateB = new Date(b.data.split("-").reverse().join("/")).getTime()
+            return dateB - dateA
+          }
         )
-
-        if (filtered.length === 0) {
-          setTransactions(exampleTransactions as unknown as Transactions[])
-          setFilteredTransactions(exampleTransactions as unknown as Transactions[])
-        } else {
-          const sortedTransactions = filtered.sort(
-            (a: Transactions, b: Transactions) => {
-              const dateA = new Date(a.data.split("-").reverse().join("/")).getTime()
-              const dateB = new Date(b.data.split("-").reverse().join("/")).getTime()
-              return dateB - dateA
-            }
-          )
-          const limitedTransactions = sortedTransactions.slice(0, 5)
-          setTransactions(limitedTransactions)
-          setFilteredTransactions(limitedTransactions)
-        }
-      } catch (error) {
-        console.error("Erro ao buscar transações:", error)
-      } finally {
-        setLoading(false)
+        const limitedTransactions = sortedTransactions.slice(0, 5)
+        setTransactions(limitedTransactions)
+        setFilteredTransactions(limitedTransactions)
       }
+    } catch (error) {
+      console.error("Erro ao buscar transações:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchTransactions()
+  }, [])
+
+  useEffect(() => {
+    const handleTransactionUpdate = () => {
+      fetchTransactions()
     }
 
-    fetchTransactions()
+    window.addEventListener('updateTransactions', handleTransactionUpdate)
+
+    return () => {
+      window.removeEventListener('updateTransactions', handleTransactionUpdate)
+    }
   }, [])
 
   const handleSort = (key: SortKey) => {

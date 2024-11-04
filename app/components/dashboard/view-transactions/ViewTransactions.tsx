@@ -19,8 +19,9 @@ import {
 } from "@/app/components/ui/dialog"
 import { parseCookies } from "nookies"
 import LottieAnimation from "@/app/components/ui/loadingAnimation"
-import { transactionSchema, TransactionFormData } from "@/lib/validation"
+import { viewTransactionSchema, type ViewTransactionFormData } from "@/lib/validation"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 const ENDPOINTS = {
   VIEW_TRANSACTION: "/api/transactions/view-transactions",
@@ -50,8 +51,8 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({ transactionId }) => {
     reset,
     getValues,
     formState: { errors },
-  } = useForm<TransactionFormData>({
-    resolver: zodResolver(transactionSchema),
+  } = useForm<ViewTransactionFormData>({
+    resolver: zodResolver(viewTransactionSchema),
     defaultValues: {
       nome: "",
       tipo: "despesa",
@@ -123,15 +124,22 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({ transactionId }) => {
   }, [fetchTransactionDetails, fetchCards])
 
   const submitForm = async () => {
+    console.log("1. submitForm iniciado")
     setIsSubmitting(true)
     setApiError(null)
 
     try {
       const formData = getValues()
-      const validationResult = transactionSchema.safeParse(formData)
+      console.log("2. Dados do formulário:", formData)
+
+      const validationResult = viewTransactionSchema.safeParse(formData)
+      console.log("3. Resultado da validação:", validationResult)
 
       if (!validationResult.success) {
-        setApiError("Por favor, preencha todos os campos obrigatórios corretamente.")
+        console.log("4. Validação falhou")
+        setApiError(
+          "Por favor, preencha todos os campos obrigatórios corretamente."
+        )
         return
       }
 
@@ -142,39 +150,124 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({ transactionId }) => {
         valor: parseCurrencyToFloat(formData.valor),
         detalhesFonte: formData.detalhesFonte,
       }
+      console.log("5. Dados formatados para envio:", updatedData)
 
-      const response = await fetch(ENDPOINTS.UPDATE_TRANSACTION, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedData),
-      })
+      toast.promise(
+        fetch(ENDPOINTS.UPDATE_TRANSACTION, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedData),
+        }).then(async (response) => {
+          console.log("6. Resposta da API:", response)
+          if (!response.ok) {
+            throw new Error(`Erro na resposta da API: ${response.status}`)
+          }
 
-      if (!response.ok) {
-        throw new Error(`Erro na resposta da API: ${response.status}`)
-      }
+          const result = await response.json()
+          console.log("7. Resultado da API:", result)
 
-      const result = await response.json()
-
-      if (result.success) {
-        setIsOpen(false)
-        if (window.location.pathname === "/dashboard/transactions") {
-          window.location.reload()
-        } else {
-          router.push("/dashboard/transactions")
+          if (result.success) {
+            setIsOpen(false)
+            if (window.location.pathname === "/dashboard/transactions") {
+              window.location.reload()
+            } else {
+              router.push("/dashboard/transactions")
+            }
+          } else {
+            throw new Error(
+              result.error || "Erro desconhecido ao atualizar a transação"
+            )
+          }
+        }),
+        {
+          loading: "Atualizando transação...",
+          success: "Transação atualizada com sucesso!",
+          error: "Erro ao atualizar a transação",
+          duration: 4000,
         }
-      } else {
-        throw new Error(result.error || "Erro desconhecido ao atualizar a transação")
-      }
+      )
     } catch (error) {
+      console.error("8. Erro capturado:", error)
       setApiError("Erro ao atualizar a transação. Por favor, tente novamente.")
     } finally {
+      console.log("9. Finalizando submitForm")
       setIsSubmitting(false)
     }
   }
 
-  const handleSubmitClick = (e: React.MouseEvent) => {
+  const handleSubmitClick = async (e: React.MouseEvent) => {
     e.preventDefault()
-    handleSubmit(submitForm)(e)
+    console.log("1. Início do submit")
+    
+    const formData = getValues()
+    
+    const cleanedData = {
+      ...formData,
+      cardId: formData.cardId === "" ? undefined : formData.cardId
+    }
+    
+    console.log("2. Dados do form limpos:", cleanedData)
+
+    const validationResult = viewTransactionSchema.safeParse(cleanedData)
+    if (!validationResult.success) {
+      console.log("4. Erros específicos:", validationResult.error.errors)
+      setApiError("Por favor, preencha todos os campos obrigatórios corretamente.")
+      return
+    }
+
+    setIsSubmitting(true)
+    
+    try {
+      const updatedData = {
+        transactionId,
+        nome: cleanedData.nome,
+        data: cleanedData.data,
+        valor: parseCurrencyToFloat(cleanedData.valor),
+        detalhesFonte: cleanedData.detalhesFonte,
+        cardId: cleanedData.cardId
+      }
+
+      toast.promise(
+        fetch(ENDPOINTS.UPDATE_TRANSACTION, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedData),
+        }).then(async (response) => {
+          console.log("6. Resposta da API:", response)
+          if (!response.ok) {
+            throw new Error(`Erro na resposta da API: ${response.status}`)
+          }
+
+          const result = await response.json()
+          console.log("7. Resultado da API:", result)
+
+          if (result.success) {
+            setIsOpen(false)
+            if (window.location.pathname === "/dashboard/transactions") {
+              window.location.reload()
+            } else {
+              router.push("/dashboard/transactions")
+            }
+          } else {
+            throw new Error(
+              result.error || "Erro desconhecido ao atualizar a transação"
+            )
+          }
+        }),
+        {
+          loading: "Atualizando transação...",
+          success: "Transação atualizada com sucesso!",
+          error: "Erro ao atualizar a transação",
+          duration: 4000,
+        }
+      )
+    } catch (error) {
+      console.error("8. Erro capturado:", error)
+      setApiError("Erro ao atualizar a transação. Por favor, tente novamente.")
+    } finally {
+      console.log("9. Finalizando submitForm")
+      setIsSubmitting(false)
+    }
   }
 
   const handleDeleteClick = async () => {
@@ -182,30 +275,42 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({ transactionId }) => {
     setApiError(null)
 
     try {
-      const response = await fetch(ENDPOINTS.DELETE_TRANSACTION, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transactionId }),
-      })
+      await toast.promise(
+        (async () => {
+          const response = await fetch(ENDPOINTS.DELETE_TRANSACTION, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ transactionId }),
+          })
 
-      if (!response.ok) {
-        throw new Error(`Erro na resposta da API: ${response.status}`)
-      }
+          if (!response.ok) {
+            throw new Error(`Erro na resposta da API: ${response.status}`)
+          }
 
-      const result = await response.json()
+          const result = await response.json()
 
-      if (result.success) {
-        setIsOpen(false)
-        if (window.location.pathname === "/dashboard/transactions") {
-          window.location.reload()
-        } else {
-          router.push("/dashboard/transactions")
+          if (!result.success) {
+            throw new Error(
+              result.error || "Erro desconhecido ao excluir a transação"
+            )
+          }
+
+          setIsOpen(false)
+          if (window.location.pathname === "/dashboard/transactions") {
+            window.location.reload()
+          } else {
+            router.push("/dashboard/transactions")
+          }
+        })(),
+        {
+          loading: "Excluindo transação...",
+          success: "Transação excluída com sucesso!",
+          error: "Erro ao excluir a transação",
+          duration: 4000,
         }
-      } else {
-        throw new Error(result.error || "Erro desconhecido ao excluir a transação")
-      }
+      )
     } catch (error) {
-      setApiError("Erro ao excluir a transação. Por favor, tente novamente.")
+      console.error("Erro ao excluir transação:", error)
     } finally {
       setIsDeleting(false)
     }
@@ -253,7 +358,10 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({ transactionId }) => {
                   <LottieAnimation animationPath="/loadingAnimation.json" />
                 </div>
               ) : (
-                <form className="space-y-6 mt-4">
+                <form
+                  onSubmit={handleSubmit(submitForm)}
+                  className="space-y-6 mt-4"
+                >
                   <Controller
                     name="nome"
                     control={control}
@@ -381,7 +489,7 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({ transactionId }) => {
                   <div className="flex flex-col gap-2">
                     <Button
                       type="button"
-                      variant={"outline"}
+                      variant="outline"
                       className="w-full shadow-sm"
                       disabled={isSubmitting || isDeleting}
                       onClick={handleDeleteClick}
@@ -392,7 +500,10 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({ transactionId }) => {
                       type="button"
                       className="w-full"
                       disabled={isSubmitting}
-                      onClick={handleSubmitClick}
+                      onClick={(e) => {
+                        console.log("0. Botão clicado")
+                        handleSubmitClick(e)
+                      }}
                     >
                       Atualizar Transação
                     </Button>

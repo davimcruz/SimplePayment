@@ -7,13 +7,12 @@ import {
 } from "@/app/components/ui/card"
 import BarChartComponent from "./charts/bar-chart"
 import { Skeleton } from "../../ui/skeleton"
-import { Button } from "@/app/components/ui/button"
-import { PlusCircle } from "lucide-react"
-import CreateTransaction from "@/app/components/sidebar/CreateTransactions"
+import CreateTransaction from "../create-transactions/CreateTransactions"
 
 const FinancesGraph = () => {
   const [loading, setLoading] = useState(true)
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false)
+  const [key, setKey] = useState(0)
 
   function getCurrentYear() {
     return new Date().getFullYear()
@@ -22,10 +21,25 @@ const FinancesGraph = () => {
   const year = getCurrentYear()
 
   useEffect(() => {
-    // Simular um tempo de carregamento mínimo
     setTimeout(() => {
       setLoading(false)
     }, 500)
+  }, [])
+
+  useEffect(() => {
+    const handleTransactionUpdate = () => {
+      setLoading(true)
+      setKey(prev => prev + 1)
+      setTimeout(() => {
+        setLoading(false)
+      }, 500)
+    }
+
+    window.addEventListener('updateTransactions', handleTransactionUpdate)
+
+    return () => {
+      window.removeEventListener('updateTransactions', handleTransactionUpdate)
+    }
   }, [])
 
   return (
@@ -38,7 +52,7 @@ const FinancesGraph = () => {
           <Skeleton className="h-[300px] w-full md:h-[400px]" />
         ) : (
           <div className="w-full h-[300px] md:h-[400px] relative">
-            <BarChartComponent />
+            <BarChartComponent key={key} />
             <CreateTransaction 
               isOpen={isTransactionDialogOpen}
               onOpenChange={setIsTransactionDialogOpen}

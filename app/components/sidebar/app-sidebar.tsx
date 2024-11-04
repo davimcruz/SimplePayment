@@ -1,5 +1,5 @@
 "use client"
-import { parseCookies } from "nookies"
+import { parseCookies, destroyCookie } from "nookies"
 import {
   Calendar,
   ChevronUp,
@@ -7,9 +7,7 @@ import {
   Home,
   Inbox,
   LogOut,
-  Search,
   Settings,
-  User,
   Wallet,
   PlusCircle,
   ListOrdered,
@@ -47,13 +45,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "../ui/collapsible"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import VisaIcon from "@/public/visa.svg"
 import MastercardIcon from "@/public/mastercard.svg"
 import AmexIcon from "@/public/amex.svg"
 import EloIcon from "@/public/elo.svg"
 import HipercardIcon from "@/public/hipercard.svg"
-import CreateTransaction from "@/app/components/sidebar/CreateTransactions"
+import CreateTransaction from "../dashboard/create-transactions/CreateTransactions"
+import { toast } from "sonner"
 
 interface UserData {
   id?: string
@@ -188,6 +187,12 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
     }
   }, [cookies.userId])
 
+  const handleTransactionSuccess = useCallback(() => {
+    if (window.location.pathname === '/dashboard/transactions') {
+      router.refresh()
+    }
+  }, [router])
+
   if (isLoading || !userData) {
     return (
       <Sidebar collapsible="icon">
@@ -206,19 +211,25 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
   }
 
   const handleLogout = () => {
-    const cookiesToDelete = ['token', 'userId']
+    const cookies = parseCookies()
     
-    cookiesToDelete.forEach(cookieName => {
-      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`
+    Object.keys(cookies).forEach(cookieName => {
+      destroyCookie(null, cookieName, {
+        path: '/',
+        domain: window.location.hostname,
+      })
     })
 
-    document.cookie.split(';').forEach(cookie => {
-      const [name] = cookie.split('=')
-      document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`
+    document.cookie.split(";").forEach((cookie) => {
+      document.cookie = cookie
+        .replace(/^ +/, "")
+        .replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/`)
     })
 
+    toast.success('Logout realizado com sucesso!')
+    
     router.push('/signin')
-    router.refresh() 
+    router.refresh()
   }
 
   const handleSettings = () => {
@@ -447,7 +458,9 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
       <CreateTransaction
         isOpen={isTransactionDialogOpen}
         onOpenChange={setIsTransactionDialogOpen}
+        onSuccess={handleTransactionSuccess}
       />
     </>
   )
 }
+

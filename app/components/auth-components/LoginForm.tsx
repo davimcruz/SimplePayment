@@ -9,6 +9,7 @@ import { Label } from "@/app/components/ui/label"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { loginSchema, LoginInput } from "@/lib/validation"
+import { toast } from "sonner"
 
 export default function LoginForm() {
   const router = useRouter()
@@ -31,22 +32,28 @@ export default function LoginForm() {
 
       router.prefetch('/dashboard')
 
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-        cache: 'no-store'
-      })
-
-      if (!response.ok) {
-        const result = await response.json()
-        throw new Error(result.error || "Credenciais inválidas.")
-      }
-
-      router.push('/dashboard', { scroll: false })
-      router.refresh()
+      toast.promise(
+        fetch("/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+          cache: 'no-store'
+        }).then(async (response) => {
+          if (!response.ok) {
+            const result = await response.json()
+            throw new Error(result.error || "Credenciais inválidas.")
+          }
+          router.push('/dashboard', { scroll: false })
+          router.refresh()
+        }),
+        {
+          loading: 'Entrando...',
+          success: 'Login realizado com sucesso!',
+          error: 'Credenciais inválidas',
+        }
+      )
       
     } catch (err: any) {
       setError(err.message || "Erro ao tentar fazer login.")

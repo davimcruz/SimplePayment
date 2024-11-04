@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { parseCookies } from "nookies"
 import useSWR from "swr"
 import Link from "next/link"
+import { toast } from "sonner"
 import { UploadButton } from "@/app/components/uploadthing"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/app/components/ui/avatar"
@@ -88,6 +89,7 @@ const SettingsPage = () => {
     if (!newName || !newLastName) {
       return
     }
+
     try {
       setLoadingSave(true)
       const emailFromCookieEncoded = document.cookie
@@ -101,26 +103,33 @@ const SettingsPage = () => {
 
       const emailFromCookie = decodeURIComponent(emailFromCookieEncoded)
 
-      const requestBody = {
-        email: emailFromCookie,
-        nome: newName,
-        sobrenome: newLastName,
-      }
+      await toast.promise(
+        (async () => {
+          const response = await fetch("/api/settings/edit-name", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: emailFromCookie,
+              nome: newName,
+              sobrenome: newLastName,
+            }),
+          })
 
-      const response = await fetch("/api/settings/edit-name", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      })
+          if (!response.ok) {
+            throw new Error("Erro ao atualizar nome e sobrenome")
+          }
 
-      if (!response.ok) {
-        throw new Error("Erro ao atualizar nome e sobrenome")
-      } else {
-        router.push("/dashboard")
-      }
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+          router.push("/dashboard")
+        })(),
+        {
+          loading: 'Atualizando seus dados...',
+          success: 'Dados atualizados com sucesso!',
+          error: 'Erro ao atualizar seus dados',
+          duration: 4000,
+        }
+      )
     } catch (error) {
       console.error("Erro durante o salvamento:", error)
     } finally {
@@ -129,6 +138,11 @@ const SettingsPage = () => {
   }
 
   const saveImage = async () => {
+    if (!imageUrl) {
+      toast.error("Selecione uma imagem primeiro")
+      return
+    }
+
     try {
       setLoadingImage(true)
       const emailFromCookieEncoded = document.cookie
@@ -142,27 +156,47 @@ const SettingsPage = () => {
 
       const emailFromCookie = decodeURIComponent(emailFromCookieEncoded)
 
-      const response = await fetch("/api/settings/save-image", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: emailFromCookie,
-          imageUrl: imageUrl,
-        }),
-      })
+      await toast.promise(
+        (async () => {
+          const response = await fetch("/api/settings/save-image", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: emailFromCookie,
+              imageUrl: imageUrl,
+            }),
+          })
 
-      if (!response.ok) {
-        throw new Error("Erro ao salvar a imagem")
-      } else {
-        router.push("/dashboard")
-      }
+          if (!response.ok) {
+            throw new Error("Erro ao salvar a imagem")
+          }
+
+          router.push("/dashboard")
+        })(),
+        {
+          loading: 'Salvando sua foto...',
+          success: 'Foto atualizada com sucesso!',
+          error: 'Erro ao salvar sua foto',
+          duration: 4000,
+        }
+      )
     } catch (error) {
       console.log(error)
     } finally {
       setLoadingImage(false)
     }
+  }
+
+  const handleUploadComplete = (res: any[]) => {
+    setImageUrl(res[0].url)
+    toast.success("Imagem carregada com sucesso! Clique em salvar para confirmar.")
+  }
+
+  const handleUploadError = (error: Error) => {
+    console.log(`Erro: ${error.message}`)
+    toast.error("Erro ao carregar a imagem. Tente novamente.")
   }
 
   return (
@@ -233,12 +267,8 @@ const SettingsPage = () => {
                     ut-button: text-sm
                      "
                     endpoint="imageUploader"
-                    onClientUploadComplete={(res) => {
-                      setImageUrl(res[0].url)
-                    }}
-                    onUploadError={(error: Error) => {
-                      console.log(`Erro: ${error.message}`)
-                    }}
+                    onClientUploadComplete={handleUploadComplete}
+                    onUploadError={handleUploadError}
                   />
                 </form>
               </CardContent>

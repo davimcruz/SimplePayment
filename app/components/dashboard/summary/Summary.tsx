@@ -25,6 +25,18 @@ const Summary: React.FC<SummaryProps> = ({ initialData }) => {
     }
   }, [initialData])
 
+  useEffect(() => {
+    const handleTransactionUpdate = () => {
+      fetchAllData()
+    }
+
+    window.addEventListener('updateTransactions', handleTransactionUpdate)
+
+    return () => {
+      window.removeEventListener('updateTransactions', handleTransactionUpdate)
+    }
+  }, [])
+
   const fetchAllData = async () => {
     try {
       setLoading(true)

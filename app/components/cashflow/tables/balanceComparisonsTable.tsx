@@ -20,7 +20,7 @@ import { Button } from "@/app/components/ui/button"
 import { Badge } from "@/app/components/ui/badge"
 import { Skeleton } from "@/app/components/ui/skeleton"
 import { exampleFlows } from "@/utils/exampleData"
-import CreateTransaction from "@/app/components/sidebar/CreateTransactions"
+import CreateTransaction from "../../dashboard/create-transactions/CreateTransactions"
 import { PlusCircle } from "lucide-react"
 
 interface FlowItem {

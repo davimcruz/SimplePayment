@@ -275,7 +275,7 @@ export const viewTransactionSchema = z.object({
     { message: "O valor mínimo é R$ 1,00" }
   ),
 
-  cardId: z.string().uuid().optional(),
+  cardId: z.string().uuid().optional().or(z.literal("")),
   detalhesFonte: z.string().optional(),
 }).refine(
   (data) => {

@@ -18,7 +18,7 @@ import {
 import { Button } from "@/app/components/ui/button"
 import { exampleFlows } from "@/utils/exampleData"
 import { useMemo, useState } from "react"
-import CreateTransaction from "@/app/components/sidebar/CreateTransactions"
+import CreateTransaction from "../../dashboard/create-transactions/CreateTransactions"
 
 interface FlowItem {
   mes: number

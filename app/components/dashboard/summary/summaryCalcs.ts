@@ -1,4 +1,5 @@
 import { GetServerSideProps } from "next"
+import { useEffect } from "react"
 
 export const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat("pt-BR", {
@@ -58,4 +59,22 @@ export const getServerSideProps: GetServerSideProps = async () => {
   return {
     props: { initialData },
   }
+}
+
+// Adicionar um hook para ouvir o evento de atualização
+export const useSummaryUpdate = (
+  setSummaryData: (data: ReturnType<typeof fetchSummaryData> extends Promise<infer T> ? T : never) => void
+) => {
+  useEffect(() => {
+    const handleTransactionUpdate = async () => {
+      const newData = await fetchSummaryData()
+      setSummaryData(newData)
+    }
+
+    window.addEventListener('updateTransactions', handleTransactionUpdate)
+
+    return () => {
+      window.removeEventListener('updateTransactions', handleTransactionUpdate)
+    }
+  }, [setSummaryData])
 }

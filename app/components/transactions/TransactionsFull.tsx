@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState, useMemo, useCallback } from "react"
 import { Badge } from "@/app/components/ui/badge"
 import {
   Card,
@@ -16,7 +16,7 @@ import {
 } from "@/app/components/ui/table"
 import { Input } from "@/app/components/ui/input"
 import { Skeleton } from "../ui/skeleton"
-import CreateTransaction from "@/app/components/sidebar/CreateTransactions"
+import CreateTransaction from "../dashboard/create-transactions/CreateTransactions"
 import { Transactions } from "@/types/types"
 import ViewTransaction from "../dashboard/view-transactions/ViewTransactions"
 import { exampleTransactions } from "@/utils/exampleData"
@@ -56,38 +56,13 @@ const TransactionsFull = () => {
       )
   }, [filteredTransactions])
 
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      setLoading(true)
-      try {
-        const response = await fetch("/api/transactions/get-table")
-        const data = await response.json()
+  const fetchTransactions = useCallback(async () => {
+    setLoading(true)
+    try {
+      const response = await fetch("/api/transactions/get-table")
+      const data = await response.json()
 
-        if (!data.table || data.table.length === 0) {
-          const completeExampleData = exampleTransactions.map(transaction => ({
-            ...transaction,
-            userId: "",
-            dataCriacao: new Date().toISOString()
-          })) as TransactionWithUnknownId[]
-          
-          setTransactions(completeExampleData)
-          setFilteredTransactions(completeExampleData)
-          setLoading(false)
-          return
-        }
-
-        const sortedTransactions = data.table.sort(
-          (a: TransactionWithUnknownId, b: TransactionWithUnknownId) => {
-            const dateA = new Date(a.data.split("-").reverse().join("/")).getTime()
-            const dateB = new Date(b.data.split("-").reverse().join("/")).getTime()
-            return dateB - dateA
-          }
-        )
-
-        setTransactions(sortedTransactions)
-        setFilteredTransactions(sortedTransactions)
-      } catch (error) {
-        console.error(error)
+      if (!data.table || data.table.length === 0) {
         const completeExampleData = exampleTransactions.map(transaction => ({
           ...transaction,
           userId: "",
@@ -96,12 +71,37 @@ const TransactionsFull = () => {
         
         setTransactions(completeExampleData)
         setFilteredTransactions(completeExampleData)
+        setLoading(false)
+        return
       }
-      setLoading(false)
-    }
 
-    fetchTransactions()
+      const sortedTransactions = data.table.sort(
+        (a: TransactionWithUnknownId, b: TransactionWithUnknownId) => {
+          const dateA = new Date(a.data.split("-").reverse().join("/")).getTime()
+          const dateB = new Date(b.data.split("-").reverse().join("/")).getTime()
+          return dateB - dateA
+        }
+      )
+
+      setTransactions(sortedTransactions)
+      setFilteredTransactions(sortedTransactions)
+    } catch (error) {
+      console.error(error)
+      const completeExampleData = exampleTransactions.map(transaction => ({
+        ...transaction,
+        userId: "",
+        dataCriacao: new Date().toISOString()
+      })) as TransactionWithUnknownId[]
+      
+      setTransactions(completeExampleData)
+      setFilteredTransactions(completeExampleData)
+    }
+    setLoading(false)
   }, [])
+
+  useEffect(() => {
+    fetchTransactions()
+  }, [fetchTransactions])
 
   useEffect(() => {
     if (searchTerm === "") {
@@ -113,6 +113,18 @@ const TransactionsFull = () => {
       setFilteredTransactions(filtered)
     }
   }, [searchTerm, transactions])
+
+  useEffect(() => {
+    const handleTransactionUpdate = () => {
+      fetchTransactions()
+    }
+
+    window.addEventListener('updateTransactions', handleTransactionUpdate)
+
+    return () => {
+      window.removeEventListener('updateTransactions', handleTransactionUpdate)
+    }
+  }, [fetchTransactions])
 
   const handleSort = (key: SortKey) => {
     let order: "asc" | "desc" = sortOrder === "asc" ? "desc" : "asc"

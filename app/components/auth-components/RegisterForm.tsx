@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { registerSchema, RegisterInput } from "@/lib/validation"
 import { Eye, EyeOff } from "lucide-react"
+import { toast } from "sonner"
 
 export default function RegisterForm() {
   const router = useRouter()
@@ -40,22 +41,29 @@ export default function RegisterForm() {
       router.prefetch('/setup')
 
       const { confirmPassword, ...registerData } = data
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(registerData),
-        cache: 'no-store'
-      })
 
-      if (!response.ok) {
-        const result = await response.json()
-        throw new Error(result.error || "Erro ao registrar")
-      }
-
-      router.push('/setup', { scroll: false })
-      router.refresh()
+      toast.promise(
+        fetch("/api/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(registerData),
+          cache: 'no-store'
+        }).then(async (response) => {
+          if (!response.ok) {
+            const result = await response.json()
+            throw new Error(result.error || "Erro ao registrar")
+          }
+          router.push('/setup', { scroll: false })
+          router.refresh()
+        }),
+        {
+          loading: 'Criando sua conta...',
+          success: 'Conta criada com sucesso!',
+          error: 'Erro ao criar conta',
+        }
+      )
 
     } catch (error: any) {
       setError(error.message || "Erro ao registrar")

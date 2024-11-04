@@ -14,9 +14,9 @@ import {
   ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
-} from "@/app/components/ui/chart"
+} from "@/app/components/ui/chart"  
 import { useEffect, useState } from "react"
-import CreateTransaction from "@/app/components/sidebar/CreateTransactions"
+import CreateTransaction from "../../create-transactions/CreateTransactions"
 
 const chartConfig = {
   graphlabel: {
