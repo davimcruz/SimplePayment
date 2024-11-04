@@ -37,7 +37,6 @@ export default function RegisterForm() {
       setLoading(true)
       setError(null)
 
-      // Pré-carrega a página de setup
       router.prefetch('/setup')
 
       const { confirmPassword, ...registerData } = data
@@ -55,7 +54,6 @@ export default function RegisterForm() {
         throw new Error(result.error || "Erro ao registrar")
       }
 
-      // Redireciona imediatamente após sucesso
       router.push('/setup', { scroll: false })
       router.refresh()
 

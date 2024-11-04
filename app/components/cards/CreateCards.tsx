@@ -22,34 +22,31 @@ import { useCurrencyInput, parseCurrencyToFloat } from "@/utils/moneyFormatter"
 import { useNameInput } from "@/utils/nameFormatter"
 import { createCardSchema, CreateCardInput } from "@/lib/validation"
 import { z } from "zod"
-import { useRouter } from "next/navigation"
-import LottieAnimation from "@/app/components/ui/loadingAnimation"
+import { toast } from "sonner"
 
 interface CreateCreditCardProps {
   onCancel: () => void
+  onSuccess: () => void
 }
 
 type ErrorType = Partial<Record<keyof CreateCardInput, string>> & {
   general?: string
 }
 
-const CreateCreditCard: React.FC<CreateCreditCardProps> = ({ onCancel }) => {
+const CreateCreditCard: React.FC<CreateCreditCardProps> = ({ onCancel, onSuccess }) => {
   const [nome, setNome] = useState<string>("")
   const [bandeira, setBandeira] = useState<string>("")
   const [instituicao, setInstituicao] = useState<string>("")
   const [vencimento, setVencimento] = useState<string>("")
   const [limite, setLimite] = useState<string>("R$ 0,00")
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [errors, setErrors] = useState<ErrorType>({})
-
-  const router = useRouter()
 
   const { handleChange, handleFocus, handleBlur } = useCurrencyInput()
   const { handleNameChange } = useNameInput()
 
   const validateForm = (): boolean => {
     try {
-      const parsedData: CreateCardInput = createCardSchema.parse({
+      createCardSchema.parse({
         userId: Number(parseCookies().userId),
         nome,
         bandeira,
@@ -83,7 +80,7 @@ const CreateCreditCard: React.FC<CreateCreditCardProps> = ({ onCancel }) => {
     const userId = cookies.userId
 
     if (!userId) {
-      alert("Erro: Usuário não autenticado.")
+      toast.error("Erro: Usuário não autenticado.")
       return
     }
 
@@ -97,31 +94,35 @@ const CreateCreditCard: React.FC<CreateCreditCardProps> = ({ onCancel }) => {
       limite: parseCurrencyToFloat(limite),
     }
 
-    try {
-      setIsSubmitting(true)
-      const response = await fetch("/api/cards/create-card", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(cardData),
-      })
+    onCancel()
 
-      const result = await response.json()
-      if (response.ok) {
-        window.location.reload()
-      } else {
-        setErrors({
-          general: result.message || "Não foi possível criar o cartão.",
-        })
-        setIsSubmitting(false)
-      }
+    try {
+      await toast.promise(
+        (async () => {
+          const response = await fetch("/api/cards/create-card", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(cardData),
+          })
+
+          if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.message || "Não foi possível criar o cartão.")
+          }
+
+          onSuccess()
+        })(),
+        {
+          loading: 'Criando cartão...',
+          success: 'Cartão criado com sucesso!',
+          error: (error) => error instanceof Error ? error.message : "Erro ao criar o cartão",
+          duration: 4000,
+        }
+      )
     } catch (error) {
       console.error("Erro ao criar o cartão:", error)
-      setErrors({
-        general: "Erro ao criar o cartão. Tente novamente mais tarde.",
-      })
-      setIsSubmitting(false)
     }
   }
 
@@ -137,151 +138,139 @@ const CreateCreditCard: React.FC<CreateCreditCardProps> = ({ onCancel }) => {
     <div className="flex justify-center items-center min-h-[100vh] md:min-h-[90vh]">
       <Card
         className="sm:w-[400px] max-w-[100vw]
-      md:h-auto md:max-h-[85vh]
-      md:rounded-lg rounded-none
-      flex flex-col
-      pt-6 md:pt-0
-      overflow-hidden"
+        md:h-auto md:max-h-[85vh]
+        md:rounded-lg rounded-none
+        flex flex-col
+        pt-6 md:pt-0
+        overflow-hidden"
       >
-        {isSubmitting ? (
-          <>
-            <CardTitle className="px-6 pt-6">Criando cartão...</CardTitle>
-            <CardContent className="flex justify-center items-center h-[400px]">
-              <LottieAnimation animationPath="/loadingAnimation.json" />
-            </CardContent>
-          </>
-        ) : (
-          <>
-            <CardTitle className="px-6 pt-6">
-              Registrar Cartão de Crédito
-            </CardTitle>
-            <CardDescription className="px-6 pt-4">
-              Preencha o formulário abaixo para registrar seu cartão de crédito
-            </CardDescription>
-            <Separator className="w-full my-6" />
-            <CardContent className="flex-col gap-4 overflow-y-auto">
-              <div className="mb-4">
-                <Label htmlFor="card-name">Nome do Cartão</Label>
-                <Input
-                  id="card-name"
-                  placeholder="Ex: Cartão Inter"
-                  value={nome}
-                  onChange={(e) => handleNameChange(e, { onChange: setNome })}
-                  className="w-full"
-                />
-                {errors.nome && (
-                  <span className="text-red-500 text-sm">{errors.nome}</span>
-                )}
-              </div>
+        <CardTitle className="px-6 pt-6">
+          Registrar Cartão de Crédito
+        </CardTitle>
+        <CardDescription className="px-6 pt-4">
+          Preencha o formulário abaixo para registrar seu cartão de crédito
+        </CardDescription>
+        <Separator className="w-full my-6" />
+        <CardContent className="flex-col gap-4 overflow-y-auto">
+          <div className="mb-4">
+            <Label htmlFor="card-name">Nome do Cartão</Label>
+            <Input
+              id="card-name"
+              placeholder="Ex: Cartão Inter"
+              value={nome}
+              onChange={(e) => handleNameChange(e, { onChange: setNome })}
+              className="w-full"
+            />
+            {errors.nome && (
+              <span className="text-red-500 text-sm">{errors.nome}</span>
+            )}
+          </div>
 
-              <div className="mb-4">
-                <Label htmlFor="card-bandeira">Bandeira</Label>
-                <Select
-                  onValueChange={(value) => {
-                    setBandeira(value)
-                    setErrors((prev) => ({ ...prev, bandeira: "" }))
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione a bandeira do cartão" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Mastercard">Mastercard</SelectItem>
-                    <SelectItem value="Visa">Visa</SelectItem>
-                    <SelectItem value="Elo">Elo</SelectItem>
-                    <SelectItem value="American Express">
-                      American Express
-                    </SelectItem>
-                    <SelectItem value="Hipercard">Hipercard</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.bandeira && (
-                  <span className="text-red-500 text-sm">
-                    {errors.bandeira}
-                  </span>
-                )}
-              </div>
+          <div className="mb-4">
+            <Label htmlFor="card-bandeira">Bandeira</Label>
+            <Select
+              onValueChange={(value) => {
+                setBandeira(value)
+                setErrors((prev) => ({ ...prev, bandeira: "" }))
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione a bandeira do cartão" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Mastercard">Mastercard</SelectItem>
+                <SelectItem value="Visa">Visa</SelectItem>
+                <SelectItem value="Elo">Elo</SelectItem>
+                <SelectItem value="American Express">
+                  American Express
+                </SelectItem>
+                <SelectItem value="Hipercard">Hipercard</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.bandeira && (
+              <span className="text-red-500 text-sm">
+                {errors.bandeira}
+              </span>
+            )}
+          </div>
 
-              <div className="mb-4">
-                <Label htmlFor="card-instituicao">Instituição</Label>
-                <Input
-                  id="card-instituicao"
-                  placeholder="Ex: Banco Inter"
-                  value={instituicao}
-                  onChange={(e) =>
-                    handleNameChange(e, { onChange: setInstituicao })
-                  }
-                  className="w-full"
-                />
-                {errors.instituicao && (
-                  <span className="text-red-500 text-sm">
-                    {errors.instituicao}
-                  </span>
-                )}
-              </div>
+          <div className="mb-4">
+            <Label htmlFor="card-instituicao">Instituição</Label>
+            <Input
+              id="card-instituicao"
+              placeholder="Ex: Banco Inter"
+              value={instituicao}
+              onChange={(e) =>
+                handleNameChange(e, { onChange: setInstituicao })
+              }
+              className="w-full"
+            />
+            {errors.instituicao && (
+              <span className="text-red-500 text-sm">
+                {errors.instituicao}
+              </span>
+            )}
+          </div>
 
-              <div className="mb-4">
-                <Label htmlFor="card-limite">Limite do Cartão</Label>
-                <Input
-                  id="card-limite"
-                  placeholder="Ex: R$ 5.000,00"
-                  value={limite}
-                  onChange={(e) => {
-                    setLimite(handleChange(e))
-                    setErrors((prev) => ({ ...prev, limite: "" }))
-                  }}
-                  onFocus={(e) => setLimite(handleFocus(limite))}
-                  onBlur={() => setLimite(handleBlur(limite))}
-                  className="w-full"
-                />
-                {errors.limite && (
-                  <span className="text-red-500 text-sm">{errors.limite}</span>
-                )}
-              </div>
+          <div className="mb-4">
+            <Label htmlFor="card-limite">Limite do Cartão</Label>
+            <Input
+              id="card-limite"
+              placeholder="Ex: R$ 5.000,00"
+              value={limite}
+              onChange={(e) => {
+                setLimite(handleChange(e))
+                setErrors((prev) => ({ ...prev, limite: "" }))
+              }}
+              onFocus={(e) => setLimite(handleFocus(limite))}
+              onBlur={() => setLimite(handleBlur(limite))}
+              className="w-full"
+            />
+            {errors.limite && (
+              <span className="text-red-500 text-sm">{errors.limite}</span>
+            )}
+          </div>
 
-              <div className="mb-4">
-                <Label htmlFor="card-vencimento">
-                  Vencimento da Fatura (Dia)
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="card-vencimento"
-                    type="number"
-                    placeholder="Ex: 15"
-                    value={vencimento}
-                    onChange={handleVencimentoChange}
-                    className="pl-10"
-                    min={1}
-                    max={31}
-                  />
-                  <CalendarIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                </div>
-                {errors.vencimento && (
-                  <span className="text-red-500 text-sm">
-                    {errors.vencimento}
-                  </span>
-                )}
-              </div>
+          <div className="mb-4">
+            <Label htmlFor="card-vencimento">
+              Vencimento da Fatura (Dia)
+            </Label>
+            <div className="relative">
+              <Input
+                id="card-vencimento"
+                type="number"
+                placeholder="Ex: 15"
+                value={vencimento}
+                onChange={handleVencimentoChange}
+                className="pl-10"
+                min={1}
+                max={31}
+              />
+              <CalendarIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+            </div>
+            {errors.vencimento && (
+              <span className="text-red-500 text-sm">
+                {errors.vencimento}
+              </span>
+            )}
+          </div>
 
-              <div className="p-6 mt-auto bg-background border-t">
-                <Button
-                  onClick={handleSubmit}
-                  className="w-full mb-2"
-                  disabled={isSubmitting}
-                >
-                  Criar Cartão de Crédito
-                </Button>
-                <Button
-                  onClick={onCancel}
-                  className="w-full"
-                  variant="outline"
-                >
-                  Cancelar
-                </Button>
-              </div>
-            </CardContent>
-          </>
-        )}
+          <div className="p-6 mt-auto bg-background border-t">
+            <Button
+              onClick={handleSubmit}
+              className="w-full mb-2"
+            >
+              Criar Cartão de Crédito
+            </Button>
+            <Button
+              onClick={onCancel}
+              className="w-full"
+              variant="outline"
+            >
+              Cancelar
+            </Button>
+          </div>
+        </CardContent>
       </Card>
     </div>
   )

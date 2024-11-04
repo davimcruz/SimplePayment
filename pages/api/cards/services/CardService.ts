@@ -10,7 +10,17 @@ class CardService {
     const { userId, nome, bandeira, instituicao, tipo, vencimento, limite } =
       data
 
-    // Verificação do número de cartões do tipo especificado já existentes para o usuário (Feito para que no futuro seja capaz também adicionar funcionalidade de controle específico de cartão de débito)
+    // Busca o usuário para verificar a permissão
+    const user = await prisma.usuarios.findUnique({
+      where: { id: userId },
+      select: { permissao: true }
+    })
+
+    if (!user) {
+      throw new Error("[ERRO] Usuário não encontrado.")
+    }
+
+    // Verifica o número de cartões existentes
     const cartoesExistentes = await prisma.cartoes.count({
       where: {
         userId: userId,
@@ -18,8 +28,15 @@ class CardService {
       },
     })
 
-    if (cartoesExistentes >= 3) {
-      throw new Error(`[ERRO] Limite de 3 cartões do tipo ${tipo} já atingido.`)
+    // Define o limite baseado na permissão
+    const limiteCartoes = user.permissao === "pro" ? 10 : 3
+
+    if (cartoesExistentes >= limiteCartoes) {
+      throw new Error(
+        user.permissao === "pro" 
+          ? "[ERRO] Limite de 10 cartões atingido. Este é o máximo permitido para usuários Pro."
+          : "[ERRO] Limite de 3 cartões atingido. Faça upgrade para o plano Pro e adicione até 10 cartões!"
+      )
     }
 
     const novoCartao = await prisma.cartoes.create({

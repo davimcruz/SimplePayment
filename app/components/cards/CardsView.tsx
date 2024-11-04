@@ -14,6 +14,8 @@ import {
 import { Trash2, PencilLine, Plus, Settings2 } from "lucide-react"
 import CreateCreditCard from "./CreateCards"
 import UpdateCard from "./UpdateCards"
+import { toast } from "sonner"
+import { useUserData } from "../hooks/useUserData"
 
 interface CardType {
   cardId: string
@@ -36,28 +38,23 @@ const cardBrands = {
 
 const CardsView = () => {
   const [cards, setCards] = useState<CardType[]>([])
-  const [loading, setLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
   const [showCreateCard, setShowCreateCard] = useState(false)
   const [showManageCards, setShowManageCards] = useState(false)
   const [deletingCardId, setDeletingCardId] = useState<string | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
   const [editingCardId, setEditingCardId] = useState<string | null>(null)
   const router = useRouter()
 
   const cookies = parseCookies()
   const userId = cookies.userId
 
+  const { user, loading, error } = useUserData()
+
   useEffect(() => {
     const fetchCards = async () => {
-      setLoading(true)
+      setIsLoading(true)
       try {
-        const response = await fetch(`/api/cards/get-card?userId=${userId}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-
+        const response = await fetch(`/api/cards/get-card?userId=${userId}`)
         const data = await response.json()
 
         if (Array.isArray(data.cartoes)) {
@@ -67,13 +64,10 @@ const CardsView = () => {
             return limiteB - limiteA
           })
           setCards(sortedCards)
-        } else {
-          console.error("A resposta da API não é um array.")
         }
       } catch (error) {
-        console.error("Erro ao buscar cartões:", error)
       } finally {
-        setLoading(false)
+        setIsLoading(false)
       }
     }
 
@@ -95,28 +89,35 @@ const CardsView = () => {
   }
 
   const handleDeleteCard = async (cardId: string) => {
-    setIsDeleting(true)
+    setDeletingCardId(null)
+    
     try {
-      const response = await fetch(`/api/cards/delete-cards`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ cardId, userId: Number(userId) }),
-      })
+      await toast.promise(
+        (async () => {
+          const response = await fetch(`/api/cards/delete-cards`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ cardId, userId: Number(userId) }),
+          })
 
-      const data = await response.json()
-      if (response.ok) {
-        const updatedCards = cards.filter(card => card.cardId !== cardId)
-        setCards(updatedCards)
-        setDeletingCardId(null)
-      } else {
-        console.error("Erro ao deletar cartão:", data.error)
-      }
+          if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.error || "Erro ao excluir cartão")
+          }
+
+          setCards(cards => cards.filter(card => card.cardId !== cardId))
+        })(),
+        {
+          loading: 'Excluindo cartão...',
+          success: 'Cartão excluído com sucesso!',
+          error: (error) => error instanceof Error ? error.message : "Erro ao excluir cartão",
+          duration: 4000,
+        }
+      )
     } catch (error) {
-      console.error("Erro ao deletar cartão:", error)
-    } finally {
-      setIsDeleting(false)
+      console.error("Erro ao excluir cartão:", error)
     }
   }
 
@@ -128,12 +129,87 @@ const CardsView = () => {
     setEditingCardId(null)
   }
 
+  const handleCreateSuccess = async () => {
+    setShowCreateCard(false)
+    const response = await fetch(`/api/cards/get-card?userId=${userId}`)
+    const data = await response.json()
+    if (Array.isArray(data.cartoes)) {
+      const sortedCards = data.cartoes.sort((a: CardType, b: CardType) => {
+        const limiteA = a.limite ? parseFloat(a.limite) : 0
+        const limiteB = b.limite ? parseFloat(b.limite) : 0
+        return limiteB - limiteA
+      })
+      setCards(sortedCards)
+    }
+  }
+
+  const handleAddCard = () => {
+    if (loading) {
+      toast.error("Aguarde, verificando suas permissões...")
+      return
+    }
+
+    if (error || !user) {
+      toast.error("Erro ao verificar suas permissões. Tente novamente.")
+      return
+    }
+
+    if (!user.permissao) {
+      toast.error("Não foi possível verificar seu tipo de conta.")
+      return
+    }
+
+    const maxCards = user.permissao === "pro" ? 10 : 3
+    
+    if (creditCards.length >= maxCards) {
+      if (user.permissao === "pro") {
+        toast.error("Você atingiu o limite máximo de 10 cartões permitidos para usuários Pro.", {
+          duration: 5000
+        })
+      } else {
+        toast.error(
+          "Você atingiu o limite de 3 cartões. Faça upgrade para o plano Pro e adicione até 10 cartões!", 
+          {
+            duration: 5000,
+            // action: {
+            //   label: "Fazer Upgrade",
+            //   onClick: () => router.push("/dashboard/settings/billing")
+            // }
+          }
+        )
+      }
+      return
+    }
+
+    setShowCreateCard(true)
+  }
+
+  const handleUpdateSuccess = async () => {
+    setEditingCardId(null)
+    const response = await fetch(`/api/cards/get-card?userId=${userId}`)
+    const data = await response.json()
+    if (Array.isArray(data.cartoes)) {
+      setCards(data.cartoes)
+    }
+  }
+
   if (showCreateCard) {
-    return <CreateCreditCard onCancel={() => setShowCreateCard(false)} />
+    return (
+      <CreateCreditCard 
+        onCancel={() => setShowCreateCard(false)}
+        onSuccess={handleCreateSuccess}
+      />
+    )
   }
 
   if (editingCardId) {
-    return <UpdateCard cardId={editingCardId} onCancel={handleCancelEdit} />
+    return (
+      <UpdateCard 
+        cardId={editingCardId} 
+        onCancel={() => setEditingCardId(null)}
+        onSuccess={handleUpdateSuccess}
+      />
+    )
   }
 
   const CardItem = ({ card }: { card: CardType }) => {
@@ -211,7 +287,7 @@ const CardsView = () => {
             </div>
             <div className="flex gap-2 w-full md:w-auto">
               <Button 
-                onClick={() => setShowCreateCard(true)} 
+                onClick={handleAddCard}
                 className="gap-2 flex-1 md:flex-none"
               >
                 <Plus className="h-4 w-4" />
@@ -228,7 +304,7 @@ const CardsView = () => {
             </div>
           </div>
 
-          {loading ? (
+          {isLoading ? (
             <div className="flex justify-center items-center h-[40vh] md:h-[50vh]">
               <LottieAnimation animationPath="/loading.json" />
             </div>
@@ -238,7 +314,7 @@ const CardsView = () => {
               <p className="text-muted-foreground mb-8">
                 Adicione seu primeiro cartão de crédito para começar
               </p>
-              <Button onClick={() => setShowCreateCard(true)}>
+              <Button onClick={handleAddCard}>
                 Adicionar Cartão
               </Button>
             </div>
@@ -268,26 +344,18 @@ const CardsView = () => {
             <Button
               variant="outline"
               onClick={() => setDeletingCardId(null)}
-              disabled={isDeleting}
             >
               Cancelar
             </Button>
             <Button
               variant="destructive"
               onClick={() => deletingCardId && handleDeleteCard(deletingCardId)}
-              disabled={isDeleting}
             >
-              {isDeleting ? "Excluindo..." : "Excluir Cartão"}
+              Excluir Cartão
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {isDeleting && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <LottieAnimation animationPath="./loading.json" />
-        </div>
-      )}
     </div>
   )
 }

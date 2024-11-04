@@ -129,7 +129,6 @@ interface AppSidebarProps {
   initialData: UserData 
 }
 
-// Defina um tipo para as bandeiras possíveis
 type CardBrand = 'Visa' | 'Mastercard' | 'American Express' | 'Elo' | 'Hipercard';
 
 interface CardType {
@@ -225,7 +224,6 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
   const handleSettings = () => {
     router.push("/dashboard/settings")
   }
-console.log(userData)
   return (
     <>
       <Sidebar

@@ -98,10 +98,8 @@ const CreateTransaction: React.FC<CreateTransactionProps> = ({ isOpen, onOpenCha
       }
 
       const data = await response.json()
-      console.log("Dados dos cartões recebidos:", data)
       setCards(data.cartoes)
     } catch (error) {
-      console.error("Erro ao buscar cartões:", error)
       setCards([])
     }
   }, [])

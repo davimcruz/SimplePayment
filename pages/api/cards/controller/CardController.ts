@@ -31,7 +31,17 @@ class CardController {
       })
     } catch (error) {
       console.error("Erro ao criar cartão:", error)
-      return res.status(500).json({ error: "[ERRO] Erro ao criar cartão" })
+      
+      // Verifica se é um erro de limite de cartões
+      if (error instanceof Error && error.message.includes("Limite de")) {
+        return res.status(400).json({ 
+          error: error.message 
+        })
+      }
+
+      return res.status(500).json({ 
+        error: "[ERRO] Erro ao criar cartão" 
+      })
     }
   }
 
