@@ -66,14 +66,22 @@ interface UserData {
 
 const items = [
   {
+    title: "Painel Admin",
+    url: "/dashboard/admin",
+    icon: Settings,
+    adminOnly: true,
+  },
+  {
     title: "Dashboard",
     url: "/dashboard/",
     icon: Home,
+    adminOnly: false,
   },
   {
     title: "Fluxo de Caixa",
     url: "/dashboard/cashflow/",
     icon: Calendar,
+    adminOnly: false,
   },
 ]
 
@@ -244,16 +252,18 @@ console.log(userData)
             <SidebarGroupLabel>Explore nossas opções</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <a href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {items
+                  .filter(item => !item.adminOnly || userData?.permissao === "admin")
+                  .map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <a href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </a>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
 
                 <Collapsible className="group/collapsible">
                   <SidebarMenuItem>
@@ -393,7 +403,7 @@ console.log(userData)
                               userData.permissao === "pro" &&
                                 "bg-violet-500/10 text-violet-500 hover:bg-violet-500/20",
                               userData.permissao === "free" &&
-                                "bg-zinc-500/10 text-zinc-500 hover:bg-zinc-500/20"
+                                "bg-emerald-400 text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-500 dark:hover:bg-emerald-500/20"
                             )}
                           >
                             {userData.permissao === "admin"

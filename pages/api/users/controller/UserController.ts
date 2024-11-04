@@ -132,4 +132,45 @@ export class UserController {
       return res.status(500).json({ error: "[ERRO] Erro ao processar a requisição." })
     }
   }
+
+  // Verifica se a senha atual está correta
+  async verifyPassword(req: NextApiRequest, res: NextApiResponse) {
+    if (req.method !== "POST") {
+      return res.status(405).json({ error: "[ERRO] Método não permitido" })
+    }
+
+    const { userId, currentPassword } = req.body
+
+    if (!userId || !currentPassword) {
+      return res.status(400).json({ error: "[ERRO] Dados inválidos" })
+    }
+
+    const result = await userService.verifyCurrentPassword(
+      Number(userId), 
+      currentPassword
+    )
+
+    return res.status(result.status).json(result.data)
+  }
+
+  // Atualiza a senha do usuário
+  async updatePassword(req: NextApiRequest, res: NextApiResponse) {
+    if (req.method !== "PATCH") {
+      return res.status(405).json({ error: "[ERRO] Método não permitido" })
+    }
+
+    const { userId, currentPassword, newPassword } = req.body
+
+    if (!userId || !currentPassword || !newPassword) {
+      return res.status(400).json({ error: "[ERRO] Dados inválidos" })
+    }
+
+    const result = await userService.updatePassword(
+      Number(userId), 
+      currentPassword, 
+      newPassword
+    )
+
+    return res.status(result.status).json(result.data)
+  }
 }

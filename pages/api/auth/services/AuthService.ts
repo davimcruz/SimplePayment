@@ -62,11 +62,37 @@ class AuthService {
 
     const user = await prisma.usuarios.findUnique({
       where: { email },
-      select: { id: true, email: true, senha: true },
+      select: { 
+        id: true, 
+        email: true, 
+        senha: true,
+        status: true
+      },
     })
 
     if (!user) {
       return { status: 401, data: { error: "[ERRO] Email não registrado." } }
+    }
+
+    if (user.status === 'suspended') {
+      return { 
+        status: 403, 
+        data: { error: "[ERRO] Sua conta está suspensa. Entre em contato com o suporte." } 
+      }
+    }
+
+    if (user.status === 'inactive') {
+      return { 
+        status: 403, 
+        data: { error: "[ERRO] Sua conta está inativa. Entre em contato com o suporte." } 
+      }
+    }
+
+    if (user.status !== 'active') {
+      return { 
+        status: 403, 
+        data: { error: "[ERRO] Status da conta inválido." } 
+      }
     }
 
     // Comparação de hash da senha (database password ---> bcrypt comparison ---> login)

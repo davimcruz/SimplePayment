@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma" 
 import redis from "@/lib/redis" 
+import bcrypt from "bcrypt"
 
 export class UserService {
   // Serviço para deletar orçamentos com base em uma lista de IDs
@@ -55,5 +56,78 @@ export class UserService {
     }
 
     return user; 
+  }
+
+  // Verifica se a senha atual está correta
+  async verifyCurrentPassword(userId: number, currentPassword: string) {
+    try {
+      const user = await prisma.usuarios.findUnique({
+        where: { id: userId },
+        select: { senha: true }
+      })
+
+      if (!user) {
+        return { 
+          status: 404, 
+          data: { error: "[ERRO] Usuário não encontrado" } 
+        }
+      }
+
+      // Verifica se a senha atual está correta usando bcrypt
+      const isPasswordValid = await bcrypt.compare(currentPassword, user.senha)
+      
+      if (!isPasswordValid) {
+        return { 
+          status: 401, 
+          data: { error: "[ERRO] Senha atual incorreta" } 
+        }
+      }
+
+      return { 
+        status: 200, 
+        data: { message: "[SUCESSO] Senha atual válida" } 
+      }
+    } catch (error) {
+      console.error("[ERRO] Erro ao verificar senha:", error)
+      return { 
+        status: 500, 
+        data: { error: "[ERRO] Erro ao verificar senha" } 
+      }
+    }
+  }
+
+  // Atualiza a senha do usuário
+  async updatePassword(userId: number, currentPassword: string, newPassword: string) {
+    try {
+      // Primeiro verifica se a senha atual está correta
+      const verifyResult = await this.verifyCurrentPassword(userId, currentPassword)
+      if (verifyResult.status !== 200) {
+        return verifyResult
+      }
+
+      // Hash da nova senha
+      const hashedPassword = await bcrypt.hash(newPassword, 10)
+
+      // Atualiza a senha no banco
+      await prisma.usuarios.update({
+        where: { id: userId },
+        data: { senha: hashedPassword }
+      })
+
+      // Invalida o cache do usuário
+      await redis.del(`user:${userId}`)
+      console.log(`[SUCESSO] Cache invalidado para o usuário ${userId}`)
+
+      return { 
+        status: 200, 
+        data: { message: "[SUCESSO] Senha atualizada com sucesso" } 
+      }
+    } catch (error) {
+      console.error("[ERRO] Erro ao atualizar senha:", error)
+      return { 
+        status: 500, 
+        data: { error: "[ERRO] Erro ao atualizar senha" } 
+      }
+    }
   }
 }

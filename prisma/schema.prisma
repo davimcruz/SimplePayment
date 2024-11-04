@@ -15,6 +15,8 @@ model usuarios {
   sobrenome  String       @db.VarChar(100)
   image      String?      @db.VarChar(255)
   permissao  String?      @db.VarChar(20)
+  status     String      @default("active") @db.VarChar(20)
+  createdAt  DateTime    @default(now()) @db.Timestamp(0)
   transacoes transacoes[]
   cartoes    cartoes[]
 }

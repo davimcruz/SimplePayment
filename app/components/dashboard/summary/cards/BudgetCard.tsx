@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/app/components/ui/card"
-import { ArrowDownUp } from "lucide-react"
+import { TrendingUp, TrendingDown } from "lucide-react"
 import { Skeleton } from "@/app/components/ui/skeleton"
 
 interface Flow {
@@ -69,7 +69,7 @@ const BudgetCard = () => {
           <CardTitle className="text-sm font-medium">
             Gap Orçamentário
           </CardTitle>
-          <ArrowDownUp className="h-4 w-4 text-muted-foreground" />
+          <TrendingUp className="h-4 w-4 text-white" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">0%</div>
@@ -82,18 +82,19 @@ const BudgetCard = () => {
   }
   const correctPercentage = flowData.gapPercentage * 100
   const formattedGap = `${correctPercentage.toFixed(2)}%`
-  const statusFlag = flowData.status === "excedente" ? "↑" : "↓"
 
   return (
     <Card className="bg-gradient-to-br from-background/10 to-primary/10">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Gap Orçamentário</CardTitle>
-        <ArrowDownUp className="h-4 w-4 text-muted-foreground" />
+        {flowData.status === "excedente" ? (
+          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+        ) : (
+          <TrendingDown className="h-4 w-4 text-muted-foregroun" />
+        )}
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">
-          {statusFlag} {formattedGap}
-        </div>
+        <div className="text-2xl font-bold">{formattedGap}</div>
         <p className="text-xs text-muted-foreground">
           Status para o mês de {flowData.nome}:{" "}
           <span className="font-bold">
