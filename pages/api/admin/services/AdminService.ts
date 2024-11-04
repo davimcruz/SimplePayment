@@ -58,23 +58,55 @@ export class AdminService {
 
   // Remove um usuário específico e todos seus dados relacionados do sistema
   async deleteUser(userId: number) {
-    // Remove em cascata (orçamentos e transações primeiro)
-    await prisma.orcamento.deleteMany({
-      where: { userId },
-    })
+    await prisma.$transaction(async (prisma) => {
+      // 1. Primeiro, encontra todos os cartões do usuário
+      const userCards = await prisma.cartoes.findMany({
+        where: { userId },
+        select: { cardId: true }
+      })
+      const cardIds = userCards.map(card => card.cardId)
 
-    await prisma.transacoes.deleteMany({
-      where: { userId },
-    })
+      // 2. Remove todas as parcelas primeiro (pois dependem de faturas e transações)
+      await prisma.parcelas.deleteMany({
+        where: { 
+          OR: [
+            { cardId: { in: cardIds } },
+            { transacao: { userId: userId } }
+          ]
+        }
+      })
 
-    const deletedUser = await prisma.usuarios.delete({
-      where: { id: userId },
+      // 3. Remove todas as faturas dos cartões
+      await prisma.faturas.deleteMany({
+        where: { cardId: { in: cardIds } }
+      })
+
+      // 4. Remove todas as transações
+      // (onDelete: SetNull no cardId, então podemos deletar depois dos cartões)
+      await prisma.transacoes.deleteMany({
+        where: { userId }
+      })
+
+      // 5. Remove todos os cartões
+      // (onDelete: Cascade com usuário, mas precisamos deletar antes por causa das relações)
+      await prisma.cartoes.deleteMany({
+        where: { userId }
+      })
+
+      // 6. Remove todos os orçamentos
+      await prisma.orcamento.deleteMany({
+        where: { userId }
+      })
+
+      // 7. Finalmente, remove o usuário
+      await prisma.usuarios.delete({
+        where: { id: userId }
+      })
     })
 
     // Invalida o cache do usuário no Redis
     await redis.del(`user:${userId}`)
-    console.log(`[SUCESSO] Cache invalidado para o usuário ${userId}`)
-    return deletedUser
+    console.log(`[SUCESSO] Usuário ${userId} e todos seus dados relacionados foram removidos`)
   }
 
   // Obtém estatísticas gerais do sistema (total de usuários, distribuição de planos)
@@ -125,26 +157,53 @@ export class AdminService {
   // Remove múltiplos usuários e seus dados relacionados de uma vez
   async deleteMultipleUsers(userIds: number[]) {
     await prisma.$transaction(async (prisma) => {
-      // Remove todos os orçamentos dos usuários selecionados
-      await prisma.orcamento.deleteMany({
+      // 1. Encontra todos os cartões dos usuários
+      const userCards = await prisma.cartoes.findMany({
         where: { userId: { in: userIds } },
+        select: { cardId: true }
+      })
+      const cardIds = userCards.map(card => card.cardId)
+
+      // 2. Remove todas as parcelas primeiro
+      await prisma.parcelas.deleteMany({
+        where: {
+          OR: [
+            { cardId: { in: cardIds } },
+            { transacao: { userId: { in: userIds } } }
+          ]
+        }
       })
 
-      // Remove todas as transações dos usuários selecionados
+      // 3. Remove todas as faturas
+      await prisma.faturas.deleteMany({
+        where: { cardId: { in: cardIds } }
+      })
+
+      // 4. Remove todas as transações
       await prisma.transacoes.deleteMany({
-        where: { userId: { in: userIds } },
+        where: { userId: { in: userIds } }
       })
 
-      // Remove os usuários selecionados
+      // 5. Remove todos os cartões
+      await prisma.cartoes.deleteMany({
+        where: { userId: { in: userIds } }
+      })
+
+      // 6. Remove todos os orçamentos
+      await prisma.orcamento.deleteMany({
+        where: { userId: { in: userIds } }
+      })
+
+      // 7. Remove os usuários
       await prisma.usuarios.deleteMany({
-        where: { id: { in: userIds } },
+        where: { id: { in: userIds } }
       })
     })
 
     // Invalida o cache de todos os usuários deletados no Redis
     await Promise.all(userIds.map(id => redis.del(`user:${id}`)))
-    console.log(`[SUCESSO] Cache invalidado para ${userIds.length} usuários`)
-
+    console.log(`[SUCESSO] ${userIds.length} usuários e todos seus dados relacionados foram removidos`)
+    
     return { success: true }
   }
 }
