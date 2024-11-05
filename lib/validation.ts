@@ -288,3 +288,15 @@ export const viewTransactionSchema = z.object({
 )
 
 export type ViewTransactionFormData = z.infer<typeof viewTransactionSchema>
+
+export const checkoutSchema = z.object({
+  nome: z.string().min(1, "Nome é obrigatório"),
+  email: z.string().email("Email inválido"),
+  cpf: z.string()
+    .min(11, "CPF inválido")
+    .max(14, "CPF inválido")
+    .regex(/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/, "Formato de CPF inválido")
+    .transform(val => val.replace(/[^\d]/g, '')), 
+})
+
+export type CheckoutFormData = z.infer<typeof checkoutSchema>

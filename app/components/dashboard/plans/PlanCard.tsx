@@ -15,6 +15,7 @@ interface PlanCardProps {
   popular?: boolean
   buttonText: string
   onSelect: () => void
+  disabled?: boolean
 }
 
 const PlanCard = ({
@@ -25,6 +26,7 @@ const PlanCard = ({
   popular,
   buttonText,
   onSelect,
+  disabled,
 }: PlanCardProps) => {
   return (
     <div
@@ -80,8 +82,9 @@ const PlanCard = ({
           variant={popular ? "default" : "outline"}
           className={cn(
             "mt-2",
-            popular && "bg-emerald-500 hover:bg-emerald-600 font-semibold text-emerald-950"
+            popular && "bg-emerald-600 hover:bg-emerald-500 font-semibold text-white"
           )}
+          disabled={disabled}
         >
           {buttonText}
         </Button>

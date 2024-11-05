@@ -26,6 +26,8 @@ const Header = () => {
     settings: "Configurações",
     setup: "Configuração Inicial",
     plans: "Planos",
+    checkout: "Checkout",
+    success: "Sucesso",
   }
 
   useEffect(() => {

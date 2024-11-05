@@ -1,15 +1,29 @@
 "use client"
 
 import { toast } from "sonner"
-import PlanCard from "@/app/components/plans/PlanCard"
+import { useRouter } from "next/navigation"
+import { useUserData } from "@/app/components/hooks/useUserData"
+import PlanCard from "@/app/components/dashboard/plans/PlanCard"
 
 const PlansPage = () => {
+  const router = useRouter()
+  const { user, loading: isLoading, error } = useUserData()
+
   const handleSelectPlan = (plan: string) => {
-    if (plan === "pro") {
-      toast.info("Em breve! O plano PRO estará disponível em breve.")
+    if (!user) {
+      toast.error("Erro ao verificar usuário")
       return
     }
-    toast.success("Você já está no plano gratuito!")
+
+    if (plan === user.permissao) {
+      toast.info("Você já está neste plano!")
+      return
+    }
+
+    if (plan === "pro") {
+      router.push("/dashboard/plans/checkout")
+      return
+    }
   }
 
   const plans = [
@@ -18,30 +32,32 @@ const PlansPage = () => {
       price: "Grátis",
       description: "Perfeito para começar a organizar suas finanças",
       features: [
+        { text: "Suporte via email", included: true },
         { text: "Controle de despesas ilimitado", included: true },
         { text: "Análise básica de gastos", included: true },
-        { text: "Categorização de transações", included: true },
-        { text: "Suporte via email", included: true },
+        { text: "Limite de 3 cartões de crédito cadastrados", included: true },
         { text: "Análise avançada com IA", included: false },
         { text: "Relatórios personalizados", included: false },
       ],
-      buttonText: "Plano Atual",
+      buttonText: user?.permissao === "free" ? "Plano Atual" : "Selecionar Plano",
       popular: false,
+      disabled: user?.permissao === "free",
     },
     {
       name: "PRO",
       price: "R$ 19,90",
       description: "Para quem quer levar as finanças ao próximo nível",
       features: [
+        { text: "Suporte via email", included: true },
         { text: "Controle de despesas ilimitado", included: true },
         { text: "Análise básica de gastos", included: true },
-        { text: "Categorização de transações", included: true },
-        { text: "Suporte via email", included: true },
+        { text: "Limite de 10 cartões de crédito cadastrados", included: true },
         { text: "Análise avançada com IA", included: true },
         { text: "Relatórios personalizados", included: true },
       ],
-      buttonText: "Virar membro Pro",
+      buttonText: user?.permissao === "pro" ? "Plano Atual" : "Virar membro Pro",
       popular: true,
+      disabled: user?.permissao === "pro",
     },
   ]
 
@@ -60,7 +76,6 @@ const PlansPage = () => {
             key={plan.name}
             {...plan}
             onSelect={() => handleSelectPlan(plan.name.toLowerCase())}
-
           />
         ))}
       </div>
