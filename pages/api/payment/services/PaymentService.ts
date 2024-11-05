@@ -1,6 +1,7 @@
 import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { GetPixDTO, PixResponse, PaymentStatusResponse } from "../dtos/GetPixDTO"
 import { paymentLogRepository } from '@/models/PaymentLog'
+import prisma from '@/lib/prisma'
 
 interface MPPaymentResponse {
   id: number
@@ -126,7 +127,27 @@ export class PaymentService {
       const existingLog = await paymentLogRepository.findByPaymentId(payment.id.toString())
       
       if (existingLog && status !== existingLog.status) {
-        // Ao invés de criar novo, atualizar o existente
+        // Se foi aprovado
+        if (status === 'approved') {
+          // Atualizar permissão do usuário para PRO
+          await prisma.usuarios.update({
+            where: { 
+              id: Number(existingLog.userId)
+            },
+            data: { 
+              permissao: 'PRO'
+            }
+          })
+
+          // Retornar com redirect para página de sucesso
+          return {
+            status,
+            paymentId: payment.id,
+            redirect: '/dashboard/plans/checkout/success'
+          }
+        }
+
+        // Atualizar status no log
         await paymentLogRepository.update(existingLog.paymentId, {
           status: status
         })

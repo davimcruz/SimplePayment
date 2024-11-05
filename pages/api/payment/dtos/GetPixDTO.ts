@@ -14,4 +14,5 @@ export interface PixResponse {
 export interface PaymentStatusResponse {
   status: "pending" | "approved" | "rejected" | "cancelled"
   paymentId: number
+  redirect?: string
 }
