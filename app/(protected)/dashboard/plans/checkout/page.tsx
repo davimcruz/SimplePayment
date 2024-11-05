@@ -60,7 +60,8 @@ export default function CheckoutPage() {
       setState(prev => ({
         ...prev,
         nome: `${userData.nome} ${userData.sobrenome}`,
-        email: userData.email
+        email: userData.email,
+        userId: userData.id
       }))
     } catch (error) {
       toast.error("Erro ao carregar seus dados. Tente novamente.")

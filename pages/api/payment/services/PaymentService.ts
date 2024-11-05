@@ -29,7 +29,8 @@ export class PaymentService {
     email,
     nome,
     cpf,
-    valor
+    valor,
+    userId
   }: GetPixDTO): Promise<PixResponse> {
     try {
       // Buscar pagamentos pendentes existenes pra esse CPF
@@ -96,7 +97,7 @@ export class PaymentService {
         customerEmail: email,
         customerName: nome,
         customerCpf: cpf,
-        userId: 'pending'
+        userId: userId.toString()
       })
 
       return {
@@ -135,7 +136,7 @@ export class PaymentService {
               id: Number(existingLog.userId)
             },
             data: { 
-              permissao: 'PRO'
+              permissao: 'pro'
             }
           })
 

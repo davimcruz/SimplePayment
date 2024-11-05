@@ -3,6 +3,7 @@ export interface GetPixDTO {
   nome: string
   cpf: string
   valor: number
+  userId: number
 }
 
 export interface PixResponse {

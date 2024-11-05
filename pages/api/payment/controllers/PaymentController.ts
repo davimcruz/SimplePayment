@@ -10,11 +10,11 @@ export class PaymentController {
 
   async generatePix(req: NextApiRequest, res: NextApiResponse) {
     try {
-      const { email, nome, cpf } = req.body
+      const { email, nome, cpf, userId } = req.body
 
-      if (!email || !nome || !cpf) {
+      if (!email || !nome || !cpf || !userId) {
         return res.status(400).json({ 
-          error: "Dados incompletos. Email, nome e CPF são obrigatórios." 
+          error: "Dados incompletos. Email, nome, CPF e userId são obrigatórios." 
         })
       }
 
@@ -22,7 +22,8 @@ export class PaymentController {
         email,
         nome,
         cpf,
-        valor: 1.00 // Valor fixo do plano PRO
+        valor: 1.00,
+        userId
       })
 
       return res.status(200).json(pixData)
