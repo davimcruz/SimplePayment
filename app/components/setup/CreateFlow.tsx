@@ -15,10 +15,10 @@ import LottieAnimation from "@/app/components/ui/loadingAnimation"
 import { monthNames } from "@/utils/monthNames"
 import { createFlowSchema } from "@/lib/validation"
 import {
-  formatToCurrency,
   parseCurrencyToFloat,
   handleCurrencyInput,
 } from "@/utils/moneyFormatter"
+import { toast } from "sonner"
 
 const CreateFlow = () => {
   const [monthlyValues, setMonthlyValues] = useState<{
@@ -35,8 +35,16 @@ const CreateFlow = () => {
   useEffect(() => {
     const cookies = parseCookies()
     const userIdCookie = cookies.userId ? parseInt(cookies.userId) : null
+    
+    if (!userIdCookie) {
+      toast.error("Usuário não identificado", {
+        description: "Por favor, faça login novamente."
+      })
+      router.push("/signin")
+      return
+    }
+    
     setUserId(userIdCookie)
-
     initializeMonthlyValues()
   }, [])
 
@@ -72,12 +80,15 @@ const CreateFlow = () => {
 
   const handleCreateBudget = async () => {
     if (userId === null) {
+      toast.error("Usuário não autenticado")
       setBudgetError("Usuário não autenticado.")
       return
     }
 
     setBudgetError(null)
     setIsSubmitting(true)
+    
+    const toastId = toast.loading("Criando fluxo de caixa...")
 
     try {
       const flow = Object.entries(monthlyValues).reduce(
@@ -107,6 +118,14 @@ const CreateFlow = () => {
       if (!response.ok) {
         const errorData = await response.json()
         if (response.status === 409 && errorData.code === "EXISTING_FLOW") {
+          toast.error(`Já existe um fluxo de caixa para o ano ${errorData.year}`, {
+            id: toastId,
+            description: "Você pode editar o fluxo existente ou criar um novo.",
+            action: {
+              label: "Editar existente",
+              onClick: () => router.push("/dashboard/cashflow/updateFlow")
+            }
+          })
           setBudgetError(
             `Já existe um fluxo de caixa para o ano ${errorData.year}. Deseja editar o fluxo existente?`
           )
@@ -115,11 +134,22 @@ const CreateFlow = () => {
         throw new Error(errorData.message || "Erro ao criar fluxo de caixa.")
       }
 
-      router.push("/dashboard")
+      toast.success("Fluxo de caixa criado com sucesso!", {
+        id: toastId,
+        description: "Você será redirecionado para o dashboard."
+      })
+
+      setTimeout(() => {
+        router.push("/dashboard")
+      }, 1000)
+
     } catch (error: any) {
       if (error.errors) {
-        setBudgetError(error.errors.map((e: any) => e.message).join(", "))
+        const errorMessage = error.errors.map((e: any) => e.message).join(", ")
+        toast.error(errorMessage, { id: toastId })
+        setBudgetError(errorMessage)
       } else {
+        toast.error(error.message, { id: toastId })
         setBudgetError(error.message)
       }
     } finally {
@@ -128,7 +158,12 @@ const CreateFlow = () => {
   }
 
   const handleRedirect = () => {
-    router.push("/dashboard")
+    toast.info("Pulando criação do fluxo de caixa...", {
+      description: "Você pode criar o fluxo de caixa mais tarde no dashboard."
+    })
+    setTimeout(() => {
+      router.push("/dashboard")
+    }, 1000)
   }
 
   const getGridColumns = (monthCount: number) => {
@@ -149,7 +184,6 @@ const CreateFlow = () => {
         {isSubmitting ? (
           <div className="flex flex-col items-center justify-center h-[400px]">
             <LottieAnimation animationPath="/loadingAnimation.json" />
-            <p className="mt-4 text-center">Criando fluxo de caixa...</p>
           </div>
         ) : (
           <div className="grid gap-5 mx-auto">

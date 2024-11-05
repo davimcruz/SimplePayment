@@ -19,6 +19,7 @@ import {
   parseCurrencyToFloat,
   handleCurrencyInput,
 } from "@/utils/moneyFormatter"
+import { toast } from "sonner"
 
 const UpdateFlow = () => {
   const [monthlyValues, setMonthlyValues] = useState<{
@@ -69,6 +70,7 @@ const UpdateFlow = () => {
       setMonthlyValues(budgets)
     } catch (error) {
       console.error("Erro ao buscar fluxo de caixa:", error)
+      toast.error("Erro ao carregar fluxo de caixa existente")
       setBudgetError("Erro ao carregar fluxo de caixa existente.")
     } finally {
       setIsLoading(false)
@@ -94,12 +96,15 @@ const UpdateFlow = () => {
 
   const handleUpdateBudget = async () => {
     if (userId === null) {
+      toast.error("Usuário não autenticado")
       setBudgetError("Usuário não autenticado.")
       return
     }
 
     setBudgetError(null)
     setIsSubmitting(true)
+    
+    const toastId = toast.loading("Atualizando fluxo de caixa...")
 
     try {
       const flow = Object.entries(monthlyValues).reduce(
@@ -130,11 +135,22 @@ const UpdateFlow = () => {
         throw new Error("Erro ao atualizar fluxo de caixa.")
       }
 
-      router.push("/dashboard/cashflow")
+      toast.success("Fluxo de caixa atualizado com sucesso!", {
+        id: toastId,
+        description: "Você será redirecionado para a página de fluxo de caixa."
+      })
+
+      setTimeout(() => {
+        router.push("/dashboard/cashflow")
+      }, 1000)
+
     } catch (error: any) {
       if (error.errors) {
-        setBudgetError(error.errors.map((e: any) => e.message).join(", "))
+        const errorMessage = error.errors.map((e: any) => e.message).join(", ")
+        toast.error(errorMessage, { id: toastId })
+        setBudgetError(errorMessage)
       } else {
+        toast.error(error.message, { id: toastId })
         setBudgetError(error.message)
       }
       setIsSubmitting(false)
@@ -142,7 +158,12 @@ const UpdateFlow = () => {
   }
 
   const handleRedirect = () => {
-    router.push("/dashboard/cashflow")
+    toast.info("Redirecionando para fluxo de caixa...", {
+      description: "As alterações não serão salvas."
+    })
+    setTimeout(() => {
+      router.push("/dashboard/cashflow")
+    }, 1000)
   }
 
   const getGridColumns = (monthCount: number) => {
@@ -165,6 +186,7 @@ const UpdateFlow = () => {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center">
             <LottieAnimation animationPath="/loadingAnimation.json" />
+            <p className="mt-4 text-center">Carregando fluxo de caixa...</p>
           </div>
         ) : isSubmitting ? (
           <div className="flex flex-col items-center justify-center h-[400px]">

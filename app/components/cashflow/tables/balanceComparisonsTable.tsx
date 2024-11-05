@@ -21,7 +21,8 @@ import { Badge } from "@/app/components/ui/badge"
 import { Skeleton } from "@/app/components/ui/skeleton"
 import { exampleFlows } from "@/utils/exampleData"
 import CreateTransaction from "../../dashboard/create-transactions/CreateTransactions"
-import { PlusCircle } from "lucide-react"
+import { PlusCircle, BarChart2, Sparkles, Loader2 } from "lucide-react"
+import ShimmerButton from "@/app/components/ui/shimmer-button"
 
 interface FlowItem {
   mes: number
@@ -60,9 +61,11 @@ interface BalanceComparisonTableProps {
   data: FlowItem[]
   loading: boolean
   setData: (data: FlowItem[]) => void
+  onAnalyze: () => void
+  isAnalyzing: boolean
 }
 
-const BalanceComparisonTable = ({ data, loading, setData }: BalanceComparisonTableProps) => {
+const BalanceComparisonTable = ({ data, loading, setData, onAnalyze, isAnalyzing }: BalanceComparisonTableProps) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [sortKey, setSortKey] = useState<keyof FlowItem>("mes")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
@@ -106,7 +109,7 @@ const BalanceComparisonTable = ({ data, loading, setData }: BalanceComparisonTab
   }, [])
 
   const handleUpdateBudgetClick = () => {
-    router.push("/dashboard/cashflow/updateFlow")
+    router.push("/dashboard/setup")
   }
 
   const formatCurrency = (value: number | null | undefined) => {
@@ -139,97 +142,111 @@ const BalanceComparisonTable = ({ data, loading, setData }: BalanceComparisonTab
 
   return (
     <div className="h-full w-full px-12">
-      <Card className="bg-gradient-to-tr from-background/10 to-primary/[5%] w-full mx-auto relative">
-        <div className={`${isExample ? "blur-md" : ""}`}>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="-mt-2">Fluxo de Caixa</CardTitle>
-            <div className="flex items-center">
-              <Input
-                placeholder="Pesquisar por mês ou status"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full max-w-sm py-0 hidden lg:block"
-              />
-            </div>
-          </CardHeader>
-          <CardContent className="relative p-4">
-            {loading ? (
-              <Skeleton className="h-[250px]" />
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Mês</TableHead>
-                      <TableHead>Orçado</TableHead>
-                      <TableHead>Realizado</TableHead>
-                      <TableHead>Gap (R$)</TableHead>
-                      <TableHead>Gap (%)</TableHead>
-                      <TableHead className="text-right">Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredAndSortedData.map((item, index) => (
-                      <TableRow key={index}>
-                        <TableCell>
-                          <div className="font-medium">{item.nome}</div>
-                        </TableCell>
-                        <TableCell>
-                          {formatCurrency(item.saldoOrcado)}
-                        </TableCell>
-                        <TableCell>
-                          {formatCurrency(item.saldoRealizado)}
-                        </TableCell>
-                        <TableCell>{formatCurrency(item.gapMoney)}</TableCell>
-                        <TableCell>
-                          {formatPercentage(item.gapPercentage)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Badge
-                            variant="outline"
-                            className={getBadgeClass(item.status)}
-                          >
-                            {statusTranslations[item.status] || item.status}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-          <CardFooter className="flex justify-center">
-            <Button
-              variant="link"
-              className="text-sm text-zinc-500"
-              onClick={handleUpdateBudgetClick}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Fluxo de Caixa</CardTitle>
+          <div className="flex items-center gap-2">
+            <Input
+              placeholder="Pesquisar por mês ou status"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full max-w-sm py-0 hidden lg:block"
+            />
+            <ShimmerButton 
+              onClick={onAnalyze}
+              disabled={isAnalyzing}
+              className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 px-8 py-2 rounded-md transition-all duration-200 ease-in-out shadow-lg"
             >
-              Clique aqui para alterar seu orçamento anual
-            </Button>
-          </CardFooter>
-        </div>
-
-        {isExample && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center ">
-            <p className="text-xl font-semibold mb-2 text-center px-4">
-              Você ainda não criou seu fluxo de caixa
-            </p>
-            <p className="text-sm text-muted-foreground mb-4 text-center px-4">
-              Crie seu fluxo de caixa para começar a controlar suas finanças
-            </p>
-            <Button variant="outline" onClick={handleUpdateBudgetClick}>
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Criar Fluxo de Caixa
-            </Button>
+              <div className="flex items-center justify-center gap-2">
+                {isAnalyzing ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-white mr-2" />
+                ) : (
+                  <Sparkles className="h-4 w-4 text-white group-hover:animate-pulse mr-2" />
+                )}
+                <span className="text-sm font-medium text-white">
+                  {isAnalyzing ? 'Analisando...' : 'Análise IA'}
+                </span>
+              </div>
+            </ShimmerButton>
           </div>
-        )}
-
-        <CreateTransaction
-          isOpen={isTransactionDialogOpen}
-          onOpenChange={setIsTransactionDialogOpen}
-        />
+        </CardHeader>
+        <CardContent className="relative p-4">
+          {loading ? (
+            <Skeleton className="h-[250px]" />
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Mês</TableHead>
+                    <TableHead>Orçado</TableHead>
+                    <TableHead>Realizado</TableHead>
+                    <TableHead>Gap (R$)</TableHead>
+                    <TableHead>Gap (%)</TableHead>
+                    <TableHead className="text-right">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredAndSortedData.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <div className="font-medium">{item.nome}</div>
+                      </TableCell>
+                      <TableCell>
+                        {formatCurrency(item.saldoOrcado)}
+                      </TableCell>
+                      <TableCell>
+                        {formatCurrency(item.saldoRealizado)}
+                      </TableCell>
+                      <TableCell>{formatCurrency(item.gapMoney)}</TableCell>
+                      <TableCell>
+                        {formatPercentage(item.gapPercentage)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Badge
+                          variant="outline"
+                          className={getBadgeClass(item.status)}
+                        >
+                          {statusTranslations[item.status] || item.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+        <CardFooter className="flex justify-center">
+          <Button
+            variant="link"
+            className="text-sm text-zinc-500"
+            onClick={handleUpdateBudgetClick}
+          >
+            Clique aqui para alterar seu orçamento anual
+          </Button>
+        </CardFooter>
       </Card>
+
+      {isExample && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center ">
+          <p className="text-xl font-semibold mb-2 text-center px-4">
+            Você ainda não criou seu fluxo de caixa
+          </p>
+          <p className="text-sm text-muted-foreground mb-4 text-center px-4">
+            Crie seu fluxo de caixa para começar a controlar suas finanças
+          </p>
+          <Button variant="outline" onClick={handleUpdateBudgetClick}>
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Criar Fluxo de Caixa
+          </Button>
+        </div>
+      )}
+
+      <CreateTransaction
+        isOpen={isTransactionDialogOpen}
+        onOpenChange={setIsTransactionDialogOpen}
+      />
     </div>
   )
 }

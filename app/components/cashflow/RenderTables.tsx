@@ -5,6 +5,7 @@ import { parseCookies } from "nookies"
 import BalanceComparisonTable from "./tables/balanceComparisonsTable"
 import BalanceComparisonChart from "./charts/balanceComparisonChart"
 import { exampleFlows } from "@/utils/exampleData"
+import FinancialAnalysis from "./analysis/FinancialAnalysis"
 
 interface FlowItem {
   mes: number
@@ -23,6 +24,8 @@ interface FlowItem {
 const BudgetTables = () => {
   const [data, setData] = useState<FlowItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [showAnalysis, setShowAnalysis] = useState(false)
+  const [analysisLoading, setAnalysisLoading] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,16 +75,39 @@ const BudgetTables = () => {
     fetchData()
   }, [])
 
+  const handleAnalyze = () => {
+    setShowAnalysis(prev => !prev)
+    
+    if (showAnalysis) {
+      const analysisComponent = document.getElementById('financial-analysis')
+      if (analysisComponent) {
+        analysisComponent.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
+  }
+
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] w-full">
       <div className="flex-1 overflow-y-auto space-y-6">
         <div className="grid gap-6 px-12 py-6">
           <div className="w-full">
-            <BalanceComparisonTable 
-              data={data} 
-              loading={loading} 
-              setData={setData} 
-            />
+            {showAnalysis && (
+              <div id="financial-analysis">
+                <FinancialAnalysis 
+                  setLoading={setAnalysisLoading}
+                  isButtonLoading={analysisLoading}
+                />
+              </div>
+            )}
+            <div className={showAnalysis ? "mt-6" : ""}>
+              <BalanceComparisonTable
+                data={data}
+                loading={loading}
+                setData={setData}
+                onAnalyze={handleAnalyze}
+                isAnalyzing={analysisLoading}
+              />
+            </div>
           </div>
           <div className="w-full">
             <BalanceComparisonChart data={data} />

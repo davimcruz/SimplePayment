@@ -2,41 +2,44 @@ import prisma from "@/lib/prisma"
 
 export async function realocarFluxo(userId: number) {
   const anoAtual = new Date().getFullYear()
-  const mesAtual = new Date().getMonth() + 1 
-
-  // Busca os fluxos de caixa do usuário para o ano atual e meses futuros
-  const fluxoAtual = await prisma.orcamento.findMany({
+  
+  const fluxos = await prisma.orcamento.findMany({
     where: {
       userId,
       ano: anoAtual,
-      mes: { gte: mesAtual },
     },
     orderBy: { mes: "asc" },
   })
 
+  console.log('=== INÍCIO REALOCAÇÃO DE FLUXO ===')
+  console.log('Fluxos encontrados:', fluxos)
 
-  if (fluxoAtual.length === 0) {
+  if (fluxos.length === 0) {
     throw new Error("Nenhum fluxo de caixa encontrado para o usuário.")
   }
 
   let saldoAnterior = 0
 
-  // Mapeia os fluxos para calcular o novo saldo orçado
-  const fluxoRealocado = fluxoAtual.map((mes) => {
+  const fluxoRealocado = fluxos.map((mes) => {
     const receitaOrcada = mes.receitaOrcada ?? 0
     const despesaOrcada = mes.despesaOrcada ?? 0
-
-    // Calcula o novo saldo orçado
+    
+    console.log(`\nCálculo para o mês ${mes.mes}:`)
+    console.log(`Saldo Anterior: ${saldoAnterior}`)
+    console.log(`Receita Orçada: ${receitaOrcada}`)
+    console.log(`Despesa Orçada: ${despesaOrcada}`)
+    
     const novoSaldoOrcado = saldoAnterior + (receitaOrcada - despesaOrcada)
-    saldoAnterior = Number(novoSaldoOrcado.toFixed(2)) // Atualiza o saldo anterior
+    console.log(`Novo Saldo Orçado: ${novoSaldoOrcado}`)
+    
+    saldoAnterior = novoSaldoOrcado
 
     return {
       ...mes,
-      saldoOrcado: saldoAnterior,
+      saldoOrcado: novoSaldoOrcado,
     }
   })
 
-  // Atualiza os fluxos no banco de dados em uma transação
   try {
     await prisma.$transaction(
       fluxoRealocado.map((mes) =>
@@ -50,13 +53,14 @@ export async function realocarFluxo(userId: number) {
           },
           data: {
             saldoOrcado: mes.saldoOrcado,
-            status: mes.status, 
           },
         })
       )
     )
+    console.log('Transação concluída com sucesso')
   } catch (error) {
-    throw new Error("Falha ao atualizar os fluxos de caixa. Tente novamente mais tarde.")
+    console.error('Erro na transação:', error)
+    throw new Error("Falha ao atualizar os fluxos de caixa.")
   }
 
   return fluxoRealocado
