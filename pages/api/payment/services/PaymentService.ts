@@ -126,15 +126,9 @@ export class PaymentService {
       const existingLog = await paymentLogRepository.findByPaymentId(payment.id.toString())
       
       if (existingLog && status !== existingLog.status) {
-        // Se o status mudou, criar um novo log definitivo
-        await paymentLogRepository.create({
-          paymentId: payment.id.toString(),
-          status: status,
-          amount: existingLog.amount,
-          customerEmail: existingLog.customerEmail,
-          customerName: existingLog.customerName,
-          customerCpf: existingLog.customerCpf,
-          userId: existingLog.userId
+        // Ao invés de criar novo, atualizar o existente
+        await paymentLogRepository.update(existingLog.paymentId, {
+          status: status
         })
       }
 

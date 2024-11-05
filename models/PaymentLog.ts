@@ -103,6 +103,19 @@ class PaymentLogRepository {
     await this.client.close()
     this.collection = null
   }
+
+  async update(paymentId: string, data: Partial<PaymentLog>): Promise<void> {
+    try {
+      const collection = await this.getCollection()
+      await collection.updateOne(
+        { paymentId },
+        { $set: data }
+      )
+    } catch (error) {
+      console.error('Erro ao atualizar log:', error)
+      throw new Error('Falha ao atualizar log de pagamento')
+    }
+  }
 }
 
 // Singleton para reutilizar a conexão
