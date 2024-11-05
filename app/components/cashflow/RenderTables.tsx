@@ -87,9 +87,9 @@ const BudgetTables = () => {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] w-full">
-      <div className="flex-1 overflow-y-auto space-y-6">
-        <div className="grid gap-6 px-12 py-6">
+    <div className="flex-col h-[calc(100vh-4rem)] w-full">
+      <div className="flex-1 overflow-y-auto">
+        <div className="space-y-6 py-6">
           <div className="w-full">
             {showAnalysis && (
               <div id="financial-analysis">
@@ -111,7 +111,7 @@ const BudgetTables = () => {
           </div>
           <div className="w-full">
             <BalanceComparisonChart data={data} />
-          </div>
+          </div> 
         </div>
       </div>
     </div>

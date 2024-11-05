@@ -18,6 +18,83 @@ interface FinancialAnalysisProps {
   isButtonLoading: boolean
 }
 
+const SituacaoCard = ({ content }: { content: string }) => {
+  const formatContent = (text: string) => {
+    return text.split('\n').map((line, index) => {
+      if (line.startsWith('- ')) {
+        return (
+          <li key={index} className="flex items-start gap-2 mb-2">
+            <span>•</span>
+            <span className="text-muted-foreground font-medium">{line.substring(2)}</span>
+          </li>
+        )
+      }
+      if (line.includes(':')) {
+        const [title, content] = line.split(':')
+        return (
+          <div key={index} className="mb-2">
+            <span className="font-semibold">{title}:</span>
+            <span className="text-muted-foreground font-medium">{content}</span>
+          </div>
+        )
+      }
+      return <p key={index} className="text-muted-foreground font-medium mb-2">{line}</p>
+    })
+  }
+
+  return (
+    <div className="space-y-2">
+      {formatContent(content)}
+    </div>
+  )
+}
+
+const PontosCard = ({ content }: { content: string }) => {
+  const formatContent = (text: string) => {
+    const sections = text.split('\n\n')
+    return sections.map((section, sectionIndex) => {
+      const lines = section.split('\n')
+      const title = lines[0]
+      const points = lines.slice(1)
+
+      return (
+        <div key={sectionIndex} className="mb-4">
+          <h3 className="font-semibold text-base mb-2">{title}</h3>
+          <ul className="space-y-1">
+            {points.map((point, index) => (
+              <li key={index} className="flex items-start gap-2">
+                <span>•</span>
+                <span className="text-muted-foreground font-medium">{point.substring(2)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    })
+  }
+
+  return <div>{formatContent(content)}</div>
+}
+
+const RecomendacoesCard = ({ content }: { content: string }) => {
+  const formatContent = (text: string) => {
+    return text.split('\n').map((line, index) => {
+      if (line.match(/^\d+\./)) {
+        const [num, ...rest] = line.split('.')
+        return (
+          <div key={index} className="flex items-start gap-2 mb-2">
+            <span className="font-semibold min-w-[20px]">{num}.</span>
+            <span className="text-muted-foreground font-medium">{rest.join('.').trim()}</span>
+          </div>
+        )
+      }
+      return <p key={index} className="text-muted-foreground font-medium mb-2">{line}</p>
+    })
+  }
+
+  return <div className="space-y-1">{formatContent(content)}</div>
+}
+
 const FinancialAnalysis = ({ 
   setLoading, 
   isButtonLoading
@@ -97,7 +174,7 @@ const FinancialAnalysis = ({
   }
 
   return (
-    <div className="space-y-6 px-12">
+    <div className="space-y-6 px-4 md:px-12">
       {isButtonLoading ? (
         <div className="grid gap-4 grid-cols-1 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
@@ -108,42 +185,42 @@ const FinancialAnalysis = ({
         <div className="grid gap-4 grid-cols-1 lg:grid-cols-3">
           <Card className="bg-gradient-to-br from-background/10 to-primary/10">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+              <CardTitle className="text-sm font-semibold">
                 Situação Atual
               </CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-sm whitespace-pre-line">
-                {analysis.situacao}
+              <div className="text-sm">
+                <SituacaoCard content={analysis.situacao} />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-background/10 to-primary/10">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+              <CardTitle className="text-sm font-semibold">
                 Pontos Fortes e Fracos
               </CardTitle>
               <Target className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-sm whitespace-pre-line">
-                {analysis.pontos}
+              <div className="text-sm">
+                <PontosCard content={analysis.pontos} />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-background/10 to-primary/10">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+              <CardTitle className="text-sm font-semibold">
                 Recomendações
               </CardTitle>
               <LineChart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-sm whitespace-pre-line">
-                {analysis.recomendacoes}
+              <div className="text-sm">
+                <RecomendacoesCard content={analysis.recomendacoes} />
               </div>
             </CardContent>
           </Card>
