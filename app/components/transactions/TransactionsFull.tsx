@@ -104,7 +104,7 @@ const TransactionsFull = () => {
   }, [fetchTransactions])
 
   return (
-    <div className="h-full w-full px-12 mt-8">
+    <div className="h-full w-full px-2 md:px-12 mt-8">
       <Card className="bg-gradient-to-t from-background/10 to-primary/[5%] relative">
         <div className={isExample ? "blur-md bg-background/20" : ""}>
           <CardHeader>
