@@ -81,6 +81,17 @@ const BalanceComparisonTable = ({
               />
             )}
           </CardContent>
+          {!isExample && (
+            <CardFooter className="flex justify-end p-6">
+              <Button
+                variant="ghost"
+                onClick={handleUpdateBudgetClick}
+                className="bg-background hover:bg-accent text-muted-foreground"
+              >
+                Atualizar Orçamento
+              </Button>
+            </CardFooter>
+          )}
         </div>
 
         {isExample && (

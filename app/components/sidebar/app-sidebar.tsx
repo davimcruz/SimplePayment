@@ -11,6 +11,7 @@ import {
   Wallet,
   PlusCircle,
   ListOrdered,
+  Crown,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import {
@@ -369,6 +370,23 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
                     </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <a href="/dashboard/plans" className="relative">
+                      <Crown />
+                      <span>Planos</span>
+                      {userData?.permissao === "free" && (
+                        <Badge
+                          variant="premium"
+                          className="ml-auto bg-violet-500/10 text-violet-500 hover:bg-violet-500/20"
+                        >
+                          Upgrade
+                        </Badge>
+                      )}
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

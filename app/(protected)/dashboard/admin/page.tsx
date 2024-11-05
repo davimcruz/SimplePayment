@@ -7,7 +7,7 @@ import Cookies from "js-cookie"
 import AnalysisResult from "./analysis-result"
 import { Flow } from "@/types/analysis"
 
-const DashboardPage = () => {
+const AdminPage = () => {
   const router = useRouter()
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null)
   const [targetUserId, setTargetUserId] = useState("")
@@ -92,37 +92,8 @@ const DashboardPage = () => {
   if (isAuthorized) {
     return (
       <div className="flex flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <div className="mt-8 p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold mb-4">
-            Análise Financeira de Usuário
-          </h2>
-
-          <div className="flex gap-4 mb-6">
-            <input
-              type="number"
-              value={targetUserId}
-              onChange={(e) => setTargetUserId(e.target.value)}
-              placeholder="ID do usuário"
-              className="flex-1 max-w-xs px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <button
-            onClick={handleAnalysis}
-            disabled={isLoading}
-            className={`px-6 py-2 rounded-md text-white ${
-              isLoading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
-            }`}
-          >
-            {isLoading ? "Analisando..." : "Analisar"}
-          </button>
-          {analysis?.flows && (
-            <AnalysisResult
-              data={analysis.flows}
-              aiAnalysis={analysis.analysis}
-            />
-          )}
+        <div className=" shadow-md">
+          
           <UsersTable />
 
           {error && (
@@ -138,4 +109,4 @@ const DashboardPage = () => {
   return null
 }
 
-export default DashboardPage
+export default AdminPage

@@ -25,6 +25,7 @@ const Header = () => {
     cashflow: "Fluxo de Caixa",
     settings: "Configurações",
     setup: "Configuração Inicial",
+    plans: "Planos",
   }
 
   useEffect(() => {
