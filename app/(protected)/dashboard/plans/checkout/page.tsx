@@ -23,6 +23,7 @@ interface CheckoutState {
   nome: string
   email: string
   cpf: string
+  userId: number | null
   isLoading: boolean
   showQRCode: boolean
   qrCodeData: string
@@ -35,6 +36,7 @@ export default function CheckoutPage() {
     nome: "",
     email: "",
     cpf: "",
+    userId: null,
     isLoading: false,
     showQRCode: false,
     qrCodeData: "",
@@ -81,7 +83,10 @@ export default function CheckoutPage() {
       const response = await fetch("/api/payment/get-pix", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          userId: state.userId
+        }),
       })
 
       const responseData = await response.json()
