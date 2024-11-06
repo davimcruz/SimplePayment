@@ -34,7 +34,6 @@ export class PaymentService {
     userId
   }: GetPixDTO): Promise<PixResponse> {
     try {
-      // Buscar pagamentos pendentes existenes pra esse CPF
       const existingLogs = await paymentLogRepository.findByCpf(cpf)
       const pendingPayment = existingLogs.find(log => log.status === 'pending')
 
@@ -81,15 +80,6 @@ export class PaymentService {
         throw new Error("Resposta do Mercado Pago incompleta")
       }
 
-      // Log específico do código PIX
-      console.log('=== CÓDIGO PIX GERADO ===')
-      console.log(payment.point_of_interaction.transaction_data.qr_code)
-      console.log('=== QR CODE BASE64 ===')
-      console.log(payment.point_of_interaction.transaction_data.qr_code_base64)
-      console.log('=== ID DO PAGAMENTO ===')
-      console.log(payment.id)
-      console.log('========================')
-
       // Salvar novo log
       await paymentLogRepository.create({
         paymentId: payment.id.toString(),
@@ -125,7 +115,6 @@ export class PaymentService {
         throw new Error("Status de pagamento inválido")
       }
 
-      // Buscar log existente para atualizar
       const existingLog = await paymentLogRepository.findByPaymentId(payment.id.toString())
       
       if (existingLog && status !== existingLog.status) {
@@ -138,7 +127,6 @@ export class PaymentService {
         if (status === 'approved') {
           const userId = Number(existingLog.userId)
           
-          // Atualizar permissão do usuário para PRO
           await prisma.usuarios.update({
             where: { id: userId },
             data: { permissao: 'pro' }

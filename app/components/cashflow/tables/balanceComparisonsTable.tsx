@@ -32,21 +32,23 @@ interface FlowItem {
   status: string
 }
 
-interface BalanceComparisonTableProps {
+interface BalanceComparisonsTableProps {
   data: FlowItem[]
   loading: boolean
-  setData: (data: FlowItem[]) => void
+  setData: React.Dispatch<React.SetStateAction<FlowItem[]>>
   onAnalyze: () => void
   isAnalyzing: boolean
+  isPro: boolean
 }
 
-const BalanceComparisonTable = ({
+const BalanceComparisonsTable = ({
   data,
   loading,
   setData,
   onAnalyze,
   isAnalyzing,
-}: BalanceComparisonTableProps) => {
+  isPro
+}: BalanceComparisonsTableProps) => {
   const router = useRouter()
   const isExample = useMemo(() => {
     return JSON.stringify(data) === JSON.stringify(exampleFlows)
@@ -55,20 +57,23 @@ const BalanceComparisonTable = ({
   const currentYear = new Date().getFullYear()
 
   const handleUpdateBudgetClick = () => {
+    router.push("/dashboard/cashflow/updateflow")
+  }
+  const handleCreateBudgetClick = () => {
     router.push("/dashboard/setup")
   }
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-12">
       <Card className="mx-auto max-w-5xl lg:max-w-none bg-gradient-to-t from-background/10 to-primary/[5%] relative">
-        <div className={isExample ? "blur-md bg-background/20" : ""}>
+        <div className={isExample ? "blur-md bg-background/20" : "px-2"}>
           <CardHeader>
             <CardTitle>Fluxo de Caixa</CardTitle>
             <CardDescription>
               Acompanha seu fluxo de caixa para o ano de {currentYear}
             </CardDescription>
           </CardHeader>
-          <Separator className="w-full" />
+          <Separator className="w-full hidden md:block" />
           <CardContent className="p-0 sm:p-6">
             {loading ? (
               <Skeleton className="h-[250px]" />
@@ -78,11 +83,12 @@ const BalanceComparisonTable = ({
                 data={data}
                 onAnalyze={onAnalyze}
                 isAnalyzing={isAnalyzing}
+                isPro={isPro}
               />
             )}
           </CardContent>
           {!isExample && (
-            <CardFooter className="flex justify-end p-6">
+            <CardFooter className="flex justify-center  md:justify-end p-6">
               <Button
                 variant="ghost"
                 onClick={handleUpdateBudgetClick}
@@ -102,7 +108,7 @@ const BalanceComparisonTable = ({
             <p className="text-sm text-muted-foreground mb-4 text-center">
               Crie seu fluxo de caixa para começar a controlar suas finanças
             </p>
-            <Button variant="outline" onClick={handleUpdateBudgetClick}>
+            <Button variant="outline" onClick={handleCreateBudgetClick}>
               <PlusCircle className="h-4 w-4 mr-2" />
               Criar Fluxo de Caixa
             </Button>
@@ -113,4 +119,4 @@ const BalanceComparisonTable = ({
   )
 }
 
-export default BalanceComparisonTable
+export default BalanceComparisonsTable

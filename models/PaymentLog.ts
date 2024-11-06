@@ -24,8 +24,8 @@ class PaymentLogRepository {
     }
 
     const options: MongoClientOptions = {
-      connectTimeoutMS: 10000, // 10 segundos
-      socketTimeoutMS: 45000,  // 45 segundos
+      connectTimeoutMS: 10000, 
+      socketTimeoutMS: 45000, 
     }
 
     this.client = new MongoClient(uri, options)
@@ -38,7 +38,6 @@ class PaymentLogRepository {
         const db = this.client.db(this.dbName)
         this.collection = db.collection<PaymentLog>(this.collectionName)
         
-        // Criar índices se necessário
         await this.collection.createIndex({ userId: 1 })
         await this.collection.createIndex({ paymentId: 1 }, { unique: true })
         await this.collection.createIndex({ createdAt: -1 })
@@ -108,9 +107,8 @@ class PaymentLogRepository {
     try {
       const collection = await this.getCollection()
       
-      // Garantir que o status seja atualizado
       await collection.updateOne(
-        { paymentId: paymentId }, // Usar paymentId como identificador
+        { paymentId: paymentId }, // Usar paymentId como identificador (já que não muda e futuramente vai ter mais planos)
         { 
           $set: {
             status: data.status,

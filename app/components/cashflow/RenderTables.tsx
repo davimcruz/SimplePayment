@@ -21,7 +21,11 @@ interface FlowItem {
   status: string
 }
 
-const BudgetTables = () => {
+interface BudgetTablesProps {
+  isPro: boolean
+}
+
+const BudgetTables = ({ isPro }: BudgetTablesProps) => {
   const [data, setData] = useState<FlowItem[]>([])
   const [loading, setLoading] = useState(true)
   const [showAnalysis, setShowAnalysis] = useState(false)
@@ -106,6 +110,7 @@ const BudgetTables = () => {
                 setData={setData}
                 onAnalyze={handleAnalyze}
                 isAnalyzing={analysisLoading}
+                isPro={isPro}
               />
             </div>
           </div>

@@ -67,14 +67,14 @@ const BalanceComparisonChart = ({ data }: BalanceComparisonChartProps) => {
       <Card className="w-full bg-gradient-to-t from-background/10 to-primary/[5%]">
         <div className={`${isExample ? "blur-md " : ""}`}>
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex-col md:flex-row flex justify-between items-center">
               <div className="flex flex-col gap-2">
                 <CardTitle>Comparativo de Saldos</CardTitle>
                 <CardDescription>
                   Comparação entre o saldo orçado e o saldo realizado
                 </CardDescription>
               </div>
-              <div className="flex items-center gap-2 font-normal text-zinc-300 text-sm leading-none text-center">
+              <div className="flex items-center gap-2 font-normal text-zinc-300 text-sm leading-none text-center mt-6 md:mt-0">
                 {isTrendingUp ? "Acima" : "Abaixo"} do orçado em{" "}
                 {Math.abs(trend * 100).toFixed(2)}% este mês{" "}
                 {isTrendingUp ? (

@@ -168,8 +168,9 @@ const CardsView = () => {
         })
       } else {
         toast.error(
-          "Você atingiu o limite de 3 cartões. Faça upgrade para o plano Pro e adicione até 10 cartões!", 
+          "Você atingiu o limite de 3 cartões.", 
           {
+            description: "Faça upgrade para Membro PRO e adicione até 10 cartões!",
             duration: 5000,
             // action: {
             //   label: "Fazer Upgrade",

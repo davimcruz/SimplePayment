@@ -250,9 +250,23 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
       >
         <SidebarHeader>
           <div className="flex items-center gap-2">
-            <Wallet className="w-4 h-4 ml-2 mt-4 group-data-[collapsible=icon]:block hidden" />
+            <Image
+              className="ml-2 mt-4 group-data-[collapsible=icon]:block hidden"
+              src="/logo-vector.png"
+              alt="SimpleFinance"
+              width={16}
+              height={16}
+            />
+            {/* <Wallet className="w-4 h-4 ml-2 mt-4 group-data-[collapsible=icon]:block hidden" /> */}
             <div className="flex items-center gap-2 group-data-[collapsible=icon]:hidden">
-              <Wallet className="w-12 h-12 p-2 border-zinc-50 rounded-lg" />
+              <Image
+                src="/logo-vector.png"
+                alt="SimpleFinance"
+                className="p-2"
+                width={48}
+                height={48}
+              />
+              {/* <Wallet className="w-12 h-12 p-2 border-zinc-50 rounded-lg" /> */}
               <Separator orientation="vertical" className="h-10 mx-1" />
               <div className="flex flex-col">
                 <span className="text-md font-bold">SimpleFinance</span>
@@ -269,7 +283,9 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
             <SidebarGroupContent>
               <SidebarMenu>
                 {items
-                  .filter(item => !item.adminOnly || userData?.permissao === "admin")
+                  .filter(
+                    (item) => !item.adminOnly || userData?.permissao === "admin"
+                  )
                   .map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
@@ -331,7 +347,8 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
                         {cards.length > 0 ? (
                           <>
                             {cards.map((card) => {
-                              const CardIcon = cardIcons[card.bandeira] || CreditCard
+                              const CardIcon =
+                                cardIcons[card.bandeira] || CreditCard
                               return (
                                 <SidebarMenuSubItem key={card.cardId}>
                                   <SidebarMenuButton asChild>

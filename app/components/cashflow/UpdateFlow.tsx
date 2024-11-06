@@ -32,6 +32,10 @@ const UpdateFlow = () => {
   const router = useRouter()
 
   const currentMonth = new Date().getMonth() + 1
+  const availableMonths = Array.from(
+    { length: 12 - currentMonth + 1 },
+    (_, i) => currentMonth + i
+  )
 
   useEffect(() => {
     const cookies = parseCookies()
@@ -167,118 +171,112 @@ const UpdateFlow = () => {
   }
 
   const getGridColumns = (monthCount: number) => {
-    if (monthCount <= 3) return 1
-    if (monthCount === 4) return 2
-    return Math.ceil(monthCount / 2)
+    return 1
   }
 
   return (
-    <Card className="w-[90vw] lg:w-[800px] flex-row">
-      <CardTitle className="pl-6 pt-6">
-        Atualizar fluxo de caixa orçado
-      </CardTitle>
-      <CardDescription className="pl-6 pt-2">
-        Atualize os campos com os novos valores que você espera ganhar e gastar
-        nos próximos meses.
-      </CardDescription>
-      <Separator className="mt-10" />
-      <CardContent className="pt-10 pl-4 pb-3">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center">
+    <Card className={`
+      w-[95vw] 
+      ${availableMonths.length <= 2 ? 'md:w-[600px]' : 'md:w-[90vw]'} 
+      ${availableMonths.length <= 2 ? 'lg:w-[600px]' : 'lg:w-[800px]'}
+      bg-gradient-to-t from-background/10 to-primary/[5%]
+    `}>
+      <div className="p-4 md:p-6">
+        <CardTitle className="text-xl md:text-2xl font-bold tracking-tight">
+          Atualizar Fluxo de Caixa
+        </CardTitle>
+        <CardDescription className="mt-2 text-sm md:text-base text-muted-foreground">
+          Planeje seus próximos meses atualizando suas receitas e despesas previstas
+        </CardDescription>
+      </div>
+      
+      <Separator />
+      
+      <CardContent className="p-4 md:p-6">
+        {isLoading || isSubmitting ? (
+          <div className="flex flex-col items-center justify-center min-h-[300px] md:min-h-[400px]">
             <LottieAnimation animationPath="/loadingAnimation.json" />
-            <p className="mt-4 text-center">Carregando fluxo de caixa...</p>
-          </div>
-        ) : isSubmitting ? (
-          <div className="flex flex-col items-center justify-center h-[400px]">
-            <LottieAnimation animationPath="/loadingAnimation.json" />
-            <p className="mt-4 text-center">Atualizando fluxo de caixa...</p>
+            <p className="mt-4 text-center text-sm md:text-base text-muted-foreground">
+              {isLoading ? "Carregando fluxo de caixa..." : "Atualizando fluxo de caixa..."}
+            </p>
           </div>
         ) : (
-          <div className="grid gap-5 mx-auto">
-            {(() => {
-              const availableMonths = Array.from(
-                { length: 12 - currentMonth + 1 },
-                (_, i) => currentMonth + i
-              )
-              const columns = getGridColumns(availableMonths.length)
-
-              return (
-                <div
-                  className={`grid grid-cols-1 md:grid-cols-${columns} gap-x-8 gap-y-2`}
-                  style={{
-                    gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-                  }}
+          <div className="space-y-4 md:space-y-6">
+            <div className={`
+              grid gap-4 md:gap-6
+              ${availableMonths.length === 1 ? 'grid-cols-1' : ''}
+              ${availableMonths.length === 2 ? 'grid-cols-1 md:grid-cols-2' : ''}
+              ${availableMonths.length > 2 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : ''}
+            `}>
+              {availableMonths.map((month) => (
+                <Card 
+                  key={month} 
+                  className="p-3 md:p-4 bg-card/50 transition-all duration-200 hover:shadow-md"
                 >
-                  {availableMonths.map((month) => (
-                    <div key={month} className="flex flex-col gap-2 mb-4">
-                      <Label className="text-center font-semibold">
-                        {monthNames[month - 1]}
+                  <CardTitle className="text-base font-medium text-center mb-3 md:mb-4">
+                    {monthNames[month - 1]}
+                  </CardTitle>
+                  
+                  <div className="space-y-3 md:space-y-4">
+                    <div className="space-y-1.5 md:space-y-2">
+                      <Label 
+                        htmlFor={`receita-${month}`}
+                        className="text-xs md:text-sm font-medium text-muted-foreground"
+                      >
+                        Receita Prevista
                       </Label>
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor={`receita-${month}`} className="w-20">
-                          Receita:
-                        </Label>
-                        <Input
-                          type="text"
-                          id={`receita-${month}`}
-                          value={
-                            monthlyValues[month]?.receitaOrcada || "R$ 0,00"
-                          }
-                          onChange={(e) =>
-                            handleInputChange(
-                              month,
-                              "receitaOrcada",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor={`despesa-${month}`} className="w-20">
-                          Despesa:
-                        </Label>
-                        <Input
-                          type="text"
-                          id={`despesa-${month}`}
-                          value={
-                            monthlyValues[month]?.despesaOrcada || "R$ 0,00"
-                          }
-                          onChange={(e) =>
-                            handleInputChange(
-                              month,
-                              "despesaOrcada",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </div>
+                      <Input
+                        type="text"
+                        id={`receita-${month}`}
+                        value={monthlyValues[month]?.receitaOrcada || "R$ 0,00"}
+                        onChange={(e) => handleInputChange(month, "receitaOrcada", e.target.value)}
+                        className="bg-background/50 text-sm md:text-base h-8 md:h-10"
+                      />
                     </div>
-                  ))}
-                </div>
-              )
-            })()}
-            <div className="flex justify-between gap-4 mt-6">
+
+                    <div className="space-y-1.5 md:space-y-2">
+                      <Label 
+                        htmlFor={`despesa-${month}`}
+                        className="text-xs md:text-sm font-medium text-muted-foreground"
+                      >
+                        Despesa Prevista
+                      </Label>
+                      <Input
+                        type="text"
+                        id={`despesa-${month}`}
+                        value={monthlyValues[month]?.despesaOrcada || "R$ 0,00"}
+                        onChange={(e) => handleInputChange(month, "despesaOrcada", e.target.value)}
+                        className="bg-background/50 text-sm md:text-base h-8 md:h-10"
+                      />
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            {budgetError && (
+              <p className="text-xs md:text-sm text-red-500 text-center">
+                {budgetError}
+              </p>
+            )}
+
+            <div className="flex flex-col-reverse md:flex-row justify-end gap-3 md:gap-4 pt-2 md:pt-4">
               <Button
-                variant={"secondary"}
-                className="w-[40%]"
+                variant="outline"
                 onClick={handleRedirect}
                 disabled={isSubmitting}
+                className="w-full md:w-auto md:min-w-[120px] h-10"
               >
                 Cancelar
               </Button>
               <Button
-                className="w-[60%]"
                 onClick={handleUpdateBudget}
                 disabled={isSubmitting}
+                className="w-full md:w-auto md:min-w-[180px] h-10 font-semibold bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600"
               >
-                Atualizar Fluxo de Caixa
+                Atualizar Fluxo
               </Button>
             </div>
-            {budgetError && (
-              <p className="mt-4 text-center text-sm text-red-600">
-                {budgetError}
-              </p>
-            )}
           </div>
         )}
       </CardContent>

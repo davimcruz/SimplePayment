@@ -28,6 +28,7 @@ const Header = () => {
     plans: "Planos",
     checkout: "Checkout",
     success: "Sucesso",
+    updateflow: "Atualizar Fluxo",
   }
 
   useEffect(() => {

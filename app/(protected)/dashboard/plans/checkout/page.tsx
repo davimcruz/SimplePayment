@@ -145,7 +145,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="container max-w-2xl mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6">Checkout do Plano PRO</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center md:text-left">Checkout de Membro PRO</h1>
       
       <Card className="p-6 bg-gradient-to-t from-background/10 to-primary/10">
         <div className="space-y-6">
