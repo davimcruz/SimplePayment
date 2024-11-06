@@ -1,211 +1,188 @@
-import { HfInference } from "@huggingface/inference"
+import Anthropic from '@anthropic-ai/sdk'
 import CashflowService from "../../cashflow/services/CashflowService"
 import prisma from "@/lib/prisma"
 
+/**
+ * Serviço responsável pela análise financeira usando IA (Claude 3.5)
+ */
 export class FinancialAnalysisService {
-  private model: HfInference
+  private model: Anthropic
 
   constructor() {
-    this.model = new HfInference(process.env.HUGGINGFACE_API_KEY)
+    this.model = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY
+    })
   }
 
+  /**
+   * Analisa as finanças do usuário usando dados de orçamentos e transações
+   * @param userId - ID do usuário para análise
+   * @returns Objeto contendo a análise e os fluxos financeiros
+   */
   async analyzeUserFinances(userId: string | number) {
     try {
+      // Validação do ID do usuário
       const userIdNumber = Number(userId)
       if (isNaN(userIdNumber)) {
-        throw new Error('ID do usuário inválido')
+        throw new Error("ID do usuário inválido")
       }
 
+      // Busca orçamentos do usuário
       const orcamentos = await prisma.orcamento.findMany({
         where: { userId: userIdNumber },
-        orderBy: { mes: 'asc' }
+        orderBy: { mes: "asc" },
       })
 
+      // Validação de orçamentos
       if (orcamentos.length === 0) {
-        throw new Error('Nenhum orçamento encontrado. Para realizar a análise IA, é necessário ter fluxos de caixa cadastrados.')
+        throw new Error(
+          "Nenhum orçamento encontrado. Para realizar a análise IA, é necessário ter fluxos de caixa cadastrados."
+        )
       }
 
+      // Busca transações do usuário
       const transacoes = await prisma.transacoes.findMany({
-        where: { userId: userIdNumber }
+        where: { userId: userIdNumber },
       })
 
+      // Validação de transações
       if (transacoes.length === 0) {
-        throw new Error('Nenhuma transação encontrada. Para realizar a análise IA, é necessário ter transações cadastradas.')
+        throw new Error(
+          "Nenhuma transação encontrada. Para realizar a analise IA, é necessário ter transações cadastradas."
+        )
       }
 
+      // Obtém fluxos de caixa processados
       const response = await CashflowService.getFlow(userIdNumber)
       let flows: any[] = []
 
+      // Normaliza o formato dos fluxos
       if (Array.isArray(response)) {
         flows = response
-      } else if (typeof response === 'object' && response !== null) {
+      } else if (typeof response === "object" && response !== null) {
         flows = Object.values(response)
       } else {
-        throw new Error('Formato de resposta inválido. Esperado um array ou objeto.')
+        throw new Error("Formato de resposta inválido")
       }
 
+      // Validação dos fluxos
       if (flows.length === 0) {
-        throw new Error('Não há fluxos de caixa cadastrados. Para realizar a análise, é necessário ter fluxos de caixa criados.')
+        throw new Error(
+          "Não há fluxos de caixa cadastrados. Para realizar a análise, é necessário ter fluxos de caixa criados."
+        )
       }
 
-      const prompt = this.generateAnalysisPrompt(flows)
-      
-
-      // Atualmente usando o t5 porque é gratuito, mas ao escalar vou usar o claude
       try {
-        const analysis = await this.model.textGeneration({
-          model: "google/flan-t5-large",
-          inputs: prompt,
-          parameters: {
-            max_new_tokens: 250,
-            temperature: 0.7,
-            top_p: 0.9,
-            do_sample: true,
-            num_return_sequences: 1,
-            repetition_penalty: 1.1
-          }
+        // Chamada à API do Claude 3.5
+        console.log("4. Chamando Claude 3.5...")
+        const message = await this.model.messages.create({
+          model: "claude-3-sonnet-20240229",
+          max_tokens: 1000,
+          temperature: 0.1,
+          messages: [{
+            role: "user",
+            // Prompt estruturado para análise detalhada
+            content: `Analise estes dados financeiros mensais:
+
+${flows.sort((a, b) => a.mes - b.mes).map(flow => `
+${flow.nome}/${flow.ano}:
+Receitas: Orçado R$ ${flow.receitaOrcada.toFixed(2)} | Realizado R$ ${flow.receitaRealizada.toFixed(2)}
+Despesas: Orçado R$ ${flow.despesaOrcada.toFixed(2)} | Realizado R$ ${flow.despesaRealizada.toFixed(2)}
+Saldo Final: R$ ${flow.saldoRealizado.toFixed(2)} (${flow.status} de R$ ${flow.gapMoney.toFixed(2)})`).join('\n\n')}
+
+Forneça uma análise financeira detalhada no seguinte formato:
+
+[ANÁLISE]
+Outubro/2024:
+- Análise da receita (compare orçado vs realizado)
+- Análise da despesa (compare orçado vs realizado)
+- Impacto no saldo final
+
+(Repetir mesmo formato para Novembro e Dezembro)
+
+[PONTOS FORTES E FRACOS]
+Pontos Fortes:
+- 3 pontos fortes específicos analisando receitas, despesas e saldos
+
+Pontos Fracos:
+- 3 pontos fracos específicos analisando receitas, despesas e saldos
+
+[RECOMENDAÇÕES]
+1. Recomendação sobre gestão de receitas
+2. Recomendação sobre controle de despesas
+3. Recomendação sobre planejamento orçamentário
+4. Recomendação sobre gestão de saldo
+5. Recomendação geral para melhoria`
+          }]
         })
 
-        if (!analysis.generated_text || analysis.generated_text.length < 100) {
-          return {
-            analysis: this.generateBasicAnalysis(flows),
-            flows: flows
-          }
+        // Validação da resposta do Claude
+        if (!message.content[0] || message.content[0].type !== 'text') {
+          throw new Error('Resposta inválida do Claude')
         }
 
+        // Retorna análise completa
         return {
-          analysis: analysis.generated_text,
-          flows: flows
+          analysis: message.content[0].text,
+          flows: flows,
         }
+
       } catch (error) {
-        console.log('Erro na geração do texto:', error)
+        // Fallback para análise básica em caso de erro
+        console.log("7. Erro na geração do texto:", error)
         return {
-          analysis: this.generateBasicAnalysis(flows),
-          flows: flows
+          analysis: await this.generateBasicAnalysis(flows),
+          flows: flows,
         }
       }
     } catch (error: any) {
-      console.error('Erro durante a análise:', error)
-      if (error?.name === 'PrismaClientValidationError') {
-        throw new Error('Dados inválidos fornecidos para a análise')
+      // Tratamento de erros específicos do Prisma
+      console.error("Erro durante a análise:", error)
+      if (error?.name === "PrismaClientValidationError") {
+        throw new Error("Dados inválidos fornecidos para a análise")
       }
-      if (error?.name === 'PrismaClientKnownRequestError') {
-        throw new Error('Erro ao acessar o banco de dados')
+      if (error?.name === "PrismaClientKnownRequestError") {
+        throw new Error("Erro ao acessar o banco de dados")
       }
       throw error
     }
   }
 
-  private generateBasicAnalysis(flows: any[]): string {
+  /**
+   * Gera uma análise básica em caso de falha na análise principal
+   * @param flows - Array de fluxos financeiros
+   * @returns String contendo análise básica
+   */
+  private async generateBasicAnalysis(flows: any[]): Promise<string> {
     try {
-      const melhorMes = flows.reduce((a, b) =>
-        a.gapMoney > b.gapMoney ? a : b
-      )
-      const piorMes = flows.reduce((a, b) => (a.gapMoney < b.gapMoney ? a : b))
+      // Identifica melhor e pior mês baseado no gap
+      const melhorMes = flows.reduce((a, b) => a.gapMoney > b.gapMoney ? a : b)
+      const piorMes = flows.reduce((a, b) => a.gapMoney < b.gapMoney ? a : b)
 
-      const analisesMensais = flows
-        .sort((a, b) => a.mes - b.mes)
-        .map(
-          (mes) =>
-            `- ${mes.nome}/2024: Saldo realizado R$ ${mes.saldoRealizado.toFixed(
-              2
-            )} vs orçado R$ ${mes.saldoOrcado.toFixed(2)} (${
-              mes.status
-            } de ${mes.gapMoney.toFixed(2)})`
-        )
-        .join("\n")
+      // Gera análise simplificada
+      const message = await this.model.messages.create({
+        model: "claude-3-sonnet-20240229",
+        max_tokens: 1000,
+        temperature: 0.1,
+        messages: [{
+          role: "user",
+          content: `Analise estes resultados financeiros:
 
-      const statusMeses = flows.map(f => f.status)
-      const todosExcedentes = statusMeses.every(s => s === 'Excedente')
-      const todosDéficit = statusMeses.every(s => s === 'Déficit')
-      const statusMisto = !todosExcedentes && !todosDéficit
+Melhor mês: ${melhorMes.nome} (saldo: R$ ${melhorMes.saldoRealizado.toFixed(2)})
+Pior mês: ${piorMes.nome} (saldo: R$ ${piorMes.saldoRealizado.toFixed(2)})
 
-      const tendenciaGap = flows
-        .sort((a, b) => a.mes - b.mes)
-        .map(f => f.gapMoney)
-      const tendenciaRedução = tendenciaGap.every((gap, i) => 
-        i === 0 || gap <= tendenciaGap[i - 1]
-      )
+Forneça uma análise resumida com pontos fortes, fracos e recomendações.`
+        }]
+      })
 
-      return `[ANÁLISE]
-${analisesMensais}
+      // Retorna texto da análise ou mensagem de erro
+      return message.content[0].type === 'text' 
+        ? (message.content[0] as { type: 'text', text: string }).text
+        : 'Não foi possível gerar a análise.'
 
-Destaques:
-- Melhor desempenho: ${melhorMes.nome}/2024 com saldo realizado de R$ ${melhorMes.saldoRealizado.toFixed(
-        2
-      )} vs orçado R$ ${melhorMes.saldoOrcado.toFixed(2)}
-- Desempenho mais desafiador: ${piorMes.nome}/2024 com saldo realizado de R$ ${piorMes.saldoRealizado.toFixed(
-        2
-      )} vs orçado R$ ${piorMes.saldoOrcado.toFixed(2)}
-
-[PONTOS FORTES E FRACOS]
-Pontos Fortes:
-${todosExcedentes ? '- Todos os meses apresentaram status excedente' : 
-  statusMisto ? '- Alguns meses apresentaram resultados positivos' :
-  '- Oportunidade de melhoria na gestão financeira'}
-${melhorMes.gapMoney > 0 ? '- Boa performance na realização de receitas no melhor mês' : ''}
-${flows.some(f => f.saldoRealizado > f.saldoOrcado) ? '- Alguns meses superaram as expectativas orçadas' : ''}
-
-Pontos Fracos:
-${todosDéficit ? '- Todos os meses apresentaram déficit' :
-  statusMisto ? '- Resultados inconsistentes entre os meses' : ''}
-- Variação significativa entre valores orçados e realizados
-- Necessidade de melhor previsibilidade
-${tendenciaRedução ? '- Tendência de redução no gap ao longo dos meses' : ''}
-
-[RECOMENDAÇÕES]
-1. Revisar metodologia de orçamentação para maior precisão
-2. Manter controle sobre despesas realizadas
-3. Estabelecer metas mais realistas para receitas e despesas
-4. Investigar razões da variação entre orçado e realizado
-5. Implementar sistema de acompanhamento mensal mais detalhado`
     } catch (error) {
+      console.error("Erro na análise básica:", error)
       return "Não foi possível gerar a análise. Por favor, tente novamente."
     }
-  }
-
-  private generateAnalysisPrompt(flows: any[]): string {
-    const monthlyAnalysis = flows
-      .sort((a, b) => (a.ano !== b.ano ? a.ano - b.ano : a.mes - b.mes))
-      .map(
-        (flow) => `
-Mês: ${flow.nome}/${flow.ano}
-Orçado: Receita R$ ${flow.receitaOrcada.toFixed(
-          2
-        )} | Despesa R$ ${flow.despesaOrcada.toFixed(
-          2
-        )} | Saldo R$ ${flow.saldoOrcado.toFixed(2)}
-Realizado: Receita R$ ${flow.receitaRealizada.toFixed(
-          2
-        )} | Despesa R$ ${flow.despesaRealizada.toFixed(
-          2
-        )} | Saldo R$ ${flow.saldoRealizado.toFixed(2)}
-Comparativo: Diferença R$ ${flow.gapMoney.toFixed(2)} (${(
-          flow.gapPercentage * 100
-        ).toFixed(2)}%) | Status: ${flow.status}
-`
-      )
-      .join("\n\n")
-
-    return `Você é um analista financeiro experiente. Analise os seguintes dados financeiros mensais:
-
-${monthlyAnalysis}
-
-Responda em português do Brasil, seguindo estritamente este formato:
-
-[ANÁLISE]
-- Analise cada mês individualmente
-- Compare os saldos realizados com os orçados
-- Identifique os meses com melhor e pior desempenho
-
-[PONTOS FORTES E FRACOS]
-- Liste os principais pontos fortes encontrados
-- Liste os principais pontos fracos identificados
-- Descreva as tendências observadas no período
-
-[RECOMENDAÇÕES]
-1. Estratégias para manter/melhorar os resultados positivos
-2. Ações para corrigir os pontos negativos
-3. Sugestões para melhorar o planejamento futuro`
   }
 }

@@ -69,7 +69,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.ico' },
+      { url: '/images/favicon.ico' },
       { url: '/logos/icon.png', type: 'image/png', sizes: '32x32' },
       { url: '/logos/icon-192.png', type: 'image/png', sizes: '192x192' },
       { url: '/logos/icon-512.png', type: 'image/png', sizes: '512x512' },
@@ -77,12 +77,12 @@ export const metadata: Metadata = {
     apple: [
       { url: '/logos/icon-192.png', sizes: '180x180', type: 'image/png' }
     ],
-    shortcut: ['/favicon.ico'],
+    shortcut: ['/images/favicon.ico'],
     other: [
       {
         rel: 'search',
         type: 'image/x-icon',
-        url: '/favicon.ico'
+        url: '/images/favicon.ico'
       }
     ]
   },
@@ -127,12 +127,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-br" suppressHydrationWarning>
-      <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-      </head>
-      <Analytics />
-      <ThemeProvider defaultTheme="dark" attribute="class">
-        <body className={inter.className}>
+      <body className={inter.className}>
+        <Analytics />
+        <ThemeProvider defaultTheme="dark" attribute="class">
           {children}
           <Toaster
             richColors
@@ -154,8 +151,8 @@ export default function RootLayout({
               duration: 3000,
             }}
           />
-        </body>
-      </ThemeProvider>
+        </ThemeProvider>
+      </body>
     </html>
   )
 }

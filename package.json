@@ -10,6 +10,7 @@
     "test": "jest --detectOpenHandles"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
     "@hookform/resolvers": "^3.9.0",
     "@huggingface/inference": "^2.8.1",
     "@prisma/client": "^5.20.0",
