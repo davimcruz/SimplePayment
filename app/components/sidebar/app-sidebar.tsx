@@ -47,11 +47,11 @@ import {
   CollapsibleTrigger,
 } from "../ui/collapsible"
 import { useEffect, useState, useCallback } from "react"
-import VisaIcon from "@/public/visa.svg"
-import MastercardIcon from "@/public/mastercard.svg"
-import AmexIcon from "@/public/amex.svg"
-import EloIcon from "@/public/elo.svg"
-import HipercardIcon from "@/public/hipercard.svg"
+import VisaIcon from "@/public/cards/visa.svg"
+import MastercardIcon from "@/public/cards/mastercard.svg"
+import AmexIcon from "@/public/cards/amex.svg"
+import EloIcon from "@/public/cards/elo.svg"
+import HipercardIcon from "@/public/cards/hipercard.svg"
 import CreateTransaction from "../dashboard/create-transactions/CreateTransactions"
 import { toast } from "sonner"
 
@@ -61,7 +61,7 @@ interface UserData {
   sobrenome?: string
   email?: string
   image?: string | null
-  permissao?: 'admin' | 'pro' | 'free'
+  permissao?: "admin" | "pro" | "free"
 }
 
 const items = [
@@ -89,13 +89,14 @@ const fetcher = async (url: string) => {
   const cookies = parseCookies()
   const userId = cookies.userId
 
-  if (!userId) return {
-    image: '/profile.png',
-    nome: 'User',
-    sobrenome: '',
-    email: '',
-    permissao: 'free' as const
-  }
+  if (!userId)
+    return {
+      image: "/utilities/profile.png",
+      nome: "User",
+      sobrenome: "",
+      email: "",
+      permissao: "free" as const,
+    }
 
   try {
     const response = await fetch(`${url}?userId=${userId}`, {
@@ -104,32 +105,37 @@ const fetcher = async (url: string) => {
         "Content-Type": "application/json",
       },
     })
-    
+
     if (!response.ok) {
-      throw new Error('Erro ao carregar dados do usuário')
+      throw new Error("Erro ao carregar dados do usuário")
     }
 
     const data = await response.json()
     return {
       ...data,
-      image: data.image || '/profile.png'
+      image: data.image || "/utilities/profile.png",
     }
   } catch (error) {
     return {
-      image: '/profile.png',
-      nome: 'User',
-      sobrenome: '',
-      email: '',
-      permissao: 'free' as const
+      image: "/utilities/profile.png",
+      nome: "User",
+      sobrenome: "",
+      email: "",
+      permissao: "free" as const,
     }
   }
 }
 
 interface AppSidebarProps {
-  initialData: UserData 
+  initialData: UserData
 }
 
-type CardBrand = 'Visa' | 'Mastercard' | 'American Express' | 'Elo' | 'Hipercard';
+type CardBrand =
+  | "Visa"
+  | "Mastercard"
+  | "American Express"
+  | "Elo"
+  | "Hipercard"
 
 interface CardType {
   cardId: string
@@ -141,26 +147,30 @@ interface CardType {
 }
 
 const cardIcons = {
-  'Visa': VisaIcon,
-  'Mastercard': MastercardIcon,
-  'American Express': AmexIcon,
-  'Elo': EloIcon,
-  'Hipercard': HipercardIcon,
-} as const;
+  Visa: VisaIcon,
+  Mastercard: MastercardIcon,
+  "American Express": AmexIcon,
+  Elo: EloIcon,
+  Hipercard: HipercardIcon,
+} as const
 
 export function AppSidebar({ initialData }: AppSidebarProps) {
   const router = useRouter()
   const cookies = parseCookies()
 
-  const { data: userData = initialData, mutate: mutateUser } = useSWR<UserData>('/api/users/get-user', fetcher, {
-    fallbackData: initialData,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    revalidateIfStale: false,
-    revalidateOnMount: true,
-    dedupingInterval: 0,
-    suspense: false,
-  })
+  const { data: userData = initialData, mutate: mutateUser } = useSWR<UserData>(
+    "/api/users/get-user",
+    fetcher,
+    {
+      fallbackData: initialData,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+      revalidateOnMount: true,
+      dedupingInterval: 0,
+      suspense: false,
+    }
+  )
 
   const [cards, setCards] = useState<CardType[]>([])
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false)
@@ -168,12 +178,15 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
   useEffect(() => {
     const fetchCards = async () => {
       try {
-        const response = await fetch(`/api/cards/get-card?userId=${cookies.userId}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
+        const response = await fetch(
+          `/api/cards/get-card?userId=${cookies.userId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        )
 
         const data = await response.json()
         if (Array.isArray(data.cartoes)) {
@@ -190,26 +203,29 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
   }, [cookies.userId])
 
   const handleTransactionSuccess = useCallback(() => {
-    if (window.location.pathname === '/dashboard/transactions') {
+    if (window.location.pathname === "/dashboard/transactions") {
       router.refresh()
     }
   }, [router])
 
   useEffect(() => {
     const checkPaymentStatus = async () => {
-      const hasChecked = localStorage.getItem('payment_checked')
-      
-      if (window.location.pathname === '/dashboard/plans/checkout/success' && !hasChecked) {
+      const hasChecked = localStorage.getItem("payment_checked")
+
+      if (
+        window.location.pathname === "/dashboard/plans/checkout/success" &&
+        !hasChecked
+      ) {
         try {
-          localStorage.setItem('payment_checked', 'true')
-          
-          await new Promise(resolve => setTimeout(resolve, 10000))
-          await mutate('/api/users/get-user')
+          localStorage.setItem("payment_checked", "true")
+
+          await new Promise((resolve) => setTimeout(resolve, 10000))
+          await mutate("/api/users/get-user")
           await mutateUser()
-          
+
           window.location.reload()
         } catch (error) {
-          console.error('Erro ao atualizar dados do usuário:', error)
+          console.error("Erro ao atualizar dados do usuário:", error)
         }
       }
     }
@@ -219,10 +235,10 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
 
   const handleLogout = () => {
     const cookies = parseCookies()
-    
-    Object.keys(cookies).forEach(cookieName => {
+
+    Object.keys(cookies).forEach((cookieName) => {
       destroyCookie(null, cookieName, {
-        path: '/',
+        path: "/",
         domain: window.location.hostname,
       })
     })
@@ -233,9 +249,9 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
         .replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/`)
     })
 
-    toast.success('Logout realizado com sucesso!')
-    
-    router.push('/signin')
+    toast.success("Logout realizado com sucesso!")
+
+    router.push("/signin")
     router.refresh()
   }
 
@@ -252,7 +268,7 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
           <div className="flex items-center gap-2">
             <Image
               className="ml-2 mt-4 group-data-[collapsible=icon]:block hidden"
-              src="/logo-vector.png"
+              src="/logos/logo-vector.png"
               alt="SimpleFinance"
               width={16}
               height={16}
@@ -260,7 +276,7 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
             {/* <Wallet className="w-4 h-4 ml-2 mt-4 group-data-[collapsible=icon]:block hidden" /> */}
             <div className="flex items-center gap-2 group-data-[collapsible=icon]:hidden">
               <Image
-                src="/logo-vector.png"
+                src="/logos/logo-vector.png"
                 alt="SimpleFinance"
                 className="p-2"
                 width={48}
@@ -423,7 +439,7 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
                   <DropdownMenuTrigger asChild className="h-auto">
                     <SidebarMenuButton>
                       <Image
-                        src={userData.image || "/profile.png"}
+                        src={userData.image || "/utilities/profile.png"}
                         alt={`${userData.nome || "User"} profile`}
                         width={48}
                         height={48}
@@ -504,4 +520,3 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
     </>
   )
 }
-

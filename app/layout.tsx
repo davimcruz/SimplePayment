@@ -56,13 +56,59 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "SimpleFinance",
-  description:
-    "Descubra o SimpleFinance, o principal software de finanças pessoais projetado para ajudá-lo a gerenciar orçamentos, despesas e cartões em um só lugar.",
+  title: 'Simple Finance - Controle financeiro simplificado',
+  description: 'Simple Finance é o software de finanças pessoais mais completo do Brasil. Gerencie seus orçamentos, despesas e cartões em um só lugar.',
+  keywords: ['finanças pessoais', 'controle financeiro', 'gestão financeira', 'orçamento pessoal', 'controle de gastos'],
+  authors: [{ name: 'Simple Finance' }],
+  creator: 'Simple Finance',
+  publisher: 'Simple Finance',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/logos/icon.png', type: 'image/png', sizes: '32x32' },
+      { url: '/logos/icon-192.png', type: 'image/png', sizes: '192x192' },
+      { url: '/logos/icon-512.png', type: 'image/png', sizes: '512x512' },
+    ],
+    apple: [
+      { url: '/logos/icon-192.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
+  manifest: '/manifest.json',
   openGraph: {
-    title: "SimpleFinance - Seu Gerente de Finanças Pessoais",
-    description:
-      "Simplifique seu gerenciamento financeiro com o SimpleFinance. Acompanhe despesas, gerencie orçamentos e supervisione seus cartões com facilidade.",
+    type: 'website',
+    locale: 'pt_BR',
+    url: 'https://simplefinance.cloud',
+    title: 'Simple Finance - Controle financeiro simplificado',
+    description: 'Simple Finance é o software de finanças pessoais mais completo do Brasil. Gerencie seus orçamentos, despesas e cartões em um só lugar.',
+    siteName: 'Simple Finance',
+    images: [{
+      url: '/og-image.png',
+      width: 1200,
+      height: 630,
+      alt: 'Simple Finance Preview'
+    }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Simple Finance - Controle financeiro simplificado',
+    description: 'Simple Finance é o software de finanças pessoais mais completo do Brasil.',
+    images: ['/og-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 }
 

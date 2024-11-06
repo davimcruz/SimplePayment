@@ -75,7 +75,7 @@ const LandingHero = () => {
           onMouseLeave={handleMouseLeave}
         >
           <Image
-            src="/dashboard.png"
+            src="/utilities/dashboard.png"
             alt="Dashboard Preview"
             width={1200}
             height={600}

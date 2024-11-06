@@ -28,12 +28,11 @@ interface CardType {
 }
 
 const cardBrands = {
-  visa: "/visa.svg",
-  mastercard: "/mastercard.svg",
-  elo: "/elo.svg",
-  "american express": "/amex.svg",
-  amex: "/amex.svg",
-  hipercard: "/hipercard.svg",
+  visa: "/cards/visa.svg",
+  mastercard: "/cards/mastercard.svg",
+  elo: "/cards/elo.svg",
+  "american express": "/cards/amex.svg",
+  hipercard: "/cards/hipercard.svg",
 } as const
 
 const CardsView = () => {
@@ -307,7 +306,7 @@ const CardsView = () => {
 
           {isLoading ? (
             <div className="flex justify-center items-center h-[40vh] md:h-[50vh]">
-              <LottieAnimation animationPath="/loading.json" />
+              <LottieAnimation animationPath="/utilities/loading.json" />
             </div>
           ) : creditCards.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-[40vh] md:h-[50vh] text-center px-4">

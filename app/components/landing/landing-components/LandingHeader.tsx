@@ -30,7 +30,7 @@ const Header = () => {
             {/* Logo */}
             <div className="flex items-center gap-2 md:gap-3">
               <Image
-                src="/logo.svg"
+                src="/logos/logo.svg"
                 alt="SimpleFinance"
                 className="w-[28px] h-[28px] md:w-[48px] md:h-[48px]"
                 width={48}

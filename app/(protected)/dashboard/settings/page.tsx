@@ -9,13 +9,14 @@ const fetcher = async (url: string) => {
   const cookies = parseCookies()
   const userId = cookies.userId
 
-  if (!userId) return {
-    image: '/profile.png',
-    nome: 'User',
-    sobrenome: '',
-    email: '',
-    permissao: 'free' as const
-  }
+  if (!userId)
+    return {
+      image: "/utilities/profile.png",
+      nome: "User",
+      sobrenome: "",
+      email: "",
+      permissao: "free" as const,
+    }
 
   try {
     const response = await fetch(`${url}?userId=${userId}`, {
@@ -24,29 +25,29 @@ const fetcher = async (url: string) => {
         "Content-Type": "application/json",
       },
     })
-    
+
     if (!response.ok) {
-      throw new Error('Erro ao carregar dados do usuário')
+      throw new Error("Erro ao carregar dados do usuário")
     }
 
     const data = await response.json()
     return {
       ...data,
-      image: data.image || '/profile.png'
+      image: data.image || "/utilities/profile.png",
     }
   } catch (error) {
     return {
-      image: '/profile.png',
-      nome: 'User',
-      sobrenome: '',
-      email: '',
-      permissao: 'free' as const
+      image: "/utilities/profile.png",
+      nome: "User",
+      sobrenome: "",
+      email: "",
+      permissao: "free" as const,
     }
   }
 }
 
 const SettingsPage = () => {
-  const { data: userData } = useSWR('/api/users/get-user', fetcher)
+  const { data: userData } = useSWR("/api/users/get-user", fetcher)
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
