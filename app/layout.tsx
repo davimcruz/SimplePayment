@@ -127,6 +127,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-br" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+      </head>
       <Analytics />
       <ThemeProvider defaultTheme="dark" attribute="class">
         <body className={inter.className}>
@@ -137,13 +140,13 @@ export default function RootLayout({
             theme="dark"
             className="toaster-custom md:-mr-4 -mt-2 md-mt-5"
             icons={{
-              loading: <LoadingIcon />
+              loading: <LoadingIcon />,
             }}
             toastOptions={{
               style: {
-                background: 'hsl(162.9 93.5% 24.3%)',
-                color: 'white',
-                border: 'none',
+                background: "hsl(162.9 93.5% 24.3%)",
+                color: "white",
+                border: "none",
               },
               classNames: {
                 toast: "toast-custom",
