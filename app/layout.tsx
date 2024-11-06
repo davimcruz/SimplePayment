@@ -75,8 +75,16 @@ export const metadata: Metadata = {
       { url: '/logos/icon-512.png', type: 'image/png', sizes: '512x512' },
     ],
     apple: [
-      { url: '/logos/icon-192.png', sizes: '180x180', type: 'image/png' },
+      { url: '/logos/icon-192.png', sizes: '180x180', type: 'image/png' }
     ],
+    shortcut: ['/favicon.ico'],
+    other: [
+      {
+        rel: 'search',
+        type: 'image/x-icon',
+        url: '/favicon.ico'
+      }
+    ]
   },
   manifest: '/manifest.json',
   openGraph: {
