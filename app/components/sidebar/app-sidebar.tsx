@@ -151,6 +151,7 @@ const cardIcons = {
 export function AppSidebar({ initialData }: AppSidebarProps) {
   const router = useRouter()
   const cookies = parseCookies()
+
   const { data: userData = initialData, mutate: mutateUser } = useSWR<UserData>('/api/users/get-user', fetcher, {
     fallbackData: initialData,
     revalidateOnFocus: false,
@@ -196,12 +197,17 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
 
   useEffect(() => {
     const checkPaymentStatus = async () => {
-      if (window.location.pathname === '/dashboard/plans/checkout/success') {
+      const hasChecked = localStorage.getItem('payment_checked')
+      
+      if (window.location.pathname === '/dashboard/plans/checkout/success' && !hasChecked) {
         try {
-          await new Promise(resolve => setTimeout(resolve, 3000))
+          localStorage.setItem('payment_checked', 'true')
           
+          await new Promise(resolve => setTimeout(resolve, 10000))
+          await mutate('/api/users/get-user')
           await mutateUser()
-          router.refresh()
+          
+          window.location.reload()
         } catch (error) {
           console.error('Erro ao atualizar dados do usuário:', error)
         }
@@ -209,7 +215,7 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
     }
 
     checkPaymentStatus()
-  }, [mutateUser, router])
+  }, [])
 
   const handleLogout = () => {
     const cookies = parseCookies()
