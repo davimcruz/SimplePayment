@@ -7,6 +7,7 @@ import prisma from "@/lib/prisma"
  */
 export class FinancialAnalysisService {
   private model: Anthropic
+  private readonly MAX_MONTHS = 6 // Limita análise aos últimos 3 meses
 
   constructor() {
     this.model = new Anthropic({
@@ -20,131 +21,103 @@ export class FinancialAnalysisService {
    * @returns Objeto contendo a análise e os fluxos financeiros
    */
   async analyzeUserFinances(userId: string | number) {
+    console.time('Total Analysis Time')
     try {
-      // Validação do ID do usuário
+      console.time('1. User ID Validation')
       const userIdNumber = Number(userId)
       if (isNaN(userIdNumber)) {
         throw new Error("ID do usuário inválido")
       }
+      console.timeEnd('1. User ID Validation')
 
-      // Busca orçamentos do usuário
-      const orcamentos = await prisma.orcamento.findMany({
-        where: { userId: userIdNumber },
-        orderBy: { mes: "asc" },
-      })
+      console.time('2. Date Calculation')
+      const today = new Date()
+      const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - this.MAX_MONTHS, today.getDate())
+      const dateLimit = `${String(threeMonthsAgo.getDate()).padStart(2, '0')}-${String(threeMonthsAgo.getMonth() + 1).padStart(2, '0')}-${threeMonthsAgo.getFullYear()}`
+      console.timeEnd('2. Date Calculation')
 
-      // Validação de orçamentos
-      if (orcamentos.length === 0) {
-        throw new Error(
-          "Nenhum orçamento encontrado. Para realizar a análise IA, é necessário ter fluxos de caixa cadastrados."
-        )
+      console.time('3. Database Queries')
+      const [orcamentos, transacoes] = await Promise.all([
+        prisma.orcamento.findMany({
+          where: { 
+            userId: userIdNumber,
+            mes: {
+              gte: new Date().getMonth() - this.MAX_MONTHS + 1
+            }
+          },
+          orderBy: { mes: "asc" },
+          take: this.MAX_MONTHS
+        }),
+        prisma.transacoes.findMany({
+          where: { 
+            userId: userIdNumber,
+            data: {
+              gte: dateLimit
+            }
+          },
+          take: 100,
+          orderBy: {
+            data: 'desc'
+          }
+        })
+      ])
+      console.timeEnd('3. Database Queries')
+
+      if (!orcamentos.length || !transacoes.length) {
+        throw new Error("Dados insuficientes para análise")
       }
 
-      // Busca transações do usuário
-      const transacoes = await prisma.transacoes.findMany({
-        where: { userId: userIdNumber },
-      })
-
-      // Validação de transações
-      if (transacoes.length === 0) {
-        throw new Error(
-          "Nenhuma transação encontrada. Para realizar a analise IA, é necessário ter transações cadastradas."
-        )
+      console.time('4. Get Flows')
+      const flows = await CashflowService.getFlow(userIdNumber)
+      if (!flows || !Array.isArray(flows) || !flows.length) {
+        throw new Error("Fluxos de caixa não encontrados")
       }
+      console.timeEnd('4. Get Flows')
 
-      // Obtém fluxos de caixa processados
-      const response = await CashflowService.getFlow(userIdNumber)
-      let flows: any[] = []
-
-      // Normaliza o formato dos fluxos
-      if (Array.isArray(response)) {
-        flows = response
-      } else if (typeof response === "object" && response !== null) {
-        flows = Object.values(response)
-      } else {
-        throw new Error("Formato de resposta inválido")
-      }
-
-      // Validação dos fluxos
-      if (flows.length === 0) {
-        throw new Error(
-          "Não há fluxos de caixa cadastrados. Para realizar a análise, é necessário ter fluxos de caixa criados."
-        )
-      }
+      console.time('5. Process Recent Flows')
+      const recentFlows = flows
+        .sort((a, b) => a.mes - b.mes)
+        .slice(0, this.MAX_MONTHS)
+      console.timeEnd('5. Process Recent Flows')
 
       try {
-        // Chamada à API do Claude 3.5
-        console.log("4. Chamando Claude 3.5...")
+        console.time('6. Claude API Call')
         const message = await this.model.messages.create({
-          model: "claude-3-sonnet-20240229",
+          model: "claude-3-haiku-20240307",
           max_tokens: 1000,
           temperature: 0.1,
           messages: [{
             role: "user",
-            // Prompt estruturado para análise detalhada
-            content: `Analise estes dados financeiros mensais:
-
-${flows.sort((a, b) => a.mes - b.mes).map(flow => `
-${flow.nome}/${flow.ano}:
-Receitas: Orçado R$ ${flow.receitaOrcada.toFixed(2)} | Realizado R$ ${flow.receitaRealizada.toFixed(2)}
-Despesas: Orçado R$ ${flow.despesaOrcada.toFixed(2)} | Realizado R$ ${flow.despesaRealizada.toFixed(2)}
-Saldo Final: R$ ${flow.saldoRealizado.toFixed(2)} (${flow.status} de R$ ${flow.gapMoney.toFixed(2)})`).join('\n\n')}
-
-Forneça uma análise financeira detalhada no seguinte formato:
-
-[ANÁLISE]
-Outubro/2024:
-- Análise da receita (compare orçado vs realizado)
-- Análise da despesa (compare orçado vs realizado)
-- Impacto no saldo final
-
-(Repetir mesmo formato para Novembro e Dezembro)
-
-[PONTOS FORTES E FRACOS]
-Pontos Fortes:
-- 3 pontos fortes específicos analisando receitas, despesas e saldos
-
-Pontos Fracos:
-- 3 pontos fracos específicos analisando receitas, despesas e saldos
-
-[RECOMENDAÇÕES]
-1. Recomendação sobre gestão de receitas
-2. Recomendação sobre controle de despesas
-3. Recomendação sobre planejamento orçamentário
-4. Recomendação sobre gestão de saldo
-5. Recomendação geral para melhoria`
+            content: this.generatePrompt(recentFlows)
           }]
         })
+        console.timeEnd('6. Claude API Call')
 
-        // Validação da resposta do Claude
         if (!message.content[0] || message.content[0].type !== 'text') {
-          throw new Error('Resposta inválida do Claude')
+          throw new Error('Resposta inválida')
         }
 
-        // Retorna análise completa
+        console.timeEnd('Total Analysis Time')
         return {
-          analysis: message.content[0].text,
-          flows: flows,
+          analysis: (message.content[0] as { type: 'text', text: string }).text,
+          flows: recentFlows,
         }
 
       } catch (error) {
-        // Fallback para análise básica em caso de erro
-        console.log("7. Erro na geração do texto:", error)
-        return {
-          analysis: await this.generateBasicAnalysis(flows),
-          flows: flows,
+        console.log("Erro na geração do texto:", error)
+        console.time('7. Fallback Analysis')
+        const result = {
+          analysis: await this.generateBasicAnalysis(recentFlows),
+          flows: recentFlows,
         }
+        console.timeEnd('7. Fallback Analysis')
+        return result
       }
     } catch (error: any) {
-      // Tratamento de erros específicos do Prisma
       console.error("Erro durante a análise:", error)
-      if (error?.name === "PrismaClientValidationError") {
-        throw new Error("Dados inválidos fornecidos para a análise")
-      }
-      if (error?.name === "PrismaClientKnownRequestError") {
-        throw new Error("Erro ao acessar o banco de dados")
-      }
       throw error
+    } finally {
+      console.timeEnd('Total Analysis Time')
     }
   }
 
@@ -155,34 +128,54 @@ Pontos Fracos:
    */
   private async generateBasicAnalysis(flows: any[]): Promise<string> {
     try {
-      // Identifica melhor e pior mês baseado no gap
-      const melhorMes = flows.reduce((a, b) => a.gapMoney > b.gapMoney ? a : b)
-      const piorMes = flows.reduce((a, b) => a.gapMoney < b.gapMoney ? a : b)
-
-      // Gera análise simplificada
       const message = await this.model.messages.create({
-        model: "claude-3-sonnet-20240229",
-        max_tokens: 1000,
+        model: "claude-3-haiku-20240307",
+        max_tokens: 500,
         temperature: 0.1,
         messages: [{
           role: "user",
-          content: `Analise estes resultados financeiros:
-
-Melhor mês: ${melhorMes.nome} (saldo: R$ ${melhorMes.saldoRealizado.toFixed(2)})
-Pior mês: ${piorMes.nome} (saldo: R$ ${piorMes.saldoRealizado.toFixed(2)})
-
-Forneça uma análise resumida com pontos fortes, fracos e recomendações.`
+          content: `Análise resumida dos últimos ${flows.length} meses:
+${flows.map(f => `${f.nome}: Saldo R$ ${f.saldoRealizado.toFixed(2)}`).join('\n')}
+Forneça 3 pontos fortes, 3 fracos e 3 recomendações.`
         }]
       })
 
-      // Retorna texto da análise ou mensagem de erro
-      return message.content[0].type === 'text' 
-        ? (message.content[0] as { type: 'text', text: string }).text
-        : 'Não foi possível gerar a análise.'
+      if (!message.content[0] || message.content[0].type !== 'text') {
+        return 'Análise indisponível.'
+      }
+
+      return (message.content[0] as { type: 'text', text: string }).text
 
     } catch (error) {
-      console.error("Erro na análise básica:", error)
-      return "Não foi possível gerar a análise. Por favor, tente novamente."
+      return "Não foi possível gerar a análise."
     }
+  }
+
+  // Separei geração do prompt em método próprio
+  private generatePrompt(flows: any[]): string {
+    return `Analise estes dados financeiros mensais de forma concisa, começando do mês mais antigo para o mais recente:
+
+${flows.map(flow => `
+${flow.nome}/${flow.ano}:
+Receitas: Orçado R$ ${flow.receitaOrcada.toFixed(2)} | Realizado R$ ${flow.receitaRealizada.toFixed(2)}
+Despesas: Orçado R$ ${flow.despesaOrcada.toFixed(2)} | Realizado R$ ${flow.despesaRealizada.toFixed(2)}
+Saldo: R$ ${flow.saldoRealizado.toFixed(2)} (${flow.status} de R$ ${flow.gapMoney.toFixed(2)})`).join('\n')}
+
+[ANÁLISE]
+Apresente a análise na ordem cronológica (do mais antigo para o mais recente):
+${flows.map(f => f.nome + '/' + f.ano + ':').join('\n')}
+- Análise da receita
+- Análise da despesa
+- Impacto no saldo
+
+[PONTOS FORTES E FRACOS]
+Pontos Fortes:
+- 3 pontos principais
+
+Pontos Fracos:
+- 3 pontos principais
+
+[RECOMENDAÇÕES]
+1-5: Cinco recomendações objetivas`
   }
 }
