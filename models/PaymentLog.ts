@@ -107,12 +107,21 @@ class PaymentLogRepository {
   async update(paymentId: string, data: Partial<PaymentLog>): Promise<void> {
     try {
       const collection = await this.getCollection()
+      
+      // Garantir que o status seja atualizado
       await collection.updateOne(
-        { paymentId },
-        { $set: data }
+        { paymentId: paymentId }, // Usar paymentId como identificador
+        { 
+          $set: {
+            status: data.status,
+            updatedAt: new Date()
+          }
+        }
       )
+      
+      console.log(`[SUCESSO] Log atualizado para paymentId: ${paymentId}, novo status: ${data.status}`)
     } catch (error) {
-      console.error('Erro ao atualizar log:', error)
+      console.error('[ERRO] Falha ao atualizar log:', error)
       throw new Error('Falha ao atualizar log de pagamento')
     }
   }

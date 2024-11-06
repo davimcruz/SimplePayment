@@ -38,7 +38,7 @@ import {
 } from "../ui/dropdown-menu"
 import { Badge } from "../ui/badge"
 import { cn } from "@/lib/utils"
-import useSWR from "swr"
+import useSWR, { mutate } from "swr"
 import { Separator } from "../ui/separator"
 import Image from "next/image"
 import {
@@ -151,13 +151,13 @@ const cardIcons = {
 export function AppSidebar({ initialData }: AppSidebarProps) {
   const router = useRouter()
   const cookies = parseCookies()
-  const { data: userData, isLoading } = useSWR<UserData>('/api/users/get-user', fetcher, {
+  const { data: userData = initialData, mutate: mutateUser } = useSWR<UserData>('/api/users/get-user', fetcher, {
     fallbackData: initialData,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     revalidateIfStale: false,
-    revalidateOnMount: false,
-    dedupingInterval: 60000,
+    revalidateOnMount: true,
+    dedupingInterval: 0,
     suspense: false,
   })
 
@@ -194,22 +194,20 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
     }
   }, [router])
 
-  if (isLoading || !userData) {
-    return (
-      <Sidebar collapsible="icon">
-        <SidebarHeader>
-          <div className="flex items-center gap-2 mt-2">
-            <Wallet className="w-4 h-4 ml-2" />
-          </div>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Carregando...</SidebarGroupLabel>
-          </SidebarGroup>
-        </SidebarContent>
-      </Sidebar>
-    )
-  }
+  useEffect(() => {
+    const checkPaymentStatus = async () => {
+      if (window.location.pathname === '/dashboard/plans/checkout/success') {
+        try {
+          await mutateUser()
+          router.refresh()
+        } catch (error) {
+          console.error('Erro ao atualizar dados do usuário:', error)
+        }
+      }
+    }
+
+    checkPaymentStatus()
+  }, [mutateUser, router])
 
   const handleLogout = () => {
     const cookies = parseCookies()

@@ -129,6 +129,11 @@ export class PaymentService {
       const existingLog = await paymentLogRepository.findByPaymentId(payment.id.toString())
       
       if (existingLog && status !== existingLog.status) {
+        // Primeiro atualizar o status no log
+        await paymentLogRepository.update(payment.id.toString(), {
+          status: status
+        })
+
         // Se foi aprovado
         if (status === 'approved') {
           const userId = Number(existingLog.userId)
@@ -136,7 +141,7 @@ export class PaymentService {
           // Atualizar permissão do usuário para PRO
           await prisma.usuarios.update({
             where: { id: userId },
-            data: { permissao: 'PRO' }
+            data: { permissao: 'pro' }
           })
 
           // Invalidar cache do usuário no Redis
@@ -144,18 +149,12 @@ export class PaymentService {
           await redis.del(cacheKey)
           console.log(`[SUCESSO] Cache invalidado para o usuário ${userId}`)
 
-          // Retornar com redirect para página de sucesso
           return {
             status,
             paymentId: payment.id,
             redirect: '/dashboard/plans/checkout/success'
           }
         }
-
-        // Atualizar status no log
-        await paymentLogRepository.update(existingLog.paymentId, {
-          status: status
-        })
       }
 
       return {

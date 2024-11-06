@@ -50,7 +50,7 @@ const PlanCard = ({
         <div className="flex items-baseline gap-1">
           <span className="text-3xl font-bold">{price}</span>
           {price !== "Grátis" && (
-            <span className="text-muted-foreground">/mês</span>
+            <span className="text-muted-foreground">/vitalício</span>
           )}
         </div>
 
