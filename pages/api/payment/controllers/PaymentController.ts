@@ -57,4 +57,25 @@ export class PaymentController {
       })
     }
   }
+
+  async getPayments(req: NextApiRequest, res: NextApiResponse) {
+    try {
+      const { userId } = req.query
+
+      if (!userId || Array.isArray(userId)) {
+        return res.status(400).json({ 
+          error: "ID do usuário inválido" 
+        })
+      }
+
+      const payments = await this.paymentService.getPayments(userId)
+
+      return res.status(200).json(payments)
+    } catch (error) {
+      console.error("Erro ao buscar histórico de pagamentos:", error)
+      return res.status(500).json({ 
+        error: "Erro ao buscar histórico de pagamentos" 
+      })
+    }
+  }
 }

@@ -168,4 +168,24 @@ export class PaymentService {
       await paymentLogRepository.close()
     }
   }
+
+  async getPayments(userId: string) {
+    try {
+      const payments = await paymentLogRepository.findByUserId(userId)
+      
+      return payments.map(payment => ({
+        paymentId: payment.paymentId,
+        status: payment.status,
+        amount: payment.amount,
+        customerName: payment.customerName,
+        date: payment.createdAt,
+        plan: 'pro' 
+      }))
+    } catch (error) {
+      console.error("Erro ao buscar pagamentos:", error)
+      throw new Error("Falha ao buscar histórico de pagamentos")
+    } finally {
+      await paymentLogRepository.close()
+    }
+  }
 }

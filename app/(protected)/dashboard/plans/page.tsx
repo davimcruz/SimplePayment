@@ -39,9 +39,13 @@ const PlansPage = () => {
         { text: "Análise avançada com IA", included: false },
         { text: "Relatórios personalizados", included: false },
       ],
-      buttonText: user?.permissao === "free" ? "Plano Atual" : "Selecionar Plano",
+      buttonText: user?.permissao === "free" 
+        ? "Plano Atual" 
+        : user?.permissao === "pro" 
+          ? "Você já é um membro Pro" 
+          : "Selecionar Plano",
       popular: false,
-      disabled: user?.permissao === "free",
+      disabled: user?.permissao === "free" || user?.permissao === "pro",
     },
     {
       name: "PRO",
