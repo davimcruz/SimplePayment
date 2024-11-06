@@ -2,6 +2,7 @@ import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { GetPixDTO, PixResponse, PaymentStatusResponse } from "../dtos/GetPixDTO"
 import { paymentLogRepository } from '@/models/PaymentLog'
 import prisma from '@/lib/prisma'
+import redis from '@/lib/redis'
 
 interface MPPaymentResponse {
   id: number
@@ -130,15 +131,18 @@ export class PaymentService {
       if (existingLog && status !== existingLog.status) {
         // Se foi aprovado
         if (status === 'approved') {
+          const userId = Number(existingLog.userId)
+          
           // Atualizar permissão do usuário para PRO
           await prisma.usuarios.update({
-            where: { 
-              id: Number(existingLog.userId)
-            },
-            data: { 
-              permissao: 'pro'
-            }
+            where: { id: userId },
+            data: { permissao: 'PRO' }
           })
+
+          // Invalidar cache do usuário no Redis
+          const cacheKey = `user:${userId}`
+          await redis.del(cacheKey)
+          console.log(`[SUCESSO] Cache invalidado para o usuário ${userId}`)
 
           // Retornar com redirect para página de sucesso
           return {

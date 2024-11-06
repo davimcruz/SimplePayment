@@ -127,7 +127,7 @@ export default function CheckoutPage() {
         if (data.status === "approved") {
           toast.success("Pagamento aprovado! Redirecionando...")
           clearInterval(interval)
-          router.push("/dashboard")
+          router.push("/dashboard/plans/checkout/success")
         }
       } catch (error) {
         console.error("Erro ao verificar status:", error)
