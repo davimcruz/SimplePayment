@@ -49,7 +49,7 @@ const PlansPage = () => {
     },
     {
       name: "PRO",
-      price: "R$ 19,90",
+      price: "R$ 1,00",
       description: "Para quem quer levar as finanças ao próximo nível",
       features: [
         { text: "Suporte via email", included: true },

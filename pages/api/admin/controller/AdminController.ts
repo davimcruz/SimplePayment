@@ -152,4 +152,23 @@ export class AdminController {
       return res.status(500).json({ error: "Erro ao buscar detalhes do usuário" })
     }
   }
+
+  async getAllSells(req: NextApiRequest, res: NextApiResponse) {
+    if (req.method !== "GET") {
+      return res.status(405).json({ error: "[ERRO] Método não permitido" })
+    }
+
+    if (!(await this.verifyAdminAccess(req, res))) return
+
+    try {
+      const sellsData = await adminService.getAllSells()
+      return res.status(200).json({ 
+        message: "[SUCESSO] Vendas recuperadas com sucesso",
+        ...sellsData
+      })
+    } catch (error) {
+      console.error("[ERRO] Erro ao buscar vendas:", error)
+      return res.status(500).json({ error: "[ERRO] Erro ao buscar vendas" })
+    }
+  }
 }

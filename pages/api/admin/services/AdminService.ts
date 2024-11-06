@@ -1,5 +1,7 @@
 import prisma from "@/lib/prisma"
 import redis from "@/lib/redis"
+import { paymentLogRepository } from '@/models/PaymentLog'
+import { salesLogRepository } from '@/models/SalesLog'
 
 export class AdminService {
   // Busca todos os usuários cadastrados no sistema
@@ -205,5 +207,34 @@ export class AdminService {
     console.log(`[SUCESSO] ${userIds.length} usuários e todos seus dados relacionados foram removidos`)
     
     return { success: true }
+  }
+
+  async getAllSells() {
+    try {
+      const payments = await salesLogRepository.findAllApproved()
+      
+      const formattedPayments = payments.map(payment => ({
+        id: payment._id.toString(),
+        paymentId: payment.paymentId,
+        customerName: payment.customerName,
+        customerEmail: payment.customerEmail,
+        amount: payment.amount,
+        date: payment.createdAt,
+        plan: 'PRO',
+        userId: payment.userId
+      }))
+
+      const stats = await salesLogRepository.getStats()
+
+      return {
+        sells: formattedPayments,
+        stats
+      }
+    } catch (error) {
+      console.error("Erro ao buscar vendas:", error)
+      throw new Error("Falha ao buscar histórico de vendas")
+    } finally {
+      await salesLogRepository.close()
+    }
   }
 }
