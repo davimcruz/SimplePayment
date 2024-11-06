@@ -198,6 +198,8 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
     const checkPaymentStatus = async () => {
       if (window.location.pathname === '/dashboard/plans/checkout/success') {
         try {
+          await new Promise(resolve => setTimeout(resolve, 3000))
+          
           await mutateUser()
           router.refresh()
         } catch (error) {
