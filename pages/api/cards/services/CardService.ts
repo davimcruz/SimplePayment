@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma"
-import redis from "@/lib/redis"
+import redis from "@/lib/cache/redis"
 import { CreateCardInput } from "../dtos/CreateCardDTO"
 import { UpdateCardInput } from "../dtos/UpdateCardDTO"
 import { DeleteCardInput } from "../dtos/DeleteCardDTO"
@@ -13,7 +13,7 @@ class CardService {
     // Busca o usuário para verificar a permissão
     const user = await prisma.usuarios.findUnique({
       where: { id: userId },
-      select: { permissao: true }
+      select: { permissao: true },
     })
 
     if (!user) {
@@ -33,7 +33,7 @@ class CardService {
 
     if (cartoesExistentes >= limiteCartoes) {
       throw new Error(
-        user.permissao === "pro" 
+        user.permissao === "pro"
           ? "[ERRO] Limite de 10 cartões atingido. Este é o máximo permitido para usuários Pro."
           : "[ERRO] Limite de 3 cartões atingido. Faça upgrade para o plano Pro e adicione até 10 cartões!"
       )
@@ -117,7 +117,7 @@ class CardService {
       console.log(
         `[SUCESSO] Cartões recuperados do cache para o usuário ${userId}`
       )
-      return JSON.parse(cachedCards) 
+      return JSON.parse(cachedCards)
     }
 
     // Se não estiver no cache, realiza a busca diretamente no banco de dados

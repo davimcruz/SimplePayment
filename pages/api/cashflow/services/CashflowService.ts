@@ -1,7 +1,7 @@
 import { memoize } from "lodash"
 import NodeCache from "node-cache"
 import prisma from "@/lib/prisma"
-import redis from "@/lib/redis"
+import redis from "@/lib/cache/redis"
 import { monthNames } from "@/utils/monthNames"
 import { atualizarFluxoReal } from "@/utils/cashflow/flowReal"
 import { compararFluxos } from "@/utils/cashflow/flowComparisons"
@@ -103,7 +103,7 @@ class CashflowService {
       return flowArray.map((flow) => ({
         ...flow,
         nome: monthNames[flow.mes - 1],
-        status: flow.status || 'neutro',
+        status: flow.status || "neutro",
       }))
     })
 
@@ -146,7 +146,10 @@ class CashflowService {
   }
 
   // Atualiza fluxo existente
-  async updateFlow(userId: number, flow: { [key: string]: { receitaOrcada: number; despesaOrcada: number } }) {
+  async updateFlow(
+    userId: number,
+    flow: { [key: string]: { receitaOrcada: number; despesaOrcada: number } }
+  ) {
     const year = new Date().getFullYear()
 
     try {
@@ -164,7 +167,7 @@ class CashflowService {
             data: {
               receitaOrcada: valores.receitaOrcada,
               despesaOrcada: valores.despesaOrcada,
-              status: 'neutro',
+              status: "neutro",
             },
           })
         )
@@ -176,8 +179,8 @@ class CashflowService {
       // Invalida o cache
       await this.invalidateCache(userId)
     } catch (error) {
-      console.error('[ERRO] Falha ao atualizar fluxo:', error)
-      throw new Error('Falha ao atualizar o fluxo de caixa')
+      console.error("[ERRO] Falha ao atualizar fluxo:", error)
+      throw new Error("Falha ao atualizar o fluxo de caixa")
     }
   }
 
@@ -186,15 +189,15 @@ class CashflowService {
     try {
       // Atualiza valores realizados
       await atualizarFluxoReal(userId)
-      
+
       // Compara orçado vs realizado
       await compararFluxos(userId)
-      
+
       // Realoca saldos
       await realocarFluxo(userId)
     } catch (error) {
-      console.error('[ERRO] Falha ao processar fluxo:', error)
-      throw new Error('Falha ao processar o fluxo de caixa')
+      console.error("[ERRO] Falha ao processar fluxo:", error)
+      throw new Error("Falha ao processar o fluxo de caixa")
     }
   }
 }

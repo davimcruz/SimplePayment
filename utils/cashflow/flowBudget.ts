@@ -1,8 +1,7 @@
 import prisma from "@/lib/prisma"
 import { BigNumber } from 'bignumber.js'
-import NodeCache from 'node-cache'
 import { Prisma } from '@prisma/client'
-const cache = new NodeCache({ stdTTL: 300 }) // 5 minutos de cache
+import { sharedMemoryCache } from '@/lib/cache/sharedCache'
 
 interface FluxoMes {
   userId: number
@@ -15,11 +14,11 @@ interface FluxoMes {
 
 export async function realocarFluxo(userId: number) {
   const anoAtual = new Date().getFullYear()
-  const cacheKey = `reallocation:${userId}:${anoAtual}`
+  const cacheKey = `local_budget:${userId}:${anoAtual}`
   
   try {
-    // Verifica cache do redis
-    const cachedResult = cache.get<FluxoMes[]>(cacheKey)
+    // Verifica cache compartilhado
+    const cachedResult = sharedMemoryCache.get<FluxoMes[]>(cacheKey)
     if (cachedResult) {
       console.log('Retornando resultado do cache', { userId })
       return cachedResult
@@ -98,8 +97,8 @@ export async function realocarFluxo(userId: number) {
       maxTimeout: 5000
     })
 
-    // Armazena no cache
-    cache.set(cacheKey, fluxoRealocado)
+    // Armazena no cache compartilhado
+    sharedMemoryCache.set(cacheKey, fluxoRealocado)
     
     console.log('Realocação concluída com sucesso', {
       userId,

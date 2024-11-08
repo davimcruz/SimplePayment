@@ -20,9 +20,9 @@ import { ColumnToggle } from "./column-toggle"
 import {
   useReactTable,
   getCoreRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   getFilteredRowModel,
+  SortingState,
 } from "@tanstack/react-table"
 import {
   Select,
@@ -46,14 +46,47 @@ const TransactionsFull = () => {
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false)
   const { selectedYear, setSelectedYear } = useYear();
   const [availableYears, setAvailableYears] = useState<string[]>([])
+  const [sorting, setSorting] = useState<SortingState>([
+    {
+      id: "data",
+      desc: true
+    }
+  ])
+
+  const getAvailableYears = useCallback((transactions: TransactionWithUnknownId[]) => {
+    const years = transactions
+      .map((transaction) => {
+        if (!transaction.data) return null;
+        const [, , year] = transaction.data.split("-")
+        return year
+      })
+      .filter((year): year is string => year !== null)
+    
+    return ['all', ...Array.from(new Set(years)).sort().reverse()]
+  }, [])
+
+  const filteredTransactions = useMemo(() => {
+    if (!selectedYear || selectedYear === 'all') {
+      return transactions;
+    }
+    return transactions.filter((transaction) => {
+      if (!transaction.data) return false;
+      const [, , year] = transaction.data.split("-")
+      return year === selectedYear
+    })
+  }, [transactions, selectedYear])
 
   const table = useReactTable({
-    data: transactions,
+    data: filteredTransactions,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    state: {
+      sorting,
+    },
+    onSortingChange: setSorting,
+    enableSorting: true,
   })
 
   const isExample = useMemo(() => {
@@ -66,14 +99,6 @@ const TransactionsFull = () => {
       )
     )
   }, [transactions])
-
-  const getAvailableYears = useCallback((transactions: TransactionWithUnknownId[]) => {
-    const years = transactions.map((transaction) => {
-      const [, , year] = transaction.data.split("-")
-      return year
-    })
-    return Array.from(new Set(years)).sort().reverse()
-  }, [])
 
   const fetchTransactions = useCallback(async () => {
     setLoading(true)
@@ -89,15 +114,12 @@ const TransactionsFull = () => {
         })) as TransactionWithUnknownId[]
 
         setTransactions(completeExampleData)
-        const years = ['all', ...getAvailableYears(completeExampleData)]
-        setAvailableYears(years)
-        setLoading(false)
+        setAvailableYears(getAvailableYears(completeExampleData))
         return
       }
 
       setTransactions(data.table)
-      const years = ['all', ...getAvailableYears(data.table)]
-      setAvailableYears(years)
+      setAvailableYears(getAvailableYears(data.table))
     } catch (error) {
       console.error(error)
       const completeExampleData = exampleTransactions.map((transaction) => ({
@@ -107,10 +129,10 @@ const TransactionsFull = () => {
       })) as TransactionWithUnknownId[]
 
       setTransactions(completeExampleData)
-      const years = ['all', ...getAvailableYears(completeExampleData)]
-      setAvailableYears(years)
+      setAvailableYears(getAvailableYears(completeExampleData))
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }, [getAvailableYears])
 
   useEffect(() => {
@@ -128,16 +150,6 @@ const TransactionsFull = () => {
       window.removeEventListener("updateTransactions", handleTransactionUpdate)
     }
   }, [fetchTransactions])
-
-  const filteredTransactions = useMemo(() => {
-    if (selectedYear === 'all') {
-      return transactions;
-    }
-    return transactions.filter((transaction) => {
-      const [, , year] = transaction.data.split("-")
-      return year === selectedYear
-    })
-  }, [transactions, selectedYear])
 
   return (
     <div className="h-full w-full px-2 md:px-12 mt-8">
@@ -161,10 +173,10 @@ const TransactionsFull = () => {
                       }
                       className="max-w-sm"
                     />
-                    <ColumnToggle table={table} />
-                  </div>
-                  <div className="flex items-center gap-2 w-full md:w-auto">
-                    <Select value={selectedYear} onValueChange={setSelectedYear}>
+                    <Select
+                      value={selectedYear}
+                      onValueChange={(value) => setSelectedYear(value)}
+                    >
                       <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Selecione o ano" />
                       </SelectTrigger>
@@ -176,6 +188,9 @@ const TransactionsFull = () => {
                         ))}
                       </SelectContent>
                     </Select>
+                    <ColumnToggle table={table} />
+                  </div>
+                  <div className="flex items-center gap-2 w-full md:w-auto">
                     <Button
                       variant="outline"
                       onClick={() => setIsTransactionDialogOpen(true)}
@@ -185,10 +200,13 @@ const TransactionsFull = () => {
                     </Button>
                   </div>
                 </div>
+
                 <DataTable
                   columns={columns}
                   data={filteredTransactions}
                   onCreateTransaction={() => setIsTransactionDialogOpen(true)}
+                  table={table}
+                  showControls={false}
                 />
               </div>
             )}

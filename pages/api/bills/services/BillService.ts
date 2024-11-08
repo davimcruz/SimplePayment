@@ -1,8 +1,7 @@
 import prisma from "@/lib/prisma"
-import redis from "@/lib/redis" 
+import redis from "@/lib/cache/redis"
 
 class BillService {
-
   // Serviço de criação de faturas
   async deleteBill(faturaId: string) {
     return await prisma.$transaction(async (prisma) => {

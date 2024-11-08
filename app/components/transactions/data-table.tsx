@@ -10,6 +10,11 @@ import {
   getFilteredRowModel,
   SortingState,
   VisibilityState,
+  Table as TableType,
+  Header,
+  HeaderGroup,
+  Row,
+  Cell,
 } from "@tanstack/react-table"
 
 import {
@@ -32,45 +37,52 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   onCreateTransaction: () => void
+  table: TableType<TData>
+  showControls?: boolean
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  onCreateTransaction
+  onCreateTransaction,
+  table,
+  showControls = true
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: "data", desc: true }
-  ])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
-
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-    },
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-  })
-
   return (
     <div>
+      {showControls && (
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 py-4">
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <Input
+              placeholder="Filtrar transações..."
+              value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
+              onChange={(event) =>
+                table.getColumn("nome")?.setFilterValue(event.target.value)
+              }
+              className="max-w-sm"
+            />
+            <ColumnToggle table={table} />
+          </div>
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <Button
+              variant="outline"
+              onClick={onCreateTransaction}
+            >
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Criar Transação
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="rounded-md border">
         <div className="relative" style={{ height: "calc(100vh - 24rem)" }}>
           <div className="overflow-auto h-full">
             <Table>
               <TableHeader className="sticky top-0 bg-background/20 z-10">
-                {table.getHeaderGroups().map((headerGroup) => (
+                {table.getHeaderGroups().map((headerGroup: HeaderGroup<TData>) => (
                   <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
+                    {headerGroup.headers.map((header: Header<TData, unknown>) => (
                       <TableHead key={header.id}>
                         {header.isPlaceholder ? null : (
                           <div
@@ -105,12 +117,12 @@ export function DataTable<TData, TValue>({
               </TableHeader>
               <TableBody>
                 {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
+                  table.getRowModel().rows.map((row: Row<TData>) => (
                     <TableRow
                       key={row.id}
                       data-state={row.getIsSelected() && "selected"}
                     >
-                      {row.getVisibleCells().map((cell) => (
+                      {row.getVisibleCells().map((cell: Cell<TData, unknown>) => (
                         <TableCell key={cell.id}>
                           {flexRender(
                             cell.column.columnDef.cell,

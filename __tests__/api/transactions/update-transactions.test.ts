@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import handler from '@/pages/api/transactions/update-transactions'
-import { verifyToken } from '@/pages/api/middleware/jwt-auth'
+import { verifyTokenFromRequest } from '@/pages/api/middleware/jwt-auth'
 import prisma from '@/lib/prisma'
 
 jest.mock('@/pages/api/middleware/jwt-auth')
@@ -49,7 +49,7 @@ describe('update-transactions API', () => {
         valor: 1000,
       },
     }
-    ;(verifyToken as jest.Mock).mockResolvedValue(true)
+    ;(verifyTokenFromRequest as jest.Mock).mockResolvedValue(true)
     jest.clearAllMocks()
   })
 
@@ -103,7 +103,7 @@ describe('update-transactions API', () => {
   })
 
   it('should return 401 if token is invalid', async () => {
-    ;(verifyToken as jest.Mock).mockResolvedValue(false)
+    ;(verifyTokenFromRequest as jest.Mock).mockResolvedValue(false)
 
     await handler(mockReq as NextApiRequest, mockRes as NextApiResponse)
 

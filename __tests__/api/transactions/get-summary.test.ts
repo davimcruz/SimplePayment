@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import handler from '@/pages/api/transactions/get-summary'
-import { verifyToken } from '@/pages/api/auth/controllers/AuthController'
+import { verifyTokenFromRequest } from '@/pages/api/middleware/jwt-auth'
 import prisma from '@/lib/prisma'
 import { parseCookies } from 'nookies'
 
@@ -33,7 +33,7 @@ describe('transactionsSummary', () => {
     mockReq = {
       method: 'GET',
     }
-    ;(verifyToken as jest.Mock).mockResolvedValue(true)
+    ;(verifyTokenFromRequest as jest.Mock).mockResolvedValue(true)
     ;(parseCookies as jest.Mock).mockReturnValue({ userId: '1' })
   })
 
@@ -45,7 +45,7 @@ describe('transactionsSummary', () => {
   })
 
   it('should return 401 for invalid token', async () => {
-    ;(verifyToken as jest.Mock).mockResolvedValue(false)
+    ;(verifyTokenFromRequest as jest.Mock).mockResolvedValue(false)
     await handler(mockReq as NextApiRequest, mockRes as NextApiResponse)
     expect(mockStatus).toHaveBeenCalledWith(401)
     expect(mockJson).toHaveBeenCalledWith({ error: "Não autorizado" })

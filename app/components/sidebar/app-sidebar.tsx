@@ -77,12 +77,6 @@ const items = [
     icon: Home,
     adminOnly: false,
   },
-  {
-    title: "Fluxo de Caixa",
-    url: "/dashboard/cashflow/",
-    icon: Calendar,
-    adminOnly: false,
-  },
 ]
 
 const fetcher = async (url: string) => {
@@ -348,6 +342,15 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
                     </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <a href="/dashboard/plans" className="relative">
+                      <Calendar />
+                      <span>Fluxo de Caixa</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
 
                 <Collapsible className="group/collapsible">
                   <SidebarMenuItem>
