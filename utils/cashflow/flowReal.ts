@@ -1,105 +1,153 @@
 import prisma from "@/lib/prisma"
+import { BigNumber } from 'bignumber.js'
+import NodeCache from 'node-cache'
+import { Prisma } from '@prisma/client'
+
+const cache = new NodeCache({ stdTTL: 300 }) // 5 minutos
+
+interface FlowReal {
+  userId: number
+  mes: number
+  ano: number
+  receitaRealizada: number
+  despesaRealizada: number
+  saldoRealizado: number
+}
 
 export async function atualizarFluxoReal(userId: number) {
   const anoAtual = new Date().getFullYear()
-  const mesAtual = new Date().getMonth() + 1
+  const cacheKey = `flowReal:${userId}:${anoAtual}`
 
-  // Busca as transações do usuário para o ano atual
-  const transacoes = await prisma.transacoes.findMany({
-    where: {
-      userId,
-      data: {
-        endsWith: `-${anoAtual}`,
+  try {
+    // Verifica cache
+    const cachedResult = cache.get<FlowReal[]>(cacheKey)
+    if (cachedResult) {
+      return cachedResult
+    }
+
+    // Busca as transações em uma única query otimizada
+    const transacoes = await prisma.transacoes.findMany({
+      where: {
+        userId,
+        AND: [
+          { data: { not: null } },
+          { data: { endsWith: `-${anoAtual}` } }
+        ]
       },
-    },
-    select: {
-      tipo: true,
-      valor: true,
-      data: true,
-    },
-  })
+      select: {
+        tipo: true,
+        valor: true,
+        data: true,
+      }
+    })
 
-  // Totaliza receitas e despesas por mês
-  const totaisPorMes: { [key: number]: { receita: number; despesa: number } } = {}
+    // Inicializa mapa de totais por mês
+    const totaisPorMes = new Map<number, { 
+      receita: BigNumber
+      despesa: BigNumber 
+    }>()
 
-  transacoes.forEach((transacao) => {
-    if (transacao.data === null) return
-    const [dia, mes, ano] = transacao.data.split("-").map(Number)
-    if (ano !== anoAtual) return
+    // Processa transações
+    for (const transacao of transacoes) {
+      // Valida o formato da data (dd-mm-yyyy)
+      if (!transacao.data?.match(/^\d{2}-\d{2}-\d{4}$/)) {
+        console.warn('Formato de data inválido:', transacao.data)
+        continue // Pula transações com formato inválido
+      }
 
-    // Inicializa o objeto para o mês se não existir (visto que nem todos os meses são preenchidos)
-    if (!totaisPorMes[mes]) {
-      totaisPorMes[mes] = { receita: 0, despesa: 0 }
+      const [dia, mes, ano] = transacao.data.split("-").map(Number)
+      
+      // Validação adicional dos valores
+      if (isNaN(mes) || mes < 1 || mes > 12 || ano !== anoAtual) {
+        console.warn('Data inválida:', { dia, mes, ano })
+        continue
+      }
+      
+      if (!totaisPorMes.has(mes)) {
+        totaisPorMes.set(mes, { 
+          receita: new BigNumber(0), 
+          despesa: new BigNumber(0) 
+        })
+      }
+
+      const totais = totaisPorMes.get(mes)!
+      const valor = new BigNumber(transacao.valor)
+
+      if (transacao.tipo === "receita") {
+        totais.receita = totais.receita.plus(valor)
+      } else if (transacao.tipo === "despesa") {
+        totais.despesa = totais.despesa.plus(valor)
+      }
     }
 
-    // Acumula receitas e despesas
-    if (transacao.tipo === "receita") {
-      totaisPorMes[mes].receita += transacao.valor
-    } else if (transacao.tipo === "despesa") {
-      totaisPorMes[mes].despesa += transacao.valor
-    }
-  })
+    // Busca meses existentes no orçamento
+    const mesesExistentes = await prisma.orcamento.findMany({
+      where: {
+        userId,
+        ano: anoAtual,
+      },
+      select: {
+        mes: true,
+      },
+      orderBy: {
+        mes: "asc",
+      },
+    })
 
-  let saldoAnterior = 0
-  const atualizacoes = []
+    // Prepara atualizações
+    let saldoAnterior = new BigNumber(0)
+    const atualizacoes: FlowReal[] = []
 
-  // Busca os meses existentes no orçamento
-  const mesesExistentes = await prisma.orcamento.findMany({
-    where: {
-      userId,
-      ano: anoAtual,
-    },
-    select: {
-      mes: true,
-    },
-    orderBy: {
-      mes: "asc",
-    },
-  })
+    for (const { mes } of mesesExistentes) {
+      const totais = totaisPorMes.get(mes) || { 
+        receita: new BigNumber(0), 
+        despesa: new BigNumber(0) 
+      }
 
-  // Atualiza os saldos realizados para cada mês
-  for (const { mes } of mesesExistentes) {
-    const { receita = 0, despesa = 0 } = totaisPorMes[mes] || {}
-    const saldoMesAtual = receita - despesa
-    const saldoRealizado = saldoAnterior + saldoMesAtual
+      const saldoMesAtual = totais.receita.minus(totais.despesa)
+      const saldoRealizado = saldoAnterior.plus(saldoMesAtual)
 
-    atualizacoes.push(
-      prisma.orcamento.update({
-        where: {
-          userId_mes_ano: {
-            userId,
-            mes,
-            ano: anoAtual,
-          },
-        },
-        data: {
-          receitaRealizada: receita,
-          despesaRealizada: despesa,
-          saldoRealizado,
-        },
+      atualizacoes.push({
+        userId,
+        mes,
+        ano: anoAtual,
+        receitaRealizada: totais.receita.toNumber(),
+        despesaRealizada: totais.despesa.toNumber(),
+        saldoRealizado: saldoRealizado.toNumber()
       })
+
+      saldoAnterior = saldoRealizado
+    }
+
+    // Atualiza em transação
+    await prisma.$transaction(
+      atualizacoes.map((atualizacao) =>
+        prisma.orcamento.update({
+          where: {
+            userId_mes_ano: {
+              userId: atualizacao.userId,
+              mes: atualizacao.mes,
+              ano: atualizacao.ano,
+            },
+          },
+          data: {
+            receitaRealizada: atualizacao.receitaRealizada,
+            despesaRealizada: atualizacao.despesaRealizada,
+            saldoRealizado: atualizacao.saldoRealizado,
+          },
+        })
+      ),
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted
+      }
     )
 
-    saldoAnterior = saldoRealizado // Atualiza o saldo anterior para o próximo mês 
-  }
+    // Armazena no cache
+    cache.set(cacheKey, atualizacoes)
 
-  // Executa as atualizações em uma transação
-  try {
-    await prisma.$transaction(atualizacoes)
+    return atualizacoes
   } catch (error) {
-    console.error("Erro ao atualizar os saldos:", error)
-    throw new Error("Falha ao atualizar os fluxos de caixa.")
+    console.error('Erro ao atualizar fluxo real:', error)
+    throw new Error("Falha ao atualizar os valores realizados.")
   }
-
-  // Busca os fluxos atualizados
-  const fluxoAtualizado = await prisma.orcamento.findMany({
-    where: {
-      userId,
-      ano: anoAtual,
-      mes: { gte: mesAtual },
-    },
-    orderBy: { mes: "asc" },
-  })
-
-  return fluxoAtualizado
 }
