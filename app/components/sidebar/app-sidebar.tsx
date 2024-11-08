@@ -345,7 +345,7 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
 
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <a href="/dashboard/plans" className="relative">
+                    <a href="/dashboard/cashflow" className="relative">
                       <Calendar />
                       <span>Fluxo de Caixa</span>
                     </a>
