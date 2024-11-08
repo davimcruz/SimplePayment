@@ -18,14 +18,14 @@ export async function realocarFluxo(userId: number) {
   const cacheKey = `reallocation:${userId}:${anoAtual}`
   
   try {
-    // Verifica cache
+    // Verifica cache do redis
     const cachedResult = cache.get<FluxoMes[]>(cacheKey)
     if (cachedResult) {
       console.log('Retornando resultado do cache', { userId })
       return cachedResult
     }
 
-    // Busca fluxos em lotes
+    // Buscar fluxos em lotes
     const fluxos = await prisma.orcamento.findMany({
       where: {
         userId,
@@ -46,7 +46,7 @@ export async function realocarFluxo(userId: number) {
       throw new Error("Nenhum fluxo de caixa encontrado para o usuário.")
     }
 
-    // Processa em lotes de 100
+    // Processa em lotes de 100 (é tipo paginação, mas eu achei por batchs mais rápido)
     const BATCH_SIZE = 100
     let saldoAnterior = new BigNumber(0)
     const fluxoRealocado: FluxoMes[] = []
