@@ -3,7 +3,7 @@
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { useUserData } from "@/app/components/hooks/useUserData"
-import PlanCard from "@/app/components/dashboard/plans/PlanCard"
+import PlanCard from "@/app/components/plans/PlanCard"
 
 const PlansPage = () => {
   const router = useRouter()
@@ -39,10 +39,11 @@ const PlansPage = () => {
         { text: "Análise avançada com IA", included: false },
         { text: "Relatórios personalizados", included: false },
       ],
-      buttonText: user?.permissao === "free" 
-        ? "Plano Atual" 
-        : user?.permissao === "pro" 
-          ? "Você já é um membro Pro" 
+      buttonText:
+        user?.permissao === "free"
+          ? "Plano Atual"
+          : user?.permissao === "pro"
+          ? "Você já é um membro Pro"
           : "Selecionar Plano",
       popular: false,
       disabled: user?.permissao === "free" || user?.permissao === "pro",
@@ -59,7 +60,8 @@ const PlansPage = () => {
         { text: "Análise avançada com IA", included: true },
         { text: "Relatórios personalizados", included: true },
       ],
-      buttonText: user?.permissao === "pro" ? "Plano Atual" : "Virar membro Pro",
+      buttonText:
+        user?.permissao === "pro" ? "Plano Atual" : "Virar membro Pro",
       popular: true,
       disabled: user?.permissao === "pro",
     },

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import UsersTable from "@/app/components/dashboard/admin/users/users-table"
-import { SalesComponent } from "@/app/components/dashboard/admin/SalesComponent"
+import UsersTable from "@/app/components/admin/users/users-table"
+import { SalesComponent } from "@/app/components/admin/SalesComponent"
 import Cookies from "js-cookie"
 
 const AdminPage = () => {

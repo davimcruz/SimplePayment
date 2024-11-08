@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { TransactionTypeSelect } from "@/app/components/dashboard/create-transactions/TransactionType"
-import { PaymentMethodSelect } from "@/app/components/dashboard/create-transactions/PaymentMethod"
-import { CardSelect } from "@/app/components/dashboard/create-transactions/CardSelect"
-import { CreditPaymentTypeSelect } from "@/app/components/dashboard/create-transactions/CreditPaymentType"
-import { DatePicker } from "@/app/components/dashboard/create-transactions/DatePicker"
-import { CurrencyInput } from "@/app/components/dashboard/create-transactions/CurrencyInput"
+import { TransactionTypeSelect } from "@/app/components/create-transactions/TransactionType"
+import { PaymentMethodSelect } from "@/app/components/create-transactions/PaymentMethod"
+import { CardSelect } from "@/app/components/create-transactions/CardSelect"
+import { CreditPaymentTypeSelect } from "@/app/components/create-transactions/CreditPaymentType"
+import { DatePicker } from "@/app/components/create-transactions/DatePicker"
+import { CurrencyInput } from "@/app/components/create-transactions/CurrencyInput"
 import { Input } from "@/app/components/ui/input"
 import { Label } from "@/app/components/ui/label"
 import { Button } from "@/app/components/ui/button"
@@ -176,7 +176,7 @@ const CreateTransaction: React.FC<CreateTransactionProps> = ({
             }
 
             reset()
-            window.dispatchEvent(new Event('updateTransactions'))
+            window.dispatchEvent(new Event("updateTransactions"))
             onSuccess?.()
           })(),
           {

@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/app/components/ui/card"
 import { Skeleton } from "../ui/skeleton"
-import CreateTransaction from "../dashboard/create-transactions/CreateTransactions"
+import CreateTransaction from "../create-transactions/CreateTransactions"
 import { Transactions } from "@/types/types"
 import { exampleTransactions } from "@/utils/exampleData"
 import { PlusCircle } from "lucide-react"
@@ -24,16 +24,28 @@ import {
   getSortedRowModel,
   getFilteredRowModel,
 } from "@tanstack/react-table"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/app/components/ui/select"
+import { useYear } from '@/app/contexts/YearContext';
 
-type TransactionWithUnknownId = Omit<Transactions, 'userId' | 'dataCriacao'> & {
-  userId: unknown;
-  dataCriacao: string | Date;
+type TransactionWithUnknownId = Omit<Transactions, "userId" | "dataCriacao"> & {
+  userId: unknown
+  dataCriacao: string | Date
 }
 
 const TransactionsFull = () => {
-  const [transactions, setTransactions] = useState<TransactionWithUnknownId[]>([])
+  const [transactions, setTransactions] = useState<TransactionWithUnknownId[]>(
+    []
+  )
   const [loading, setLoading] = useState(true)
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false)
+  const { selectedYear, setSelectedYear } = useYear();
+  const [availableYears, setAvailableYears] = useState<string[]>([])
 
   const table = useReactTable({
     data: transactions,
@@ -55,6 +67,14 @@ const TransactionsFull = () => {
     )
   }, [transactions])
 
+  const getAvailableYears = useCallback((transactions: TransactionWithUnknownId[]) => {
+    const years = transactions.map((transaction) => {
+      const [, , year] = transaction.data.split("-")
+      return year
+    })
+    return Array.from(new Set(years)).sort().reverse()
+  }, [])
+
   const fetchTransactions = useCallback(async () => {
     setLoading(true)
     try {
@@ -69,11 +89,15 @@ const TransactionsFull = () => {
         })) as TransactionWithUnknownId[]
 
         setTransactions(completeExampleData)
+        const years = ['all', ...getAvailableYears(completeExampleData)]
+        setAvailableYears(years)
         setLoading(false)
         return
       }
 
       setTransactions(data.table)
+      const years = ['all', ...getAvailableYears(data.table)]
+      setAvailableYears(years)
     } catch (error) {
       console.error(error)
       const completeExampleData = exampleTransactions.map((transaction) => ({
@@ -83,9 +107,11 @@ const TransactionsFull = () => {
       })) as TransactionWithUnknownId[]
 
       setTransactions(completeExampleData)
+      const years = ['all', ...getAvailableYears(completeExampleData)]
+      setAvailableYears(years)
     }
     setLoading(false)
-  }, [])
+  }, [getAvailableYears])
 
   useEffect(() => {
     fetchTransactions()
@@ -103,6 +129,16 @@ const TransactionsFull = () => {
     }
   }, [fetchTransactions])
 
+  const filteredTransactions = useMemo(() => {
+    if (selectedYear === 'all') {
+      return transactions;
+    }
+    return transactions.filter((transaction) => {
+      const [, , year] = transaction.data.split("-")
+      return year === selectedYear
+    })
+  }, [transactions, selectedYear])
+
   return (
     <div className="h-full w-full px-2 md:px-12 mt-8">
       <Card className="bg-gradient-to-t from-background/10 to-primary/[5%] relative">
@@ -114,11 +150,47 @@ const TransactionsFull = () => {
             {loading ? (
               <Skeleton className="h-[250px]" />
             ) : (
-              <DataTable 
-                columns={columns} 
-                data={transactions} 
-                onCreateTransaction={() => setIsTransactionDialogOpen(true)}
-              />
+              <div>
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 py-4">
+                  <div className="flex items-center gap-2 w-full md:w-auto">
+                    <Input
+                      placeholder="Filtrar transações..."
+                      value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
+                      onChange={(event) =>
+                        table.getColumn("nome")?.setFilterValue(event.target.value)
+                      }
+                      className="max-w-sm"
+                    />
+                    <ColumnToggle table={table} />
+                  </div>
+                  <div className="flex items-center gap-2 w-full md:w-auto">
+                    <Select value={selectedYear} onValueChange={setSelectedYear}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Selecione o ano" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableYears.map((year) => (
+                          <SelectItem key={year} value={year}>
+                            {year === 'all' ? 'Todos os anos' : year}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsTransactionDialogOpen(true)}
+                    >
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Criar Transação
+                    </Button>
+                  </div>
+                </div>
+                <DataTable
+                  columns={columns}
+                  data={filteredTransactions}
+                  onCreateTransaction={() => setIsTransactionDialogOpen(true)}
+                />
+              </div>
             )}
           </CardContent>
         </div>

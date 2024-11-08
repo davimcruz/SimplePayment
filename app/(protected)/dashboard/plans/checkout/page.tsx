@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation"
 import { Card } from "@/app/components/ui/card"
 import { toast } from "sonner"
 import { parseCookies } from "nookies"
-import { CheckoutForm } from "@/app/components/dashboard/plans/checkout/CheckoutForm"
-import { QRCodeDisplay } from "@/app/components/dashboard/plans/checkout/QRCodeDisplay"
+import { CheckoutForm } from "@/app/components/plans/checkout/CheckoutForm"
+import { QRCodeDisplay } from "@/app/components/plans/checkout/QRCodeDisplay"
 import { CheckoutFormData } from "@/lib/validation"
 
-const PLAN_PRICE = 1.00 // Alterar também no PaymentController.ts
+const PLAN_PRICE = 1.0 // Alterar também no PaymentController.ts
 const PAYMENT_CHECK_INTERVAL = 3000
 
 interface User {
@@ -40,11 +40,10 @@ export default function CheckoutPage() {
     isLoading: false,
     showQRCode: false,
     qrCodeData: "",
-    paymentId: null
+    paymentId: null,
   })
 
   const fetchUserData = useCallback(async () => {
-    
     try {
       const { userId } = parseCookies()
       if (!userId) {
@@ -59,11 +58,11 @@ export default function CheckoutPage() {
       }
 
       const userData: User = await response.json()
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         nome: `${userData.nome} ${userData.sobrenome}`,
         email: userData.email,
-        userId: userData.id
+        userId: userData.id,
       }))
     } catch (error) {
       toast.error("Erro ao carregar seus dados. Tente novamente.")
@@ -77,7 +76,7 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (data: CheckoutFormData) => {
     const loadingToast = toast.loading("Gerando QR Code PIX...")
-    setState(prev => ({ ...prev, isLoading: true }))
+    setState((prev) => ({ ...prev, isLoading: true }))
 
     try {
       const response = await fetch("/api/payment/get-pix", {
@@ -85,22 +84,22 @@ export default function CheckoutPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
-          userId: state.userId
+          userId: state.userId,
         }),
       })
 
       const responseData = await response.json()
-      
+
       if (!response.ok) {
         throw new Error(responseData.error || "Erro ao gerar pagamento")
       }
-      
-      setState(prev => ({
+
+      setState((prev) => ({
         ...prev,
         qrCodeData: responseData.qrCode,
         paymentId: responseData.paymentId,
         showQRCode: true,
-        isLoading: false
+        isLoading: false,
       }))
       toast.dismiss(loadingToast)
       toast.success("QR Code PIX gerado com sucesso!")
@@ -108,7 +107,7 @@ export default function CheckoutPage() {
       toast.dismiss(loadingToast)
       toast.error("Erro ao gerar pagamento. Tente novamente.")
       console.error("Erro ao gerar PIX:", error)
-      setState(prev => ({ ...prev, isLoading: false }))
+      setState((prev) => ({ ...prev, isLoading: false }))
     }
   }
 
@@ -117,7 +116,9 @@ export default function CheckoutPage() {
 
     const checkPaymentStatus = async () => {
       try {
-        const response = await fetch(`/api/payment/get-status?paymentId=${state.paymentId}`)
+        const response = await fetch(
+          `/api/payment/get-status?paymentId=${state.paymentId}`
+        )
         const data = await response.json()
 
         if (!response.ok) {
@@ -145,12 +146,14 @@ export default function CheckoutPage() {
 
   return (
     <div className="container max-w-2xl mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6 text-center md:text-left">Checkout de Membro PRO</h1>
-      
+      <h1 className="text-2xl font-bold mb-6 text-center md:text-left">
+        Checkout de Membro PRO
+      </h1>
+
       <Card className="p-6 bg-gradient-to-t from-background/10 to-primary/10">
         <div className="space-y-6">
           {!state.showQRCode ? (
-            <CheckoutForm 
+            <CheckoutForm
               nome={state.nome}
               email={state.email}
               cpf={state.cpf}
@@ -158,17 +161,22 @@ export default function CheckoutPage() {
               onSubmit={handleSubmit}
             />
           ) : (
-            <QRCodeDisplay 
+            <QRCodeDisplay
               qrCodeData={state.qrCodeData}
               price={PLAN_PRICE}
-              onBack={() => setState(prev => ({ ...prev, showQRCode: false }))}
+              onBack={() =>
+                setState((prev) => ({ ...prev, showQRCode: false }))
+              }
             />
           )}
         </div>
       </Card>
 
       <div className="mt-6 text-center text-sm text-muted-foreground">
-        <p>Após a confirmação do pagamento, seu plano será atualizado automaticamente</p>
+        <p>
+          Após a confirmação do pagamento, seu plano será atualizado
+          automaticamente
+        </p>
       </div>
     </div>
   )

@@ -2,15 +2,21 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/app/components/ui/badge"
-import ViewTransaction from "../dashboard/view-transactions/ViewTransactions"
+import ViewTransaction from "../view-transactions/ViewTransactions"
 import { Transactions } from "@/types/types"
 
-type TransactionWithUnknownId = Omit<Transactions, 'userId' | 'dataCriacao'> & {
-  userId: unknown;
-  dataCriacao: string | Date;
+type TransactionWithUnknownId = Omit<Transactions, "userId" | "dataCriacao"> & {
+  userId: unknown
+  dataCriacao: string | Date
 }
 
-type FonteKey = "cartao-credito" | "cartao-debito" | "pix" | "boleto" | "especie" | "outros"
+type FonteKey =
+  | "cartao-credito"
+  | "cartao-debito"
+  | "pix"
+  | "boleto"
+  | "especie"
+  | "outros"
 
 const mappings: { [key in FonteKey]?: string } = {
   "cartao-credito": "Cartão de Crédito",
@@ -85,18 +91,18 @@ export const columns: ColumnDef<TransactionWithUnknownId>[] = [
     sortingFn: (rowA, rowB, columnId) => {
       const dateA = rowA.getValue(columnId) as string
       const dateB = rowB.getValue(columnId) as string
-      
+
       const [diaA, mesA, anoA] = dateA.replace(/-/g, "/").split("/")
       const [diaB, mesB, anoB] = dateB.replace(/-/g, "/").split("/")
-      
+
       if (anoA !== anoB) {
         return parseInt(anoA) - parseInt(anoB)
       }
-      
+
       if (mesA !== mesB) {
         return parseInt(mesA) - parseInt(mesB)
       }
-      
+
       return parseInt(diaA) - parseInt(diaB)
     },
     enableSorting: true,
@@ -112,9 +118,7 @@ export const columns: ColumnDef<TransactionWithUnknownId>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      return (
-        <ViewTransaction transactionId={row.original.transactionId} />
-      )
+      return <ViewTransaction transactionId={row.original.transactionId} />
     },
   },
 ]

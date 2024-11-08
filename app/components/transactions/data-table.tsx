@@ -63,28 +63,6 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="flex items-center justify-between py-4">
-        <div className="flex items-center gap-2">
-          <Input
-            placeholder="Filtrar transações..."
-            value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("nome")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
-          <ColumnToggle table={table} />
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1"
-          onClick={onCreateTransaction}
-        >
-          <PlusCircle className="h-4 w-4" />
-          Criar Transação
-        </Button>
-      </div>
       <div className="rounded-md border">
         <div className="relative" style={{ height: "calc(100vh - 24rem)" }}>
           <div className="overflow-auto h-full">

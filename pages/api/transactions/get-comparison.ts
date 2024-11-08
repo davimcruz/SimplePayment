@@ -21,7 +21,6 @@ export default async function queryComparison(
       return res.status(400).json({ error: "ID de usuário inválido" })
     }
 
-    const currentYear = new Date().getFullYear().toString()
     const transactions = await getTransactions(userId)
 
     if (!transactions) {
@@ -35,19 +34,19 @@ export default async function queryComparison(
 
     transactions.forEach((transaction: Transaction) => {
       const [day, month, year] = transaction.data?.split("-") || []
+      
+      const dateKey = `01-${month}-${year}`
+      
+      if (!monthlyTransactions[dateKey]) {
+        monthlyTransactions[dateKey] = { income: 0, expense: 0 }
+      }
 
-      if (year === currentYear) {
-        if (!monthlyTransactions[month]) {
-          monthlyTransactions[month] = { income: 0, expense: 0 }
-        }
+      const value = transaction.valor ?? 0
 
-        const value = transaction.valor ?? 0
-
-        if (transaction.tipo === "receita") {
-          monthlyTransactions[month].income += value
-        } else if (transaction.tipo === "despesa") {
-          monthlyTransactions[month].expense += value
-        }
+      if (transaction.tipo === "receita") {
+        monthlyTransactions[dateKey].income += value
+      } else if (transaction.tipo === "despesa") {
+        monthlyTransactions[dateKey].expense += value
       }
     })
 

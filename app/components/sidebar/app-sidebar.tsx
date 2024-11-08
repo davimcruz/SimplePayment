@@ -52,7 +52,7 @@ import MastercardIcon from "@/public/cards/mastercard.svg"
 import AmexIcon from "@/public/cards/amex.svg"
 import EloIcon from "@/public/cards/elo.svg"
 import HipercardIcon from "@/public/cards/hipercard.svg"
-import CreateTransaction from "../dashboard/create-transactions/CreateTransactions"
+import CreateTransaction from "../create-transactions/CreateTransactions"
 import { toast } from "sonner"
 
 interface UserData {

@@ -18,7 +18,7 @@ import {
 } from "@/app/components/ui/chart"
 import { exampleFlows } from "@/utils/exampleData"
 import { useMemo, useState } from "react"
-import CreateTransaction from "../../dashboard/create-transactions/CreateTransactions"
+import CreateTransaction from "../../create-transactions/CreateTransactions"
 import { Separator } from "../../ui/separator"
 
 interface FlowItem {
@@ -58,7 +58,7 @@ const BalanceComparisonChart = ({ data }: BalanceComparisonChartProps) => {
   }))
 
   const currentMonth = new Date().getMonth() + 1
-  const currentMonthData = data.find(item => item.mes === currentMonth)
+  const currentMonthData = data.find((item) => item.mes === currentMonth)
   const trend = currentMonthData?.gapPercentage || 0
   const isTrendingUp = trend > 0
 
@@ -196,4 +196,4 @@ const BalanceComparisonChart = ({ data }: BalanceComparisonChartProps) => {
   )
 }
 
-export default BalanceComparisonChart 
+export default BalanceComparisonChart
