@@ -130,7 +130,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Analytics />
         <ThemeProvider defaultTheme="dark" attribute="class">
-          {children}
+            {children}
           <Toaster
             richColors
             position="top-right"
