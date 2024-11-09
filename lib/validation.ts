@@ -147,31 +147,17 @@ export const updateCardSchema = z.object({
 export type UpdateCardInput = z.infer<typeof updateCardSchema>
 
 export const createParcelsSchema = z.object({
-  email: z.string().email({ message: "Email inválido" }),
-  nome: z.string().min(1, { message: "Nome é obrigatório" }),
-  tipo: z.literal("despesa", {
-    message: "Tipo deve ser 'despesa' para crédito",
-  }),
-  fonte: z.literal("cartao-credito", {
-    message: "Fonte deve ser 'cartao-credito'",
-  }),
-  detalhesFonte: z.string().optional().nullable(),
-  data: z.string().refine(
-    (date) => {
-      const ddMMyyyy = /^\d{2}-\d{2}-\d{4}$/.test(date)
-      const isoFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(date)
-      return ddMMyyyy || isoFormat
-    },
-    {
-      message: "Data deve estar no formato DD-MM-YYYY ou ISO (yyyy-mm-ddTHH:MM:SS.sssZ)",
-    }
-  ),
-  valor: z.number().positive({ message: "Valor deve ser um número positivo" }),
-  cardId: z.string().uuid({ message: "Card ID inválido" }),
+  nome: z.string().min(1, "Nome é obrigatório"),
+  tipo: z.string().min(1, "Tipo é obrigatório"),
+  fonte: z.string().min(1, "Fonte é obrigatória"),
+  detalhesFonte: z.string().optional(),
+  data: z.string().min(1, "Data é obrigatória"),
+  valor: z.number().min(0.01, "Valor deve ser maior que zero"),
+  cardId: z.string().min(1, "ID do cartão é obrigatório"),
   numeroParcelas: z
     .number()
-    .min(1, { message: "Número de parcelas mínimo é 1" })
-    .max(12, { message: "Número de parcelas máximo é 12" }),
+    .min(1, "Número de parcelas deve ser maior que zero")
+    .max(24, "Máximo de 24 parcelas"),
 })
 
 export type CreateParcelsInput = z.infer<typeof createParcelsSchema>

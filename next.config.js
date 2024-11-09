@@ -1,7 +1,13 @@
-//Redirecionamento do usuário por padrão para /dashboard usando pages router
-
+/** @type {import('next').NextConfig} */
 module.exports = {
   images: {
-    domains: ["utfs.io"], // Domínio permitido para imagens (uploadthing)
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'utfs.io',
+        port: '',
+        pathname: '/**',
+      },
+    ],
   },
 }

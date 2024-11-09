@@ -15,16 +15,15 @@ export async function middleware(request: NextRequest) {
   // Verifica se existem os cookies necessários
   const token = request.cookies.get('token')
   const userId = request.cookies.get('userId')
-  const email = request.cookies.get('email')
+
 
   // Se faltar algum cookie essencial, redireciona para login
-  if (!token || !userId || !email) {
+  if (!token || !userId) {
     const response = NextResponse.redirect(new URL('/signin', request.url))
     
     // Limpa todos os cookies por segurança
     response.cookies.delete('token')
     response.cookies.delete('userId')
-    response.cookies.delete('email')
     
     return response
   }

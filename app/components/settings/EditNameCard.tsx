@@ -25,26 +25,26 @@ export function EditNameCard() {
 
     try {
       setLoadingSave(true)
-      const emailFromCookieEncoded = document.cookie
+      const userIdFromCookie = document.cookie
         .split("; ")
-        .find((row) => row.startsWith("email="))
+        .find((row) => row.startsWith("userId="))
         ?.split("=")[1]
 
-      if (!emailFromCookieEncoded) {
-        throw new Error("Email não encontrado nos cookies")
+      if (!userIdFromCookie) {
+        throw new Error("UserId não encontrado nos cookies")
       }
 
-      const emailFromCookie = decodeURIComponent(emailFromCookieEncoded)
+      const userId = Number(userIdFromCookie)
 
       await toast.promise(
         (async () => {
-          const response = await fetch("/api/settings/edit-name", {
+          const response = await fetch("/api/settings/update-name", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              email: emailFromCookie,
+              userId,
               nome: newName,
               sobrenome: newLastName,
             }),
