@@ -22,7 +22,7 @@ import LottieAnimation from "@/app/components/ui/loadingAnimation"
 import { viewTransactionSchema, type ViewTransactionFormData } from "@/lib/validation"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Pencil } from "lucide-react"
+import { ArrowUpRight } from "lucide-react"
 
 const ENDPOINTS = {
   VIEW_TRANSACTION: "/api/transactions/view-transactions",
@@ -227,7 +227,7 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({ transactionId }) => {
         onClick={openDialog}
       >
         <span className="sr-only">Abrir menu</span>
-        <Pencil className="h-4 w-4" />
+        <ArrowUpRight className="h-4 w-4" />
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
