@@ -32,7 +32,7 @@ const chartConfig = {
 const BillChart = memo(({ bills }: BillChartProps) => {
   const allMonths = monthNames.map((month, index) => ({
     month: month,
-    valor: 0, // valor padrão zero
+    valor: 0,
     mes: index + 1
   }))
 
@@ -46,7 +46,7 @@ const BillChart = memo(({ bills }: BillChartProps) => {
   const chartData = allMonths.slice(-6) 
 
   return (
-    <Card className="h-[500px] bg-gradient-to-t from-background/10 to-primary/[5%]">
+    <Card className="h-[300px] md:h-[500px] bg-gradient-to-t from-background/10 to-primary/[5%]">
       <CardHeader>
         <CardTitle>Evolução das Faturas</CardTitle>
         <CardDescription>

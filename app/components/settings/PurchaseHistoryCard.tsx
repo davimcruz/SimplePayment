@@ -57,13 +57,13 @@ export function PurchaseHistoryCard() {
           Visualize todas as suas transações realizadas na plataforma
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Data</TableHead>
-              <TableHead>Plano</TableHead>
-              <TableHead>Valor</TableHead>
+              <TableHead className="hidden md:table-cell">Plano</TableHead>
+              <TableHead className="hidden md:table-cell">Valor</TableHead>
               <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
@@ -77,7 +77,7 @@ export function PurchaseHistoryCard() {
                     year: 'numeric'
                   })}
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden md:table-cell">
                   {(() => {
                     switch (purchase.plan.toUpperCase()) {
                       case 'PRO':
@@ -87,7 +87,7 @@ export function PurchaseHistoryCard() {
                     }
                   })()}
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden md:table-cell">
                   {purchase.amount.toLocaleString('pt-BR', {
                     style: 'currency',
                     currency: 'BRL'

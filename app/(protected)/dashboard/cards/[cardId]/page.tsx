@@ -10,11 +10,13 @@ const CardDetailsPage = () => {
   }
 
   return (
-      <div className="flex flex-col">
-        <div className="p-6">
+    <div className="flex flex-col">
+      <div className="md:p-6 p-2">
+        <div className="w-full overflow-x-auto overflow-y-hidden">
           <BillsTable cardId={cardId as string} />
         </div>
       </div>
+    </div>
   )
 }
 

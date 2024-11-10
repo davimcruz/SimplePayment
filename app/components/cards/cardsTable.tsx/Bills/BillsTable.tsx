@@ -145,8 +145,8 @@ const BillsTable: React.FC<BillsTableProps> = ({ cardId }) => {
   )
 
   return (
-    <div className="flex w-full gap-6">
-      <div className="w-1/2 ml-12">
+    <div className="flex flex-col md:flex-row w-full gap-6">
+      <div className="w-full md:w-1/2 md:ml-12 px-4 md:px-0 pt-4 md:pt-0">
         <Card className="min-h-[500px] bg-gradient-to-t from-background/10 to-primary/[5%]">
           <CardHeader className="flex-col md:flex-row items-center justify-between">
             <div className="flex-col">
@@ -160,12 +160,12 @@ const BillsTable: React.FC<BillsTableProps> = ({ cardId }) => {
             <Button
               onClick={handleBackClick}
               variant={"outline"}
-              className="mt-4 md:mt-0 cursor-pointer md:hidden"
+              className="mt-4 md:mt-0 cursor-pointer"
             >
               <LogOut className="mr-2" /> Sair da Fatura
             </Button>
           </CardHeader>
-          <CardContent className="md:px-6">
+          <CardContent className="px-2 md:px-6">
             {loading ? (
               <Skeleton className="h-[250px]" />
             ) : bills.length === 0 ? (
@@ -177,7 +177,7 @@ const BillsTable: React.FC<BillsTableProps> = ({ cardId }) => {
                 <p>Nenhuma fatura encontrada</p>
               </div>
             ) : (
-              <div className="w-full">
+              <div className="w-full overflow-x-auto">
                 <DataTable<BillType, unknown>
                   columns={columns(handleBillClick)}
                   data={filteredBills}
@@ -191,7 +191,7 @@ const BillsTable: React.FC<BillsTableProps> = ({ cardId }) => {
           open={!!selectedFaturaId}
           onOpenChange={() => setSelectedFaturaId(null)}
         >
-          <DialogContent>
+          <DialogContent className="sm:max-w-[90%] md:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>Parcelas da Fatura</DialogTitle>
             </DialogHeader>
@@ -200,7 +200,9 @@ const BillsTable: React.FC<BillsTableProps> = ({ cardId }) => {
             ) : parcelas.length === 0 ? (
               <p>Nenhuma parcela encontrada para esta fatura.</p>
             ) : (
-              <ParcelsTable parcelas={parcelas} />
+              <div className="overflow-x-auto">
+                <ParcelsTable parcelas={parcelas} />
+              </div>
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setSelectedFaturaId(null)}>
@@ -211,8 +213,8 @@ const BillsTable: React.FC<BillsTableProps> = ({ cardId }) => {
         </Dialog>
       </div>
 
-      <div className="w-1/2 mr-12">
-        <Card className="min-h-[500px]">
+      <div className="w-full md:w-1/2 md:mr-12 mt-6 md:mt-0 px-4 md:px-0 mb-8 md:mb-0">
+        <Card className="md:min-h-[500px] bg-gradient-to-t from-background/10 to-primary/[5%]">
           <BillChart bills={bills} />
         </Card>
       </div>
