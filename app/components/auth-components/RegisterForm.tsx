@@ -75,8 +75,8 @@ export default function RegisterForm() {
   const isDisabled = Boolean(loading || errors.confirmPassword)
 
   return (
-    <div className="w-full lg:w-1/2 flex items-center justify-center p-4 lg:p-8">
-      <Card className="w-full max-w-lg bg-gradient-to-tr from-background/10 to-primary/10">
+    <div className="min-h-[100dvh] -mt-12 md:-mt-0 w-full lg:w-1/2 flex items-center justify-center px-4 py-8 lg:p-8 overflow-hidden">
+      <Card className="w-full max-w-[400px] lg:max-w-lg bg-gradient-to-tr from-background/10 to-primary/10">
         <div className="p-6 lg:p-10">
           <CardTitle className="text-2xl lg:text-3xl font-bold text-center mb-2 lg:mb-3">
             Crie sua conta
