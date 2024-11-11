@@ -226,8 +226,10 @@ const CreateTransaction: React.FC<CreateTransactionProps> = ({
         flex flex-col"
       >
         <DialogHeader>
-          <DialogTitle>Criar Nova Transação</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-center md:text-start">
+            Criar Nova Transação
+          </DialogTitle>
+          <DialogDescription className="text-center md:text-start">
             Preencha os detalhes abaixo corretamente
           </DialogDescription>
         </DialogHeader>
@@ -382,7 +384,10 @@ const CreateTransaction: React.FC<CreateTransactionProps> = ({
             />
           </div>
 
-          <Button type="submit" className="w-full">
+          <Button
+            type="submit"
+            className="w-full bg-emerald-800 text-white hover:bg-emerald-700 font-semibold"
+          >
             Criar Transação
           </Button>
         </form>

@@ -56,7 +56,6 @@ const BarChartComponent = () => {
         if (!response.ok) throw new Error("Erro 500")
         const data = await response.json()
 
-        console.log('Dados recebidos:', data)
 
         const getYearFromDate = (date: string) => {
           return date.includes('/') 
@@ -94,7 +93,6 @@ const BarChartComponent = () => {
           expense: filteredData[date].expense,
         }))
 
-        console.log('Dados filtrados:', translatedData)
         setChartData(translatedData)
         setIsExample(false)
       } catch (error) {
@@ -203,7 +201,7 @@ const BarChartComponent = () => {
               </span>
             </p>
             <p>
-              Menor gasto em <span className="font-medium text-foreground">{analysis.minMonth}</span> - {" "}
+              Menor gasto em: <span className="font-medium text-foreground">{analysis.minMonth}</span> - {" "}
               <span className="font-medium text-foreground">
                 {new Intl.NumberFormat('pt-BR', { 
                   style: 'currency', 
