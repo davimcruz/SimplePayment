@@ -5,6 +5,7 @@ import type { Viewport } from "next"
 import { ThemeProvider } from "@/app/components/theme/theme-provider"
 import { Analytics } from "@vercel/analytics/react"
 import { Toaster } from "sonner"
+import { PWAInstall } from "@/app/components/pwa/PWAInstall"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -13,10 +14,10 @@ const inter = Inter({
 })
 
 const LoadingIcon = () => (
-  <svg 
-    className="animate-spin" 
-    width="16" 
-    height="16" 
+  <svg
+    className="animate-spin"
+    width="16"
+    height="16"
     viewBox="0 0 16 16"
     fill="none"
   >
@@ -56,12 +57,19 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Simple Finance - Controle financeiro simplificado',
-  description: 'Simple Finance é o software de finanças pessoais mais completo do Brasil. Gerencie seus orçamentos, despesas e cartões em um só lugar.',
-  keywords: ['finanças pessoais', 'controle financeiro', 'gestão financeira', 'orçamento pessoal', 'controle de gastos'],
-  authors: [{ name: 'Simple Finance' }],
-  creator: 'Simple Finance',
-  publisher: 'Simple Finance',
+  title: "Simple Finance - Controle financeiro simplificado",
+  description:
+    "Simple Finance é o software de finanças pessoais mais completo do Brasil. Gerencie seus orçamentos, despesas e cartões em um só lugar.",
+  keywords: [
+    "finanças pessoais",
+    "controle financeiro",
+    "gestão financeira",
+    "orçamento pessoal",
+    "controle de gastos",
+  ],
+  authors: [{ name: "Simple Finance" }],
+  creator: "Simple Finance",
+  publisher: "Simple Finance",
   formatDetection: {
     email: false,
     address: false,
@@ -69,43 +77,47 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/images/favicon.ico' },
-      { url: '/logos/icon.png', type: 'image/png', sizes: '32x32' },
-      { url: '/logos/icon-192.png', type: 'image/png', sizes: '192x192' },
-      { url: '/logos/icon-512.png', type: 'image/png', sizes: '512x512' },
+      { url: "/images/favicon.ico" },
+      { url: "/logos/icon.png", type: "image/png", sizes: "32x32" },
+      { url: "/logos/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/logos/icon-512.png", type: "image/png", sizes: "512x512" },
     ],
     apple: [
-      { url: '/logos/icon-192.png', sizes: '180x180', type: 'image/png' }
+      { url: "/logos/icon-192.png", sizes: "180x180", type: "image/png" },
     ],
-    shortcut: ['/images/favicon.ico'],
+    shortcut: ["/images/favicon.ico"],
     other: [
       {
-        rel: 'search',
-        type: 'image/x-icon',
-        url: '/images/favicon.ico'
-      }
-    ]
+        rel: "search",
+        type: "image/x-icon",
+        url: "/images/favicon.ico",
+      },
+    ],
   },
-  manifest: '/manifest.json',
+  manifest: "/manifest.json",
   openGraph: {
-    type: 'website',
-    locale: 'pt_BR',
-    url: 'https://simplefinance.cloud',
-    title: 'Simple Finance - Controle financeiro simplificado',
-    description: 'Simple Finance é o software de finanças pessoais mais completo do Brasil. Gerencie seus orçamentos, despesas e cartões em um só lugar.',
-    siteName: 'Simple Finance',
-    images: [{
-      url: '/og-image.png',
-      width: 1200,
-      height: 630,
-      alt: 'Simple Finance Preview'
-    }],
+    type: "website",
+    locale: "pt_BR",
+    url: "https://simplefinance.cloud",
+    title: "Simple Finance - Controle financeiro simplificado",
+    description:
+      "Simple Finance é o software de finanças pessoais mais completo do Brasil. Gerencie seus orçamentos, despesas e cartões em um só lugar.",
+    siteName: "Simple Finance",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Simple Finance Preview",
+      },
+    ],
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'Simple Finance - Controle financeiro simplificado',
-    description: 'Simple Finance é o software de finanças pessoais mais completo do Brasil.',
-    images: ['/og-image.png'],
+    card: "summary_large_image",
+    title: "Simple Finance - Controle financeiro simplificado",
+    description:
+      "Simple Finance é o software de finanças pessoais mais completo do Brasil.",
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,
@@ -113,9 +125,9 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
 }
@@ -127,10 +139,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-br" suppressHydrationWarning>
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#000000" />
+        <link rel="apple-touch-icon" href="/logos/icon-192.png" />
+      </head>
       <body className={inter.className}>
         <Analytics />
         <ThemeProvider defaultTheme="dark" attribute="class">
-            {children}
+          {children}
           <Toaster
             richColors
             position="top-right"
@@ -151,6 +168,7 @@ export default function RootLayout({
               duration: 3000,
             }}
           />
+          <PWAInstall />
         </ThemeProvider>
       </body>
     </html>

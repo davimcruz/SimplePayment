@@ -298,7 +298,7 @@ const TransactionsTable = () => {
           </div>
         </CardHeader>
         
-        <Separator className="my-4"/>
+        <Separator className="mb-12 mt-4"/>
 
         <div className="flex flex-col gap-4 px-6 sm:hidden">
           <div className="flex flex-col gap-4 w-full mb-4">
