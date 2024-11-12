@@ -25,7 +25,6 @@ const AboutUs = () => {
           </BoxReveal>
         </div>
 
-        {/* Grid de valores - Espaçamento reduzido */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
           <BoxReveal boxColor="#10b981" duration={0.5}>
             <div className="bg-gradient-to-br from-background/10 to-primary/10 p-8 rounded-xl border-[0.5px] border-zinc-800">
@@ -120,7 +119,7 @@ const AboutUs = () => {
               </p>
               <Button
                 size="lg"
-                className="bg-emerald-500 hover:bg-emerald-500/90 text-zinc-800 font-semibold px-8"
+                className="bg-emerald-800 hover:bg-emerald-500/90 text-white font-semibold px-8"
                 asChild
               >
                 <a href="#features">Conheça Nossos Recursos</a>

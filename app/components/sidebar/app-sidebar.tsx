@@ -168,6 +168,7 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
 
   const [cards, setCards] = useState<CardType[]>([])
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
     const fetchCards = async () => {
@@ -252,6 +253,24 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
   const handleSettings = () => {
     router.push("/dashboard/settings")
   }
+
+  useEffect(() => {
+    const sidebar = document.querySelector('[data-collapsible]');
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-collapsible') {
+          setIsCollapsed(sidebar?.getAttribute('data-collapsible') === 'icon');
+        }
+      });
+    });
+
+    if (sidebar) {
+      observer.observe(sidebar, { attributes: true });
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
       <Sidebar
@@ -261,24 +280,23 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
         <SidebarHeader>
           <div className="flex items-center gap-2">
             <Image
-              className="ml-2 mt-4 group-data-[collapsible=icon]:block hidden"
-              src="/logos/logo-vector.png"
+              className={`ml-2 mt-4 group-data-[collapsible=icon]:block hidden
+                ${isCollapsed ? 'logo-animation-enter' : 'logo-animation-exit'}`}
+              src="/logos/logo.svg"
               alt="SimpleFinance"
-              width={16}
-              height={16}
+              width={20}
+              height={20}
             />
-            {/* <Wallet className="w-4 h-4 ml-2 mt-4 group-data-[collapsible=icon]:block hidden" /> */}
-            <div className="flex items-center gap-2 group-data-[collapsible=icon]:hidden">
+            <div className="flex items-center mt-2 gap-2 group-data-[collapsible=icon]:hidden">
               <Image
-                src="/logos/logo-vector.png"
+                src="/logos/logo.svg"
                 alt="SimpleFinance"
-                className="p-2"
-                width={48}
-                height={48}
+                width={42}
+                height={42}
+                className={`${!isCollapsed ? 'logo-animation-enter' : 'logo-animation-exit'}`}
               />
-              {/* <Wallet className="w-12 h-12 p-2 border-zinc-50 rounded-lg" /> */}
-              <Separator orientation="vertical" className="h-10 mx-1" />
-              <div className="flex flex-col">
+              <Separator orientation="vertical" className="h-10 mx-2 transition-opacity duration-300" />
+              <div className="flex flex-col transition-opacity duration-500">
                 <span className="text-md font-bold">SimpleFinance</span>
                 <span className="text-xs text-zinc-400">
                   Seu gerenciador financeiro

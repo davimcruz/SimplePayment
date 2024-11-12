@@ -170,51 +170,62 @@ const CreateFlow = () => {
   }
 
   return (
-    <Card className={`
+    <Card
+      className={`
       w-[95vw] 
-      ${availableMonths.length <= 2 ? 'md:w-[600px]' : 'md:w-[90vw]'} 
-      ${availableMonths.length <= 2 ? 'lg:w-[600px]' : 'lg:w-[800px]'}
+      ${availableMonths.length <= 2 ? "md:w-[600px]" : "md:w-[90vw]"} 
+      ${availableMonths.length <= 2 ? "lg:w-[600px]" : "lg:w-[800px]"}
       bg-gradient-to-t from-background/10 to-primary/[5%]
-    `}>
+    `}
+    >
       <div className="p-4 md:p-6">
         <CardTitle className="text-xl md:text-2xl font-bold tracking-tight">
           Criar Fluxo de Caixa
         </CardTitle>
         <CardDescription className="mt-2 text-sm md:text-base text-muted-foreground">
-          Preencha os campos com os valores que você espera ganhar e gastar nos próximos meses
+          Preencha os campos com os valores que você espera ganhar e gastar nos
+          próximos meses
         </CardDescription>
       </div>
-      
+
       <Separator />
-      
+
       <CardContent className="p-4 md:p-6">
         {isSubmitting ? (
           <div className="flex flex-col items-center justify-center min-h-[300px] md:min-h-[400px]">
-            <LottieAnimation animationPath="/loadingAnimation.json" />
+            <LottieAnimation animationPath="/utilities/loading.json" />
             <p className="mt-4 text-center text-sm md:text-base text-muted-foreground">
               Criando fluxo de caixa...
             </p>
           </div>
         ) : (
           <div className="space-y-4 md:space-y-6">
-            <div className={`
+            <div
+              className={`
               grid gap-4 md:gap-6
-              ${availableMonths.length === 1 ? 'grid-cols-1' : ''}
-              ${availableMonths.length === 2 ? 'grid-cols-1 md:grid-cols-2' : ''}
-              ${availableMonths.length > 2 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : ''}
-            `}>
+              ${availableMonths.length === 1 ? "grid-cols-1" : ""}
+              ${
+                availableMonths.length === 2 ? "grid-cols-1 md:grid-cols-2" : ""
+              }
+              ${
+                availableMonths.length > 2
+                  ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                  : ""
+              }
+            `}
+            >
               {availableMonths.map((month) => (
-                <Card 
-                  key={month} 
+                <Card
+                  key={month}
                   className="p-3 md:p-4 bg-card/50 transition-all duration-200 hover:shadow-md"
                 >
                   <CardTitle className="text-base font-medium text-center mb-4">
                     {monthNames[month - 1]}
                   </CardTitle>
-                  
+
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label 
+                      <Label
                         htmlFor={`receita-${month}`}
                         className="text-sm font-medium text-muted-foreground"
                       >
@@ -224,13 +235,19 @@ const CreateFlow = () => {
                         type="text"
                         id={`receita-${month}`}
                         value={monthlyValues[month]?.receitaOrcada || "R$ 0,00"}
-                        onChange={(e) => handleInputChange(month, "receitaOrcada", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange(
+                            month,
+                            "receitaOrcada",
+                            e.target.value
+                          )
+                        }
                         className="bg-background/50 text-sm md:text-base h-8 md:h-10"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label 
+                      <Label
                         htmlFor={`despesa-${month}`}
                         className="text-sm font-medium text-muted-foreground"
                       >
@@ -240,7 +257,13 @@ const CreateFlow = () => {
                         type="text"
                         id={`despesa-${month}`}
                         value={monthlyValues[month]?.despesaOrcada || "R$ 0,00"}
-                        onChange={(e) => handleInputChange(month, "despesaOrcada", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange(
+                            month,
+                            "despesaOrcada",
+                            e.target.value
+                          )
+                        }
                         className="bg-background/50 text-sm md:text-base h-8 md:h-10"
                       />
                     </div>
@@ -256,7 +279,9 @@ const CreateFlow = () => {
                   <Button
                     variant="link"
                     className="text-primary hover:text-primary/80"
-                    onClick={() => router.push("/dashboard/cashflow/updateFlow")}
+                    onClick={() =>
+                      router.push("/dashboard/cashflow/updateFlow")
+                    }
                   >
                     Editar fluxo existente
                   </Button>

@@ -62,7 +62,7 @@ const LandingHero = () => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6 relative z-[60]">
           <Button
             size="lg"
-            className="bg-emerald-500 hover:bg-emerald-800/90 text-zinc-800 hover:text-white font-semibold"
+            className="bg-emerald-800 hover:bg-emerald-800/90 text-white font-semibold text-md"
             asChild
           >
             <Link href="/signup">Vamos Começar?</Link>

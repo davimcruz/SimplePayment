@@ -27,22 +27,20 @@ const Header = () => {
       <div className="relative">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center justify-between h-16 md:h-20">
-            {/* Logo */}
             <div className="flex items-center gap-2 md:gap-3">
               <Image
                 src="/logos/logo.svg"
                 alt="SimpleFinance"
-                className="w-[28px] h-[28px] md:w-[48px] md:h-[48px]"
-                width={48}
-                height={48}
+                className="w-[30px] h-[30px] md:w-[42px] md:h-[42px]"
+                width={42}
+                height={42}
                 priority
               />
-              <span className="text-white font-semibold text-lg md:text-xl whitespace-nowrap">
+              <span className="text-white font-semibold text-lg md:text-xl whitespace-nowrap hidden md:block">
                 SimpleFinance
               </span>
             </div>
 
-            {/* Desktop Navigation */}
             <div className="hidden md:flex items-center justify-center flex-1 mx-4">
               <div className="flex items-center gap-8">
                 <Link
@@ -62,10 +60,9 @@ const Header = () => {
               </div>
             </div>
 
-            {/* Login Button */}
             <Button
               variant="default"
-              className="bg-emerald-500 hover:bg-emerald-800/90 flex items-center gap-1 text-zinc-800 hover:text-white transition-colors font-semibold px-3 md:px-4 h-9 md:h-10"
+              className="bg-emerald-800 hover:bg-emerald-800/90 flex items-center gap-1 text-white transition-colors font-semibold px-3 md:px-4 h-9 md:h-10"
               asChild
             >
               <Link href="/signin">

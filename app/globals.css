@@ -136,3 +136,33 @@
     }
   }
 }
+
+@keyframes logo-spin {
+  0% {
+    transform: rotate(-180deg) scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes logo-spin-reverse {
+  0% {
+    transform: rotate(180deg) scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.logo-animation-enter {
+  animation: logo-spin 500ms cubic-bezier(0.68, -0.6, 0.32, 1.6) forwards;
+}
+
+.logo-animation-exit {
+  animation: logo-spin-reverse 500ms cubic-bezier(0.68, -0.6, 0.32, 1.6) forwards;
+}

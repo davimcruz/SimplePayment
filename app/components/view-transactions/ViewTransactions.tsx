@@ -221,11 +221,7 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({ transactionId }) => {
 
   return (
     <>
-      <Button
-        variant="ghost"
-        className="h-8 w-8 p-0"
-        onClick={openDialog}
-      >
+      <Button variant="ghost" className="h-8 w-8 p-0" onClick={openDialog}>
         <span className="sr-only">Abrir menu</span>
         <ArrowUpRight className="h-4 w-4" />
       </Button>
@@ -240,10 +236,13 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({ transactionId }) => {
           </DialogHeader>
           {isLoading ? (
             <div className="flex justify-center items-center h-[400px]">
-              <LottieAnimation animationPath="/loadingAnimation.json" />
+              <LottieAnimation animationPath="/utilities/loading.json" />
             </div>
           ) : (
-            <form onSubmit={handleSubmit(handleUpdateTransaction)} className="space-y-6 mt-4">
+            <form
+              onSubmit={handleSubmit(handleUpdateTransaction)}
+              className="space-y-6 mt-4"
+            >
               <Controller
                 name="nome"
                 control={control}
@@ -320,9 +319,7 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({ transactionId }) => {
                   control={control}
                   render={({ field }) => (
                     <div className="grid gap-2">
-                      <Label htmlFor="detalhesFonte">
-                        Detalhes da Origem
-                      </Label>
+                      <Label htmlFor="detalhesFonte">Detalhes da Origem</Label>
                       <Input
                         {...field}
                         id="detalhesFonte"
