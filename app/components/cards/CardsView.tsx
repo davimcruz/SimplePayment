@@ -225,6 +225,7 @@ const CardsView = () => {
           transition-all duration-300 cursor-pointer
           border border-white/10
           transform hover:scale-[1.02]
+          max-h-[200px] md:max-h-none
         `}
         onClick={() => handleCardClick(card.cardId)}
       >
@@ -312,17 +313,17 @@ const CardsView = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-4 md:py-6">
-      <Card className="w-full max-w-[1200px] mx-auto bg-gradient-to-t from-background/10 to-primary/[5%]">
+    <div className="container mx-auto px-4 py-4 md:py-6 min-h-screen">
+      <Card className="w-full max-w-[1200px] mx-auto bg-gradient-to-t from-background/10 to-primary/[5%] mt-4">
         <CardContent className="p-4 md:p-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-0 mb-6 md:mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-0 mb-6">
             <div>
-              <h1 className="text-2xl md:text-2xl font-bold">Cartões de Crédito</h1>
+              <h1 className="text-xl md:text-2xl font-bold">Cartões de Crédito</h1>
               <p className="text-muted-foreground text-sm mt-1">
                 Clique no cartão para ver detalhes	
               </p>
             </div>
-            <div className="flex gap-2 w-full md:w-auto">
+            <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
               <Button 
                 onClick={handleAddCard}
                 className="gap-2 flex-1 md:flex-none bg-gradient-to-r from-emerald-800 to-emerald-700 hover:from-emerald-700 hover:to-emerald-600 text-white font-semibold"
@@ -369,7 +370,7 @@ const CardsView = () => {
         open={!!deletingCardId}
         onOpenChange={(isOpen) => !isOpen && setDeletingCardId(null)}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[90vw] md:max-w-md mx-auto">
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
             <p className="text-muted-foreground">

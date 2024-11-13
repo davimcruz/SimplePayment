@@ -106,30 +106,36 @@ export default function FixedCostsPage() {
     <div className={`
       container mx-auto p-4 max-w-5xl 
       ${!showCreateForm 
-        ? 'h-[calc(100vh-8rem)] flex items-center justify-center' 
-        : 'space-y-4 h-[calc(100vh-8rem)]'
+        ? "h-[calc(100vh-8rem)] flex items-center justify-center"
+        : "space-y-4 h-[calc(100vh-8rem)]"
       }
     `}>
       <Card className={`
         bg-gradient-to-t from-background/10 to-primary/[5%] border-border
-        ${!showCreateForm ? 'w-full' : ''}
+        ${!showCreateForm ? "w-full" : ""}
         transition-all duration-300 ease-in-out
       `}>
         <CardHeader className="p-4 md:p-6">
-          <div className="flex justify-between items-center">
-            <div>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2">
               <CardTitle className="text-xl md:text-2xl font-bold tracking-tight text-foreground">
                 Despesas Fixas
               </CardTitle>
-              <CardDescription className="mt-2 text-sm md:text-base">
+              <CardDescription className="text-sm md:text-base">
                 Gerencie suas despesas fixas mensais
               </CardDescription>
             </div>
+            
             <Button
               onClick={() => setShowCreateForm(!showCreateForm)}
-              className="bg-gradient-to-r from-emerald-800 to-emerald-700 hover:from-emerald-700 hover:to-emerald-600 text-white font-semibold">
-              <Plus className={`h-4 w-4 mr-2 transition-transform ${showCreateForm ? 'rotate-45' : ''}`} />
-              {showCreateForm ? 'Cancelar' : 'Nova Despesa'}
+              className="w-full md:w-auto bg-gradient-to-r from-emerald-800 to-emerald-700 hover:from-emerald-700 hover:to-emerald-600 text-white font-semibold"
+            >
+              <Plus
+                className={`h-4 w-4 mr-2 transition-transform ${
+                  showCreateForm ? "rotate-45" : ""
+                }`}
+              />
+              {showCreateForm ? "Cancelar" : "Nova Despesa"}
             </Button>
           </div>
         </CardHeader>
@@ -138,13 +144,13 @@ export default function FixedCostsPage() {
 
         <CardContent className="p-4 md:p-6 space-y-6">
           {showCreateForm && (
-              <CreateFixedCosts
-                onComplete={() => {
-                  setShowCreateForm(false)
-                  fetchCosts()
-                }}
-                onBack={() => setShowCreateForm(false)}
-              />
+            <CreateFixedCosts
+              onComplete={() => {
+                setShowCreateForm(false)
+                fetchCosts()
+              }}
+              onBack={() => setShowCreateForm(false)}
+            />
           )}
 
           {isLoading ? (
@@ -169,9 +175,7 @@ export default function FixedCostsPage() {
                 >
                   <div className="space-y-1">
                     <div className="flex items-center space-x-2">
-                      <p className="font-medium text-foreground">
-                        {cost.nome}
-                      </p>
+                      <p className="font-medium text-foreground">{cost.nome}</p>
                       <span className="text-sm text-muted-foreground">
                         ({cost.categoria})
                       </span>
@@ -210,17 +214,16 @@ export default function FixedCostsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
             <p className="text-muted-foreground">
-              Tem certeza que deseja excluir esta despesa fixa? 
-              {deletingCostId && costs.find(c => c.id === deletingCostId)?.formaPagamento === 'credito' 
-                ? ' Todas as parcelas futuras nas faturas também serão excluídas.'
-                : ' Todas as transações futuras serão excluídas.'}
+              Tem certeza que deseja excluir esta despesa fixa?
+              {deletingCostId &&
+              costs.find((c) => c.id === deletingCostId)?.formaPagamento ===
+                "credito"
+                ? " Todas as parcelas futuras nas faturas também serão excluídas."
+                : " Todas as transações futuras serão excluídas."}
             </p>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeletingCostId(null)}
-            >
+            <Button variant="outline" onClick={() => setDeletingCostId(null)}>
               Cancelar
             </Button>
             <Button

@@ -6,15 +6,7 @@ import { ThemeProvider } from "@/app/components/theme/theme-provider"
 import { Analytics } from "@vercel/analytics/react"
 import { Toaster } from "sonner"
 import { PWAInstall } from "@/app/components/pwa/PWAInstall"
-
-const originalError = console.error
-console.error = (...args) => {
-  if (args[0].includes('Warning: Expected server HTML')) {
-    console.log('Componente causando erro:', args[0])
-    console.trace()
-  }
-  originalError.apply(console, args)
-}
+import { useEffect } from "react"
 
 const inter = Inter({
   subsets: ["latin"],

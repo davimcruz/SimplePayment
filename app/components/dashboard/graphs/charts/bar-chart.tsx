@@ -159,7 +159,7 @@ const BarChartComponent = () => {
           <div className={isExample ? "blur-xl opacity-50" : ""}>
             <ChartContainer config={chartConfig}>
               <BarChart
-                className="mt-12"
+                className="mt-0 md:mt-12"
                 width={window.innerWidth < 768 ? 350 : 450}
                 height={350}
                 data={isExample ? exampleChartData : chartData}

@@ -248,7 +248,7 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
         <SidebarHeader>
           <div className="flex items-center gap-2">
             <Image
-              className={`ml-2 mt-4 group-data-[collapsible=icon]:block hidden
+              className={`ml-[5.5px] mt-4 group-data-[collapsible=icon]:block hidden
                 ${
                   isCollapsed ? "logo-animation-enter" : "logo-animation-exit"
                 }`}
@@ -261,8 +261,8 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
               <Image
                 src="/logos/logo.svg"
                 alt="SimpleFinance"
-                width={42}
-                height={42}
+                width={38}
+                height={38}
                 className={`${
                   !isCollapsed ? "logo-animation-enter" : "logo-animation-exit"
                 }`}

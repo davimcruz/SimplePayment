@@ -81,7 +81,7 @@ const CardsManager = () => {
   }
 
   return (
-    <div className="flex justify-center items-center max-h-[100vh] min-h-[90vh]">
+    <div className="flex justify-center items-start w-full h-[calc(100vh-8rem)] pb-4">
       <CardsView />
     </div>
   )
