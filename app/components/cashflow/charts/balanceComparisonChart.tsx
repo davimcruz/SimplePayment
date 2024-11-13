@@ -96,7 +96,8 @@ const BalanceComparisonChart = ({ data }: BalanceComparisonChartProps) => {
                   top: 12,
                   bottom: 12,
                 }}
-                height={80}
+                height={300}
+                width={undefined}
               >
                 <CartesianGrid vertical={false} strokeDasharray="3 3" />
                 <XAxis

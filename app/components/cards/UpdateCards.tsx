@@ -262,8 +262,8 @@ const UpdateCard: React.FC<UpdateCardProps> = ({ cardId, onCancel, onSuccess }) 
             )}
           </div>
 
-          <div className="p-6 mt-auto bg-background border-t">
-            <Button onClick={handleSubmit} className="w-full mb-2">
+          <div className="p-6 mt-auto bg-background">
+            <Button onClick={handleSubmit} className="w-full mb-2 bg-gradient-to-r from-emerald-800 to-emerald-700 hover:from-emerald-700 hover:to-emerald-600 text-white font-semibold">
               Atualizar Cartão de Crédito
             </Button>
             <Button onClick={onCancel} className="w-full" variant="outline">

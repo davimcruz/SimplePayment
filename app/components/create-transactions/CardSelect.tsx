@@ -24,6 +24,7 @@ interface CardSelectProps {
   error?: string
   cards: Card[] | { cartoes: Card[] } | null
   onCloseDialog?: () => void
+  showLabel?: boolean
 }
 
 export const CardSelect: React.FC<CardSelectProps> = ({
@@ -33,6 +34,7 @@ export const CardSelect: React.FC<CardSelectProps> = ({
   error,
   cards,
   onCloseDialog,
+  showLabel = true,
 }) => {
   const cardsArray = Array.isArray(cards) ? cards : cards?.cartoes || []
   const hasCards = cardsArray.length > 0
@@ -45,7 +47,7 @@ export const CardSelect: React.FC<CardSelectProps> = ({
     <div className="grid gap-2">
       {hasCards ? (
         <Select value={value} onValueChange={onChange} onOpenChange={onBlur}>
-          <Label htmlFor="card-select">Selecione o Cartão</Label>
+          {showLabel && <Label htmlFor="card-select">Selecione o Cartão</Label>}
           <SelectTrigger id="card-select">
             <SelectValue placeholder="Selecione um cartão" />
           </SelectTrigger>

@@ -4,40 +4,33 @@ const OFFLINE_URL = '/offline'
 const STATIC_ASSETS = [
   '/',
   '/offline',
-  '/dashboard',
   '/manifest.json',
-  '/sw.js',
   
-  // imagens
   '/logos/icon-192.png',
   '/logos/icon-512.png',
   '/images/favicon.ico',
   '/utilities/profile.png',
   '/og-image.png',
-  '/loadingAnimation.json',
   
-  // icones de cartão
   '/cards/elo.svg',
   '/cards/hipercard.svg',
-  
-  // globals
-  '/globals.css',
-  
-  // rotas principais
-  '/signin',
-  '/signup',
-  '/dashboard/plans',
-  '/dashboard/plans/checkout',
-  '/dashboard/plans/checkout/success',
-  '/dashboard/cashflow',
-  '/dashboard/admin'
+  '/cards/mastercard.svg',
+  '/cards/visa.svg',
+  '/cards/amex.svg'
 ]
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS)
-    })
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        return Promise.allSettled(
+          STATIC_ASSETS.map(url => 
+            cache.add(url).catch(error => {
+              console.warn(`Falha ao cachear ${url}:`, error)
+            })
+          )
+        )
+      })
   )
 })
 
@@ -54,7 +47,6 @@ self.addEventListener('activate', (event) => {
 })
 
 self.addEventListener('fetch', (event) => {
-  // paginas estaticas
   if (event.request.mode === 'navigate' || 
       (event.request.method === 'GET' && 
        event.request.headers.get('accept')?.includes('text/html'))) {
@@ -67,7 +59,6 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // imagens
   if (event.request.destination === 'image') {
     event.respondWith(
       caches.match(event.request)
@@ -93,7 +84,6 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // recursos padrão
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
@@ -102,7 +92,6 @@ self.addEventListener('fetch', (event) => {
         }
         return fetch(event.request)
           .then((fetchResponse) => {
-            // não armazena em cache respostas de API
             if (event.request.url.includes('/api/')) {
               return fetchResponse
             }
@@ -122,7 +111,6 @@ self.addEventListener('fetch', (event) => {
   )
 })
 
-// sincronização em background
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-transactions') {
     event.waitUntil(syncTransactions())

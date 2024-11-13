@@ -158,31 +158,32 @@ const BarChartComponent = () => {
           
           <div className={isExample ? "blur-xl opacity-50" : ""}>
             <ChartContainer config={chartConfig}>
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart
-                  data={isExample ? exampleChartData : chartData}
-                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                >
-                  <CartesianGrid vertical={false} />
-                  <XAxis dataKey="month" tickLine={false} axisLine={false} />
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent indicator="dashed" />}
-                  />
-                  <Bar
-                    dataKey="income"
-                    fill={chartConfig.income.color}
-                    radius={[4, 4, 0, 0]}
-                    name="Receitas"
-                  />
-                  <Bar
-                    dataKey="expense"
-                    fill={chartConfig.expense.color}
-                    radius={[4, 4, 0, 0]}
-                    name="Despesas"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+              <BarChart
+                className="mt-12"
+                width={window.innerWidth < 768 ? 350 : 450}
+                height={350}
+                data={isExample ? exampleChartData : chartData}
+                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="month" tickLine={false} axisLine={false} />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent indicator="dashed" />}
+                />
+                <Bar
+                  dataKey="income"
+                  fill={chartConfig.income.color}
+                  radius={[4, 4, 0, 0]}
+                  name="Receitas"
+                />
+                <Bar
+                  dataKey="expense"
+                  fill={chartConfig.expense.color}
+                  radius={[4, 4, 0, 0]}
+                  name="Despesas"
+                />
+              </BarChart>
             </ChartContainer>
           </div>
         </div>

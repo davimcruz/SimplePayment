@@ -1,12 +1,11 @@
 {
-  "name": "Simple Finance",
-  "short_name": "Simple Finance",
-  "description": "Simple Finance é o software de finanças pessoais mais completo do Brasil",
+  "name": "SimpleFinance",
+  "short_name": "SimpleFinance",
+  "description": "SimpleFinance é o software de finanças pessoais mais completo do Brasil",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
-  "form_factor": "wide",
   "icons": [
     {
       "src": "/logos/icon-192.png",
@@ -15,10 +14,38 @@
       "purpose": "any"
     },
     {
+      "src": "/logos/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
       "src": "/logos/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/logos/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Tela do SimpleFinance em desktop"
+    },
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Tela do SimpleFinance em dispositivos móveis"
     }
   ]
 } 

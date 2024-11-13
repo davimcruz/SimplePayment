@@ -286,3 +286,18 @@ export const checkoutSchema = z.object({
 })
 
 export type CheckoutFormData = z.infer<typeof checkoutSchema>
+
+export const despesaFixaSchema = z.object({
+  nome: z.string(),
+  valor: z.number(),
+  diaVencimento: z.number(),
+  categoria: z.enum(["aluguel", "assinatura", "financiamento", "outros"]),
+  formaPagamento: z.enum(["dinheiro", "pix", "debito", "credito"]),
+  dataInicio: z.string(),
+  cardId: z.string().optional(),
+  dataFim: z.string().optional(),
+  descricao: z.string().optional(),
+  status: z.enum(["ativa", "cancelada"]).optional()
+})
+
+export type DespesaFixaInput = z.infer<typeof despesaFixaSchema>

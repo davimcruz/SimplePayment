@@ -11,7 +11,6 @@ export function PWAInstall() {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
         .register("/sw.js")
-        .then((registration) => console.log("SW registrado:", registration))
         .catch((error) => console.error("Erro no registro do SW:", error))
     }
 

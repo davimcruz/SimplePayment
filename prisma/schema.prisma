@@ -19,6 +19,7 @@ model usuarios {
   createdAt  DateTime    @default(now()) @db.Timestamp(0)
   transacoes transacoes[]
   cartoes    cartoes[]
+  costs      costs[]
 }
 
 model transacoes {
@@ -36,9 +37,12 @@ model transacoes {
   parcelas            parcelas[]
   usuarios            usuarios   @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transacoes_ibfk_1")
   cartoes             cartoes?   @relation(fields: [cardId], references: [cardId], onDelete: SetNull)
+  costId              String?    @db.Char(36)
+  cost                costs?     @relation(fields: [costId], references: [id])
 
   @@index([userId], map: "userId")
   @@index([cardId], map: "cardId")
+  @@index([costId])
 }
 
 model orcamento {
@@ -72,6 +76,7 @@ model cartoes {
   faturas     faturas[]
   usuarios    usuarios     @relation(fields: [userId], references: [id], onDelete: Cascade)
   transacoes  transacoes[]
+  costs       costs[]
 
   @@index([userId], map: "userId")
 }
@@ -104,4 +109,28 @@ model parcelas {
   transacao transacoes @relation(fields: [transacaoId], references: [transactionId])
   cartoes   cartoes    @relation(fields: [cardId], references: [cardId])
   faturas   faturas?   @relation(fields: [faturaId], references: [faturaId])
+}
+
+model costs {
+  id            String      @id @default(uuid())
+  userId        Int
+  nome          String      @db.VarChar(255)
+  valor         Float
+  diaVencimento Int
+  status        String      @default("ativa") @db.VarChar(50)
+  categoria     String      @db.VarChar(100)
+  formaPagamento String     @default("dinheiro") @db.VarChar(50)
+  cardId        String?     @db.VarChar(36)
+  dataCriacao   DateTime    @default(now())
+  dataInicio    DateTime
+  dataFim       DateTime?
+  descricao     String?     @db.Text
+
+  user          usuarios    @relation(fields: [userId], references: [id])
+  cartao        cartoes?   @relation(fields: [cardId], references: [cardId])
+  transacoes    transacoes[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([cardId])
 }

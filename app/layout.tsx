@@ -7,6 +7,15 @@ import { Analytics } from "@vercel/analytics/react"
 import { Toaster } from "sonner"
 import { PWAInstall } from "@/app/components/pwa/PWAInstall"
 
+const originalError = console.error
+console.error = (...args) => {
+  if (args[0].includes('Warning: Expected server HTML')) {
+    console.log('Componente causando erro:', args[0])
+    console.trace()
+  }
+  originalError.apply(console, args)
+}
+
 const inter = Inter({
   subsets: ["latin"],
   weight: ["200", "300", "400", "500", "600", "700"],
@@ -57,19 +66,36 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "Simple Finance - Controle financeiro simplificado",
+  metadataBase: new URL('https://simplefinance.cloud'),
+  title: {
+    default: "SimpleFinance - Controle Financeiro Pessoal | Gestão Financeira Simplificada",
+    template: "%s | SimpleFinance"
+  },
   description:
-    "Simple Finance é o software de finanças pessoais mais completo do Brasil. Gerencie seus orçamentos, despesas e cartões em um só lugar.",
+    "Simplifique sua vida financeira com o SimpleFinance. Gerencie orçamentos, despesas, investimentos e cartões em uma única plataforma. Experimente grátis o software de finanças pessoais mais completo do Brasil.",
   keywords: [
     "finanças pessoais",
     "controle financeiro",
     "gestão financeira",
     "orçamento pessoal",
     "controle de gastos",
+    "planejamento financeiro",
+    "economia pessoal",
+    "educação financeira",
+    "investimentos",
+    "carteira digital",
+    "gestão de cartões",
+    "relatórios financeiros"
   ],
-  authors: [{ name: "Simple Finance" }],
-  creator: "Simple Finance",
-  publisher: "Simple Finance",
+  alternates: {
+    canonical: 'https://simplefinance.cloud',
+    languages: {
+      'pt-BR': 'https://simplefinance.cloud',
+    }
+  },
+  authors: [{ name: "SimpleFinance" }],
+  creator: "SimpleFinance",
+  publisher: "SimpleFinance",
   formatDetection: {
     email: false,
     address: false,
@@ -98,24 +124,25 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pt_BR",
     url: "https://simplefinance.cloud",
-    title: "Simple Finance - Controle financeiro simplificado",
+    title: "SimpleFinance - Controle Financeiro Pessoal | Gestão Financeira Simplificada",
     description:
-      "Simple Finance é o software de finanças pessoais mais completo do Brasil. Gerencie seus orçamentos, despesas e cartões em um só lugar.",
-    siteName: "Simple Finance",
+      "Simplifique sua vida financeira com o SimpleFinance. Gerencie orçamentos, despesas, investimentos e cartões em uma única plataforma. Experimente grátis o software de finanças pessoais mais completo do Brasil.",
+    siteName: "SimpleFinance",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Simple Finance Preview",
+        alt: "SimpleFinance - Plataforma de Gestão Financeira Pessoal",
+        type: "image/png",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Simple Finance - Controle financeiro simplificado",
+    title: "SimpleFinance - Controle financeiro simplificado",
     description:
-      "Simple Finance é o software de finanças pessoais mais completo do Brasil.",
+      "SimpleFinance é o software de finanças pessoais mais completo do Brasil.",
     images: ["/og-image.png"],
   },
   robots: {

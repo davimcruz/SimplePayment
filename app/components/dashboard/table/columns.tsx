@@ -36,7 +36,7 @@ export const columns: ColumnDef<Transactions>[] = [
   },
   {
     accessorKey: "fonte",
-    header: "Fonte",
+    header: "Origem",
     cell: ({ row }) => {
       const fonte = row.getValue("fonte") as string
       const detalhesFonte = row.original.detalhesFonte as string

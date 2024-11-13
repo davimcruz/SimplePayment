@@ -41,12 +41,6 @@ import { cn } from "@/lib/utils"
 import useSWR, { mutate } from "swr"
 import { Separator } from "../ui/separator"
 import Image from "next/image"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "../ui/collapsible"
-import { useEffect, useState, useCallback } from "react"
 import VisaIcon from "@/public/cards/visa.svg"
 import MastercardIcon from "@/public/cards/mastercard.svg"
 import AmexIcon from "@/public/cards/amex.svg"
@@ -54,6 +48,8 @@ import EloIcon from "@/public/cards/elo.svg"
 import HipercardIcon from "@/public/cards/hipercard.svg"
 import CreateTransaction from "../create-transactions/CreateTransactions"
 import { toast } from "sonner"
+import Link from "next/link"
+import { useCallback, useEffect, useState } from "react"
 
 interface UserData {
   id?: string
@@ -149,6 +145,8 @@ const cardIcons = {
 } as const
 
 export function AppSidebar({ initialData }: AppSidebarProps) {
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false)
   const router = useRouter()
   const cookies = parseCookies()
 
@@ -165,37 +163,7 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
       suspense: false,
     }
   )
-
-  const [cards, setCards] = useState<CardType[]>([])
-  const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false)
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
-  useEffect(() => {
-    const fetchCards = async () => {
-      try {
-        const response = await fetch(
-          `/api/cards/get-card?userId=${cookies.userId}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        )
-
-        const data = await response.json()
-        if (Array.isArray(data.cartoes)) {
-          setCards(data.cartoes)
-        }
-      } catch (error) {
-        console.error("Erro ao buscar cartões:", error)
-      }
-    }
-
-    if (cookies.userId) {
-      fetchCards()
-    }
-  }, [cookies.userId])
+  
 
   const handleTransactionSuccess = useCallback(() => {
     if (window.location.pathname === "/dashboard/transactions") {
@@ -281,7 +249,9 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
           <div className="flex items-center gap-2">
             <Image
               className={`ml-2 mt-4 group-data-[collapsible=icon]:block hidden
-                ${isCollapsed ? 'logo-animation-enter' : 'logo-animation-exit'}`}
+                ${
+                  isCollapsed ? "logo-animation-enter" : "logo-animation-exit"
+                }`}
               src="/logos/logo.svg"
               alt="SimpleFinance"
               width={20}
@@ -293,9 +263,14 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
                 alt="SimpleFinance"
                 width={42}
                 height={42}
-                className={`${!isCollapsed ? 'logo-animation-enter' : 'logo-animation-exit'}`}
+                className={`${
+                  !isCollapsed ? "logo-animation-enter" : "logo-animation-exit"
+                }`}
               />
-              <Separator orientation="vertical" className="h-10 mx-2 transition-opacity duration-300" />
+              <Separator
+                orientation="vertical"
+                className="h-10 mx-2 transition-opacity duration-300"
+              />
               <div className="flex flex-col transition-opacity duration-500">
                 <span className="text-md font-bold">SimpleFinance</span>
                 <span className="text-xs text-zinc-400">
@@ -317,123 +292,53 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
                   .map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
-                        <a href={item.url}>
+                        <Link href={item.url}>
                           <item.icon />
                           <span>{item.title}</span>
-                        </a>
+                        </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}
 
-                <Collapsible className="group/collapsible">
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton>
-                        <Inbox />
-                        <span>Transações</span>
-                        <ChevronUp className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=closed]/collapsible:rotate-180" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="overflow-x-hidden">
-                      <SidebarMenuSub className="text-zinc-700">
-                        <SidebarMenuSubItem>
-                          <SidebarMenuButton
-                            onClick={() => setIsTransactionDialogOpen(true)}
-                          >
-                            <PlusCircle className="h-4 w-4 dark:text-neutral-300" />
-                            <span className="dark:text-neutral-300">
-                              Criar Transação
-                            </span>
-                          </SidebarMenuButton>
-                        </SidebarMenuSubItem>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuButton asChild>
-                            <a href="/dashboard/transactions">
-                              <ListOrdered className="h-4 w-4 dark:text-neutral-300" />
-                              <span className="dark:text-neutral-300">
-                                Ver Todas as Transações
-                              </span>
-                            </a>
-                          </SidebarMenuButton>
-                        </SidebarMenuSubItem>
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
-
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <a href="/dashboard/cashflow" className="relative">
-                      <Calendar />
-                      <span>Fluxo de Caixa</span>
-                    </a>
+                    <Link href="/dashboard/transactions">
+                      <Inbox />
+                      <span>Transações</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                <Collapsible className="group/collapsible">
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton>
-                        <CreditCard />
-                        <span>Cartões de Crédito</span>
-                        <ChevronUp className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=closed]/collapsible:rotate-180" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="overflow-x-hidden">
-                      <SidebarMenuSub className="text-zinc-700">
-                        {cards.length > 0 ? (
-                          <>
-                            {cards.map((card) => {
-                              const CardIcon =
-                                cardIcons[card.bandeira] || CreditCard
-                              return (
-                                <SidebarMenuSubItem key={card.cardId}>
-                                  <SidebarMenuButton asChild>
-                                    <a href={`/dashboard/cards/${card.cardId}`}>
-                                      <Image
-                                        src={CardIcon}
-                                        alt={card.bandeira}
-                                        width={24}
-                                        height={24}
-                                      />
-                                      <span className="dark:text-neutral-300">
-                                        {card.nomeCartao}
-                                      </span>
-                                    </a>
-                                  </SidebarMenuButton>
-                                </SidebarMenuSubItem>
-                              )
-                            })}
-                            <SidebarMenuSubItem>
-                              <SidebarMenuButton asChild>
-                                <a href="/dashboard/cards">
-                                  <span className="text-xs text-muted-foreground">
-                                    Ver todos os cartões
-                                  </span>
-                                </a>
-                              </SidebarMenuButton>
-                            </SidebarMenuSubItem>
-                          </>
-                        ) : (
-                          <SidebarMenuSubItem>
-                            <SidebarMenuButton asChild>
-                              <a href="/dashboard/cards">
-                                <PlusCircle className="h-4 w-4 dark:text-neutral-300" />
-                                <span className="dark:text-neutral-300">
-                                  Cadastrar Cartão
-                                </span>
-                              </a>
-                            </SidebarMenuButton>
-                          </SidebarMenuSubItem>
-                        )}
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link href="/dashboard/cashflow">
+                      <Calendar />
+                      <span>Fluxo de Caixa</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
 
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <a href="/dashboard/plans" className="relative">
+                    <Link href="/dashboard/fixed-costs">
+                      <ListOrdered />
+                      <span>Despesas Fixas</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link href="/dashboard/cards">
+                      <CreditCard />
+                      <span>Cartões de Crédito</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link href="/dashboard/plans" className="relative">
                       <Crown />
                       <span>Planos</span>
                       {userData?.permissao === "free" && (
@@ -444,7 +349,7 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
                           Upgrade
                         </Badge>
                       )}
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>

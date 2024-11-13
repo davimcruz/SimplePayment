@@ -217,66 +217,103 @@ const CardsView = () => {
 
     return (
       <Card
-        className="group hover:shadow-lg transition-all duration-300 cursor-pointer w-full bg-gradient-to-br from-background/10 to-primary/[5%]"
+        className={`
+          group relative overflow-hidden
+          aspect-[1.6/1]
+          bg-gradient-to-br from-zinc-950 to-background
+          hover:shadow-xl hover:shadow-zinc-500/5
+          transition-all duration-300 cursor-pointer
+          border border-white/10
+          transform hover:scale-[1.02]
+        `}
         onClick={() => handleCardClick(card.cardId)}
       >
-        <CardHeader className="p-4 md:p-6">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+        <CardHeader className="p-6 relative">
           <div className="flex justify-between items-start">
-            <div>
-              <CardTitle className="text-base md:text-lg">{card.nomeCartao}</CardTitle>
-              <CardDescription className="text-sm md:text-base">{card.instituicao}</CardDescription>
+            <div className="space-y-2">
+              <CardTitle className="text-lg font-medium text-white/90">
+                {card.nomeCartao}
+              </CardTitle>
+              <CardDescription className="text-sm text-white/60">
+                {card.instituicao}
+              </CardDescription>
             </div>
-            <div className="flex items-center gap-2 md:gap-3">
+
+            <div className="flex items-center gap-3">
               {brandIcon && (
-                <img 
-                  src={brandIcon} 
-                  alt={`${card.bandeira} logo`} 
-                  className="h-8 w-12 md:h-10 md:w-16 object-contain"
+                <img
+                  src={brandIcon}
+                  alt={`${card.bandeira} logo`}
+                  className="h-10 w-16 object-contain opacity-90"
                 />
               )}
               {showManageCards && (
-                <div className="flex gap-1 md:gap-2">
+                <div className="flex gap-2 ml-2">
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="hover:bg-white/10"
                     onClick={(e) => {
                       e.stopPropagation()
                       handleEditCard(card.cardId)
                     }}
                   >
-                    <PencilLine className="h-4 w-4 md:h-5 md:w-5" />
+                    <PencilLine className="h-4 w-4 text-white/80" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="hover:bg-white/10"
                     onClick={(e) => {
                       e.stopPropagation()
                       setDeletingCardId(card.cardId)
                     }}
                   >
-                    <Trash2 className="h-4 w-4 md:h-5 md:w-5 text-destructive" />
+                    <Trash2 className="h-4 w-4 text-red-400" />
                   </Button>
                 </div>
               )}
             </div>
           </div>
         </CardHeader>
+
         {!showManageCards && (
-          <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
-            <div className="flex justify-end items-center">
-              <span className="text-sm md:text-base font-medium">
-                {formatCurrency(card.limite)}
-              </span>
+          <CardContent className="absolute bottom-0 w-full p-6">
+            <div className="flex justify-between items-center">
+              <div className="flex flex-col">
+                <span className="text-xs text-white/60 mb-1">Limite Total</span>
+                <span className="text-lg font-medium text-white/90">
+                  {formatCurrency(card.limite)}
+                </span>
+              </div>
+              {card.vencimento && (
+                <div className="flex flex-col items-end">
+                  <span className="text-xs text-white/60 mb-1">Vencimento</span>
+                  <span className="text-sm text-white/90">
+                    Dia {card.vencimento}
+                  </span>
+                </div>
+              )}
             </div>
           </CardContent>
         )}
+
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 w-32 h-32 opacity-5">
+          <div className="grid grid-cols-8 gap-2">
+            {Array.from({ length: 64 }).map((_, i) => (
+              <div key={i} className="w-1 h-1 rounded-full bg-white" />
+            ))}
+          </div>
+        </div>
       </Card>
     )
   }
 
   return (
-    <div className="px-4 md:px-12 py-4 md:py-6">
-      <Card className="w-[90vw] md:w-[900px] bg-gradient-to-t from-background/10 to-primary/[5%]">
+    <div className="container mx-auto px-4 py-4 md:py-6">
+      <Card className="w-full max-w-[1200px] mx-auto bg-gradient-to-t from-background/10 to-primary/[5%]">
         <CardContent className="p-4 md:p-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-0 mb-6 md:mb-8">
             <div>
@@ -288,7 +325,7 @@ const CardsView = () => {
             <div className="flex gap-2 w-full md:w-auto">
               <Button 
                 onClick={handleAddCard}
-                className="gap-2 flex-1 md:flex-none"
+                className="gap-2 flex-1 md:flex-none bg-gradient-to-r from-emerald-800 to-emerald-700 hover:from-emerald-700 hover:to-emerald-600 text-white font-semibold"
               >
                 <Plus className="h-4 w-4" />
                 Novo Cartão
@@ -319,7 +356,7 @@ const CardsView = () => {
               </Button>
             </div>
           ) : (
-            <div className="flex flex-col gap-4 mx-auto md:px-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mx-auto">
               {creditCards.map((card) => (
                 <CardItem key={card.cardId} card={card} />
               ))}
