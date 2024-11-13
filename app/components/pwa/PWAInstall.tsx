@@ -36,11 +36,6 @@ export function PWAInstall() {
   if (!showInstall) return null
 
   return (
-    <Button
-      onClick={handleInstall}
-      className="bg-emerald-500 hover:bg-emerald-600 text-white"
-    >
-      Instalar Aplicativo
-    </Button>
+<></>
   )
 }
