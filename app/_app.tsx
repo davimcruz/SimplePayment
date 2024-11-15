@@ -2,11 +2,16 @@
 
 import { ThemeProvider } from "./components/theme/theme-provider"
 import { SidebarProvider } from "@/app/components/ui/sidebar"
+import { OnboardingProvider } from '@/app/contexts/OnboardingContext'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider defaultTheme="dark" attribute="class">
-      <SidebarProvider>{children}</SidebarProvider>
+      <OnboardingProvider>
+        <SidebarProvider>
+          {children}
+        </SidebarProvider>
+      </OnboardingProvider>
     </ThemeProvider>
   )
 }

@@ -67,12 +67,6 @@ const items = [
     icon: Settings,
     adminOnly: true,
   },
-  {
-    title: "Dashboard",
-    url: "/dashboard/",
-    icon: Home,
-    adminOnly: false,
-  },
 ]
 
 const fetcher = async (url: string) => {
@@ -300,7 +294,16 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
                     </SidebarMenuItem>
                   ))}
 
-                <SidebarMenuItem>
+                <SidebarMenuItem data-sidebar-menu="dashboard">
+                  <SidebarMenuButton asChild>
+                    <Link href="/dashboard/">
+                      <Home />
+                      <span>Dashboard</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem data-sidebar-menu="transactions">
                   <SidebarMenuButton asChild>
                     <Link href="/dashboard/transactions">
                       <Inbox />
@@ -309,7 +312,7 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                <SidebarMenuItem>
+                <SidebarMenuItem data-sidebar-menu="cashflow">
                   <SidebarMenuButton asChild>
                     <Link href="/dashboard/cashflow">
                       <Calendar />
@@ -318,16 +321,16 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                <SidebarMenuItem>
+                <SidebarMenuItem data-sidebar-menu="costs">
                   <SidebarMenuButton asChild>
-                    <Link href="/dashboard/fixed-costs">
+                    <Link href="/dashboard/costs">
                       <ListOrdered />
                       <span>Despesas Fixas</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                <SidebarMenuItem>
+                <SidebarMenuItem data-sidebar-menu="cards">
                   <SidebarMenuButton asChild>
                     <Link href="/dashboard/cards">
                       <CreditCard />
@@ -336,7 +339,7 @@ export function AppSidebar({ initialData }: AppSidebarProps) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                <SidebarMenuItem>
+                <SidebarMenuItem data-sidebar-menu="plans">
                   <SidebarMenuButton asChild>
                     <Link href="/dashboard/plans" className="relative">
                       <Crown />

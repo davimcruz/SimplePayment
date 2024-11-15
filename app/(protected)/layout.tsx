@@ -7,6 +7,7 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { Providers } from "../_app"
 import { Toaster } from "sonner"
+import { GuidedTour } from '@/app/components/onboarding/GuidedTour'
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -118,6 +119,7 @@ export default async function ProtectedLayout({
                 duration: 3000,
               }}
             />
+            <GuidedTour />
           </main>
         </div>
       </div>

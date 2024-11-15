@@ -28,11 +28,12 @@ import {
   CardTitle,
 } from "@/app/components/ui/card"
 import { Separator } from "@/app/components/ui/separator"
-import { Trash2 } from "lucide-react"
+import { Plus, Trash2, Check } from "lucide-react"
 import LottieAnimation from "@/app/components/ui/loadingAnimation"
 import { handleCurrencyInput, parseCurrencyToFloat } from "@/utils/moneyFormatter"
 import { CardSelect } from "@/app/components/create-transactions/CardSelect"
 import { parseCookies } from 'nookies'
+import { useRouter, usePathname } from "next/navigation"
 
 const fixedCostSchema = z.object({
   nome: z.string().min(3, "Nome deve ter no mínimo 3 caracteres"),
@@ -59,6 +60,8 @@ export default function CreateFixedCosts({
   onComplete,
   onBack,
 }: CreateFixedCostsProps) {
+  const router = useRouter()
+  const pathname = usePathname()
   const [costs, setCosts] = useState<FixedCostFormData[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [cards, setCards] = useState<any>(null)
@@ -110,9 +113,16 @@ export default function CreateFixedCosts({
   }, [])
 
   const onSubmit = async (data: FixedCostFormData) => {
+    if (pathname === '/dashboard/setup') {
+      console.log('Valor original:', data.valor)
+      console.log('Valor após parseCurrencyToFloat:', parseCurrencyToFloat(data.valor))
+    }
+    
     setCosts((prev) => [...prev, data])
     form.reset()
-    toast.success("Despesa fixa adicionada com sucesso!")
+    setTimeout(() => {
+      toast.success("Despesa fixa adicionada com sucesso!")
+    }, 0)
   }
 
   const handleComplete = async () => {
@@ -123,26 +133,42 @@ export default function CreateFixedCosts({
 
     setIsSubmitting(true)
     try {
-      const costsFormatted = costs.map(cost => ({
-        ...cost,
-        valor: parseCurrencyToFloat(cost.valor),
-      }))
+      await toast.promise(
+        (async () => {
+          const costsFormatted = costs.map(cost => {
+            const valorOriginal = parseCurrencyToFloat(cost.valor)
+            return {
+              ...cost,
+              valor: valorOriginal,
+            }
+          })
 
-      const response = await fetch("/api/costs/batch", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ costs: costsFormatted }),
-      })
+          const response = await fetch("/api/costs/batch", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ costs: costsFormatted }),
+          })
 
-      if (!response.ok) throw new Error("Falha ao salvar despesas")
+          if (!response.ok) throw new Error("Falha ao salvar despesas")
 
-      if (onComplete) {
-        onComplete()
-      }
+          if (pathname === '/dashboard/setup') {
+            router.push('/dashboard')
+          } else if (onComplete) {
+            onComplete()
+          }
+        })(),
+        {
+          loading: 'Salvando suas despesas fixas...',
+          success: pathname === '/dashboard/setup' 
+            ? 'Despesas salvas! Redirecionando...'
+            : 'Despesas fixas salvas com sucesso!',
+          error: 'Erro ao salvar despesas fixas',
+          duration: 2000,
+        }
+      )
     } catch (error) {
-      toast.error("Erro ao salvar despesas fixas")
       console.error(error)
     } finally {
       setIsSubmitting(false)
@@ -151,7 +177,9 @@ export default function CreateFixedCosts({
 
   const removeCost = (index: number) => {
     setCosts((prev) => prev.filter((_, i) => i !== index))
-    toast.success("Despesa fixa removida com sucesso!")
+    setTimeout(() => {
+      toast.success("Despesa fixa removida com sucesso!")
+    }, 0)
   }
 
   if (!isMounted) {
@@ -340,7 +368,8 @@ export default function CreateFixedCosts({
                     type="submit"
                     className="min-w-[180px] bg-gradient-to-r from-emerald-800 to-emerald-700 hover:from-emerald-700 hover:to-emerald-600 text-white font-semibold"
                   >
-                    Adicionar Despesa
+                    <Plus className="h-4 w-4 mr-2" />
+                    Adicionar Despesa à Lista
                   </Button>
                 </div>
               </form>
@@ -381,22 +410,27 @@ export default function CreateFixedCosts({
               </div>
             ))}
 
-            <div className="flex flex-col-reverse md:flex-row justify-end gap-3 md:gap-4 pt-4">
-              <Button
-                onClick={handleComplete}
-                disabled={isSubmitting}
-                className="w-full md:w-auto min-w-[180px] bg-gradient-to-r from-emerald-800 to-emerald-700 hover:from-emerald-700 hover:to-emerald-600 text-white font-semibold"
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center gap-2">
-                    <span className="animate-spin">⚪</span>
-                    Salvando...
-                  </div>
-                ) : (
-                  "Adicionar Despesas Fixas"
-                )}
-              </Button>
-            </div>
+            {costs.length > 0 && (
+              <div className="flex flex-col-reverse md:flex-row justify-end gap-3 md:gap-4 pt-4">
+                <Button
+                  onClick={handleComplete}
+                  disabled={isSubmitting}
+                  className="w-full md:w-auto min-w-[180px] bg-gradient-to-r from-emerald-800 to-emerald-700 hover:from-emerald-700 hover:to-emerald-600 text-white font-semibold"
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center gap-2">
+                      <span className="animate-spin">⚪</span>
+                      Salvando...
+                    </div>
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4 mr-2" />
+                      Finalizar Cadastro
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </CardContent>

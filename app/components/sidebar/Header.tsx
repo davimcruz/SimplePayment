@@ -29,7 +29,7 @@ const Header = () => {
     checkout: "Checkout",
     success: "Sucesso",
     updateflow: "Atualizar Fluxo",
-  'fixed-costs': "Despesas Fixas",
+    costs: "Despesas Fixas",
   }
 
   useEffect(() => {

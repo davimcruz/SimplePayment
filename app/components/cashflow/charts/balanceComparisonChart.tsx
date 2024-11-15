@@ -170,23 +170,7 @@ const BalanceComparisonChart = ({ data }: BalanceComparisonChartProps) => {
           </CardContent>
         </div>
 
-        {isExample && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center">
-            <p className="text-xl font-semibold mb-2 text-center px-4">
-              Você ainda não criou seu fluxo de caixa
-            </p>
-            <p className="text-sm text-muted-foreground mb-4 text-center px-4">
-              Crie seu fluxo de caixa para começar a controlar suas finanças
-            </p>
-            {/* <Button
-            variant="outline"
-            onClick={() => setIsTransactionDialogOpen(true)}
-          >
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Criar Transação
-          </Button> */}
-          </div>
-        )}
+        
 
         <CreateTransaction
           isOpen={isTransactionDialogOpen}
