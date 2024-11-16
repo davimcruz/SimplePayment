@@ -79,6 +79,18 @@ export function GuidedTour() {
   const [showWelcome, setShowWelcome] = useState(false)
   const [elementPosition, setElementPosition] = useState<Position | null>(null)
   const { shouldShowTutorial, completeStep, skipTutorial } = useOnboarding()
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768) 
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const handleStartTour = () => {
     setShowWelcome(false)
@@ -111,13 +123,13 @@ export function GuidedTour() {
   }
 
   useEffect(() => {
-    if (shouldShowTutorial) {
+    if (shouldShowTutorial && !isMobile) {
       const hasStartedTutorial = localStorage.getItem("tutorial_started")
       if (!hasStartedTutorial) {
         setShowWelcome(true)
       }
     }
-  }, [shouldShowTutorial])
+  }, [shouldShowTutorial, isMobile])
 
   useEffect(() => {
     if (currentStep >= 0 && currentStep < tourSteps.length) {
@@ -144,7 +156,7 @@ export function GuidedTour() {
     }
   }, [currentStep])
 
-  if (!shouldShowTutorial) return null
+  if (!shouldShowTutorial || isMobile) return null
 
   return (
     <>
