@@ -1,18 +1,15 @@
-import type { NextApiRequest, NextApiResponse } from "next"
-import { createUploadthing, type FileRouter } from "uploadthing/next-legacy"
+import { createUploadthing, type FileRouter } from "uploadthing/next"
 import { UploadThingError } from "uploadthing/server"
+import { NextRequest } from "next/server"
 
 const f = createUploadthing()
 
-const auth = (req: NextApiRequest, res: NextApiResponse) => ({ id: "fakeid" }) 
+const auth = (req: NextRequest) => ({ id: "fakeid" })
 
 export const ourFileRouter = {
-
-
-  //Upload de imagem através do serviço do uploadthing (não mexer, configuração padrão e recomendada)
   imageUploader: f({ image: { maxFileSize: "4MB" } })
-    .middleware(async ({ req, res }) => {
-      const user = await auth(req, res)
+    .middleware(async ({ req }) => {
+      const user = await auth(req)
 
       if (!user) throw new UploadThingError("Unauthorized")
 
@@ -20,7 +17,6 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       console.log("Upload complete for userId:", metadata.userId)
-
       console.log("file url", file.url)
 
       return { uploadedBy: metadata.userId }

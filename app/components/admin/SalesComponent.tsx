@@ -106,8 +106,8 @@ export function SalesComponent() {
             Todas as vendas realizadas na plataforma
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="h-[300px] overflow-auto">
+        <CardContent className="h-[calc(100%-5rem)]">
+          <div className="h-full">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -117,7 +117,7 @@ export function SalesComponent() {
                   <TableHead>Valor</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
+              <TableBody className="overflow-auto">
                 {sales.map((sale) => (
                   <TableRow key={sale.id}>
                     <TableCell>
