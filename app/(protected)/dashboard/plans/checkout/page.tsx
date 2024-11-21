@@ -9,7 +9,7 @@ import { CheckoutForm } from "@/app/components/plans/checkout/CheckoutForm"
 import { QRCodeDisplay } from "@/app/components/plans/checkout/QRCodeDisplay"
 import { CheckoutFormData } from "@/lib/validation"
 
-const PLAN_PRICE = 1.0 // Alterar também no PaymentController.ts
+const PLAN_PRICE = 20.0 // Alterar também no PaymentController.ts
 const PAYMENT_CHECK_INTERVAL = 3000
 
 interface User {
