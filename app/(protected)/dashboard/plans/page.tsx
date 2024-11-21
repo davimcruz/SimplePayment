@@ -50,7 +50,7 @@ const PlansPage = () => {
     },
     {
       name: "PRO",
-      price: "R$ 1,00",
+      price: "R$ 20,00", //alterar na api
       description: "Para quem quer levar as finanças ao próximo nível",
       features: [
         { text: "Suporte via email", included: true },

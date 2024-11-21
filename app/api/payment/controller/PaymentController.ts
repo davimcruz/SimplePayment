@@ -23,7 +23,7 @@ class PaymentController {
         email,
         nome,
         cpf,
-        valor: 1.00,
+        valor: 20.00,
         userId
       })
 

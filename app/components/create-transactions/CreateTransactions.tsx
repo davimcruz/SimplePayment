@@ -23,7 +23,6 @@ import { parseCookies } from "nookies"
 import { toast } from "sonner"
 import { useNameInput } from "@/utils/nameFormatter"
 import { transactionSchema, TransactionFormData } from "@/lib/validation"
-import { ChevronRight } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { format, addMonths } from "date-fns"
 

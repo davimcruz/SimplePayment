@@ -18,7 +18,7 @@ interface MPPaymentResponse {
     }
   }
 }
-
+                                          
 export class PaymentService {
   private client: Payment
 
