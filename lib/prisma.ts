@@ -1,13 +1,24 @@
-import { PrismaClient } from "@prisma/client"
+/**
+ * Configuração do Prisma Client com suporte a hot-reload em desenvolvimento
+ * e singleton em produção para evitar múltiplas conexões.
+ * 
+ * @remarks
+ * Em desenvolvimento, mantemos a instância no objeto global para evitar
+ * múltiplas conexões durante hot-reload do Next.js
+ */
 
-declare global {
-  var prisma: PrismaClient | undefined
+import { PrismaClient } from '@prisma/client'
+
+const prismaClientSingleton = () => {
+  return new PrismaClient()
 }
 
-const prisma =
-  global.prisma ||
-  new PrismaClient()
+declare global {
+  var prisma: undefined | ReturnType<typeof prismaClientSingleton>
+}
 
-if (process.env.NODE_ENV !== "production") global.prisma = prisma
+const prisma = globalThis.prisma ?? prismaClientSingleton()
 
 export default prisma
+
+if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma

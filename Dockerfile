@@ -2,11 +2,15 @@ FROM node:20.16.0-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+COPY package.json pnpm-lock.yaml* .npmrc ./
+
+RUN pnpm install --frozen-lockfile
 
 COPY . .
-RUN npx prisma generate && npm run build
+
+RUN pnpm dlx prisma generate && pnpm build
 
 EXPOSE 3000
 

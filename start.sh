@@ -1,3 +1,3 @@
 #!/bin/sh
-npx prisma migrate deploy
-npm start
+pnpm dlx prisma migrate deploy
+pnpm start

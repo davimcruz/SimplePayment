@@ -5,8 +5,6 @@ import type { Viewport } from "next"
 import { ThemeProvider } from "@/app/components/theme/theme-provider"
 import { Analytics } from "@vercel/analytics/react"
 import { Toaster } from "sonner"
-import { PWAInstall } from "@/app/components/pwa/PWAInstall"
-import { useEffect } from "react"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -58,36 +56,36 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://simplefinance.cloud'),
+  metadataBase: new URL('https://simplepayment.com.br'),
   title: {
-    default: "SimpleFinance - Controle Financeiro Pessoal | Gestão Financeira Simplificada",
-    template: "%s | SimpleFinance"
+    default: "SimplePayment - Gateway de Pagamentos | Solução Completa para Transações Online",
+    template: "%s | SimplePayment"
   },
   description:
-    "Simplifique sua vida financeira com o SimpleFinance. Gerencie orçamentos, despesas, investimentos e cartões em uma única plataforma. Experimente grátis o software de finanças pessoais mais completo do Brasil.",
+    "SimplePayment: Plataforma de gateway de pagamentos segura e eficiente. Aceite pagamentos online, gerencie transações e maximize suas vendas com tecnologia de ponta. Integração simples para todos os tipos de negócios.",
   keywords: [
-    "finanças pessoais",
-    "controle financeiro",
-    "gestão financeira",
-    "orçamento pessoal",
-    "controle de gastos",
-    "planejamento financeiro",
-    "economia pessoal",
-    "educação financeira",
-    "investimentos",
-    "carteira digital",
-    "gestão de cartões",
-    "relatórios financeiros"
+    "gateway de pagamento",
+    "pagamentos online",
+    "processamento de pagamentos",
+    "solução de pagamento",
+    "transações digitais",
+    "pagamento seguro",
+    "integração de pagamentos",
+    "e-commerce",
+    "antifraude",
+    "múltiplos meios de pagamento",
+    "pagamento digital",
+    "gateway de transações"
   ],
   alternates: {
-    canonical: 'https://simplefinance.cloud',
+    canonical: 'https://simplepayment.com.br',
     languages: {
-      'pt-BR': 'https://simplefinance.cloud',
+      'pt-BR': 'https://simplepayment.com.br',
     }
   },
-  authors: [{ name: "SimpleFinance" }],
-  creator: "SimpleFinance",
-  publisher: "SimpleFinance",
+  authors: [{ name: "SimplePayment" }],
+  creator: "SimplePayment",
+  publisher: "SimplePayment",
   formatDetection: {
     email: false,
     address: false,
@@ -111,30 +109,29 @@ export const metadata: Metadata = {
       },
     ],
   },
-  manifest: "/manifest.json",
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    url: "https://simplefinance.cloud",
-    title: "SimpleFinance - Controle Financeiro Pessoal | Gestão Financeira Simplificada",
+    url: "https://simplepayment.com.br",
+    title: "SimplePayment - Gateway de Pagamentos | Solução Completa para Transações Online",
     description:
-      "Simplifique sua vida financeira com o SimpleFinance. Gerencie orçamentos, despesas, investimentos e cartões em uma única plataforma. Experimente grátis o software de finanças pessoais mais completo do Brasil.",
-    siteName: "SimpleFinance",
+      "SimplePayment: Plataforma de gateway de pagamentos segura e eficiente. Aceite pagamentos online, gerencie transações e maximize suas vendas com tecnologia de ponta.",
+    siteName: "SimplePayment",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "SimpleFinance - Plataforma de Gestão Financeira Pessoal",
+        alt: "SimplePayment - Plataforma Completa de Gateway de Pagamentos",
         type: "image/png",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "SimpleFinance - Controle financeiro simplificado",
+    title: "SimplePayment - Gateway de Pagamentos Inteligente",
     description:
-      "SimpleFinance é o software de finanças pessoais mais completo do Brasil.",
+      "Transforme suas transações online com a solução completa de pagamentos da SimplePayment.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -158,18 +155,17 @@ export default function RootLayout({
   return (
     <html lang="pt-br" suppressHydrationWarning>
       <head>
-        <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
         <link rel="apple-touch-icon" href="/logos/icon-192.png" />
       </head>
       <body className={inter.className}>
         <Analytics />
-        <ThemeProvider defaultTheme="dark" attribute="class">
+        <ThemeProvider defaultTheme="light" attribute="class">
           {children}
           <Toaster
             richColors
             position="top-right"
-            theme="dark"
+            theme="light"
             className="toaster-custom md:-mr-4 -mt-2 md-mt-5"
             icons={{
               loading: <LoadingIcon />,
@@ -186,7 +182,6 @@ export default function RootLayout({
               duration: 3000,
             }}
           />
-          <PWAInstall />
         </ThemeProvider>
       </body>
     </html>

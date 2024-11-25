@@ -1,46 +1,14 @@
 import { Inter } from "next/font/google"
 import { SidebarTrigger } from "@/app/components/ui/sidebar"
-import { AppSidebar } from "@/app/components/sidebar/app-sidebar"
-import Header from "../components/sidebar/Header"
+import AppSidebar from "../components/dashboard/navigation/Sidebar"
+import Header from "../components/dashboard/navigation/Header"
 import { Separator } from "../components/ui/separator"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { Providers } from "../_app"
 import { Toaster } from "sonner"
-import { GuidedTour } from '@/app/components/onboarding/GuidedTour'
 
 const inter = Inter({ subsets: ["latin"] })
-
-async function getUserData() {
-  const cookieStore = cookies()
-  const userId = cookieStore.get("userId")?.value
-  const token = cookieStore.get("token")?.value
-
-  if (!userId || !token) {
-    redirect('/signin')
-  }
-
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/get-user?userId=${userId}`,
-      {
-        cache: "no-store",
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    )
-
-    if (!response.ok) {
-      throw new Error('Falha ao obter dados do usuário')
-    }
-
-    return response.json()
-  } catch (error) {
-    console.error('Erro ao buscar dados do usuário:', error)
-    redirect('/signin')
-  }
-}
 
 const LoadingIcon = () => (
   <svg 
@@ -81,16 +49,11 @@ export default async function ProtectedLayout({
 }: {
   children: React.ReactNode
 }) {
-  const userData = await getUserData()
-
-  if (!userData) {
-    redirect('/signin')
-  }
 
   return (
     <Providers>
       <div className={`flex h-screen w-full ${inter.className}`}>
-        <AppSidebar initialData={userData} />
+        <AppSidebar />
         <div className="flex-1 flex flex-col w-0">
           <header className="w-full flex items-center h-16 border-b bg-background px-4">
             <SidebarTrigger />
@@ -119,7 +82,6 @@ export default async function ProtectedLayout({
                 duration: 3000,
               }}
             />
-            <GuidedTour />
           </main>
         </div>
       </div>

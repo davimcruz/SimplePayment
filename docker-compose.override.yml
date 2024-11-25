@@ -1,7 +1,7 @@
 version: '3'
 services:
   web:
-    command: npm run dev
+    command: pnpm dev
     environment:
       - NODE_ENV=development
     volumes:
